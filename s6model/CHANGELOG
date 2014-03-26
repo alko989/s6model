@@ -1,0 +1,456 @@
+
+Changes from version  0.5.10 to  0.5.11 
+ * Changed the scaling factor of Winf from 10000 to 1000
+
+Changes from version  0.5.11 to  0.5.12 
+ * Changed the scaling factor of Winf from 1000 to 10000
+
+Changes from version  0.5.11 to  0.5.12 
+ * Changed the scaling factor of Winf from 1000 to 10000
+ * The default value for Winf is now 20000
+
+Changes from version  0.5.12 to  0.5.13 
+ * The cdf has as a right y limit the correct value 1 (it had 0)
+
+Changes from version  0.5.13 to  0.5.14 
+ * 
+
+Changes from version  0.5.13 to  0.5.14 
+ * 
+
+Changes from version  0.5.14 to  0.5.15 
+ * 
+
+Changes from version  0.5.15 to  0.5.16 
+ * 
+
+Changes from version  0.5.16 to  0.5.17 
+ * 
+
+Changes from version  0.5.17 to  0.5.18 
+ * Added calculation for Fmsy
+
+Changes from version  0.5.18 to  0.5.19 
+ * Corrected calculation for Fmsy
+ * Added F/Fmsy
+
+Changes from version  0.5.19 to  0.5.20 
+ * Corrected calculation for Fmsy
+ * Added F/Fmsy
+
+Changes from version  0.5.20 to  0.5.21 
+ * Corrected calculation for Fmsy
+ * Added YpR
+
+Changes from version  0.5.21 to  0.5.22 
+ * Corrected calculation for Fmsy
+ * Added YpR -- corrected
+
+Changes from version  0.5.22 to  0.5.23 
+ * Corrected calculation for Fmsy
+ * SampleData3 return a list containing the data and the parameter values used
+
+Changes from version  0.5.22 to  0.5.23 
+ * Corrected calculation for Fmsy
+ * SampleData3 return a list containing the data and the parameter values used
+
+Changes from version  0.5.23 to  0.5.24 
+ * Corrected calculation for Fmsy
+ * SampleData3 returns a list containing also Fmsy for the given parameters
+
+Changes from version  0.5.24 to  0.5.25 
+ * estimateParam accepts now the parameter values not their log
+ * getParams doesn't return N.approx any more
+
+Changes from version  0.5.24 to  0.5.25 
+ * estimateParam accepts now the parameter values not their log
+ * getParams doesn't return N.approx any more
+
+Changes from version  0.5.25 to  0.5.26 
+ * in estimateParam the default value of fixed.vals is now numeric(0) instead of c()
+
+Changes from version  0.5.26 to  0.5.27 
+ * the estimateParam function simulates data correctly using the simulateData3 function
+
+Changes from version  0.5.27 to  0.5.28 
+ * the estimateParam function has default value for fixed.names c() again
+
+Changes from version  0.5.28 to  0.5.29 
+ * the estimate param does not use lower bounds any more (they are not really needed because of the minimiser uses the log of the params)
+
+Changes from version  0.5.29 to  0.5.30 
+ * scaled all parameters to 1, using the efault value as scaling factor
+
+Changes from version  0.5.29 to  0.5.30 
+ * scaled all parameters to 1, using the efault value as scaling factor
+
+Changes from version  0.5.30 to  0.5.31 
+ * small typo corrected in Parameters class
+
+Changes from version  0.5.31 to  0.5.32 
+ * bug corrected in Parameters class
+
+Changes from version  0.5.32 to  0.5.33 
+ * parameters function accepts normal parameter values, ie not scaled and not logged
+
+Changes from version  0.5.33 to  0.5.34 
+ * parameters function accepts 'again' log scaled values
+
+Changes from version  0.5.34 to  0.5.35 
+ * getParams returns also the paramters object
+
+Changes from version  0.5.35 to  0.5.36 
+ * The mortality at Winf is now Inf and the scaling parameter N1 is returned
+
+Changes from version  0.5.36 to  0.5.37 
+ * corrected pdfN in getParams
+
+Changes from version  0.5.37 to  0.5.38 
+ * corrected cdf in getParams
+
+Changes from version  0.5.38 to  0.5.39 
+ * returned cdf and pdfN into previous correct state in getParams
+
+Changes from version  0.5.39 to  0.5.40 
+ * pdfN.approx is now approximated using pdfN in getParams
+
+Changes from version  0.5.40 to  0.5.41 
+ * N is equal to 0 at Winf in getParams
+
+Changes from version  0.5.41 to  0.5.42 
+ * in estimateParam the optimisation has now a lower bound = 0.01
+
+Changes from version  0.5.42 to  0.5.43 
+ * getParams shows the parameter list and return all other variables invisibly
+
+Changes from version  0.5.43 to  0.5.44 
+ * getParams shows the parameter list and return all other variables invisibly
+
+Changes from version  0.5.44 to  0.5.45 
+ * getParams does not show the parameter list and return all other variables invisibly
+
+Changes from version  0.5.45 to  0.5.46 
+ * the optimisation for Winf is bounded using the biggest caught fish as lower bound
+
+Changes from version  0.5.45 to  0.5.46 
+ * the optimisation for Winf is bounded using the biggest caught fish as lower bound
+
+Changes from version  0.5.46 to  0.5.47 
+ * corrected typo
+
+Changes from version  0.5.47 to  0.5.48 
+ * fixed bug in estimateParam
+
+Changes from version  0.5.48 to  0.5.49 
+ * corrected another typo in estimateParam
+
+Changes from version  0.5.49 to  0.5.50 
+ * the lower bound for Winf is set to 1 gram more than the largest fish in the data
+
+Changes from version  0.5.50 to  0.5.51 
+ * added plotGrowth and plotMortality methods to the Parameters class
+
+Changes from version  0.5.51 to  0.5.52 
+ * added plotGrowth and plotMortality methods to the Namespace of the package
+
+Changes from version  0.5.52 to  0.5.53 
+ * changed the estimation of Fmsy including SSB and Relative recruitment
+
+Changes from version  0.5.53 to  0.5.54 
+ * changed h to A
+
+Changes from version  0.5.54 to  0.5.55 
+ * changed h to A (part 2)
+
+Changes from version  0.5.55 to  0.5.56 
+ * changed h to A (part 3)
+
+Changes from version  0.5.56 to  0.5.57 
+ * changed h to A (part 4)
+
+Changes from version  0.5.57 to  0.5.58 
+ * addedd w_egg parameter, equal to w_r
+
+Changes from version  0.5.58 to  0.5.59 
+ * changed h to A (part 5)
+
+Changes from version  0.5.59 to  0.5.60 
+ * changed h to A (part 6)
+
+Changes from version  0.5.59 to  0.5.60 
+ * changed h to A (part 7)
+
+Changes from version  0.5.59 to  0.5.60 
+ * changed h to A (part 8)
+
+Changes from version  0.5.60 to  0.5.61 
+ * Corrected the Yield calculation
+
+Changes from version  0.5.61 to  0.5.62 
+ * made getY available in the namespace
+
+Changes from version  0.5.62 to  0.5.63 
+ * changed the plotMortality function, the fishing mortality is shown as dotted line instead of grey area
+
+Changes from version  0.5.62 to  0.5.63 
+ * changed the plotMortality function, the fishing mortality is shown as dotted line instead of grey area
+
+Changes from version  0.5.63 to  0.5.64 
+ * Added the alternative approximation of N with the cumulative product and less supporting points
+
+Changes from version  0.5.63 to  0.6.0 
+ * Added the alternative approximation of N with the cumulative product and less supporting points
+
+Changes from version  0.5.63 to  0.6.0 
+ * Added the alternative approximation of N with the cumulative product and less supporting points
+
+Changes from version  0.6.0 to  0.6.1 
+ * Fixed typo in the getParams2 and getY2
+
+Changes from version  0.6.1 to  0.6.2 
+ * Delta shouldn't be deleted in getY2
+
+Changes from version  0.6.2 to  0.6.3 
+ * Changed the default M for getParams2 to 200 (from 100)
+
+Changes from version  0.6.3 to  0.6.4 
+ * Changed the default M for getParams2 to 300 (from 200)
+
+Changes from version  0.6.4 to  0.6.5 
+ * The bootstrap option returns the mean of all estimations for each parameter
+
+Changes from version  0.6.5 to  0.6.6 
+ * The bootstrap option returns the mean of all estimations for each parameter (correction)
+
+Changes from version  0.6.6 to  0.6.7 
+ * The bootstrap option returns the mean of all estimations for each parameter (fixed)
+
+Changes from version  0.6.7 to  0.7.0 
+ * Added the option of estimating using survey data
+
+Changes from version  0.7.0 to  0.7.1 
+ * Fixed the estimation with fixed parameter values when bootstrap is greater than 1
+
+Changes from version  0.7.1 to  0.7.2 
+ * The mean values are fixed in the estimation with bootstrap
+
+Changes from version  0.7.2 to  0.7.3 
+ * The Fmsy is calculatd in getParams only if calcFmsy is TRUE
+
+Changes from version  0.7.3 to  0.7.4 
+ * Estimation using multiple data is possible
+ * Parameter objects 'show' better now
+
+Changes from version  0.7.4 to  0.7.5 
+ * Exported function estimateMultidata and method difference
+
+Changes from version  0.7.5 to  0.7.6 
+ * estimParam return the hessian of the likelihood function as an attribute
+
+Changes from version  0.7.6 to  0.7.7 
+ * the numDeriv package is now imported by the package in the NAMESPACE
+
+Changes from version  0.7.7 to  0.7.8 
+ * The estimateParam returns the 95% confidence interval for the parameter estimates
+
+Changes from version  0.7.7 to  0.7.8 
+ * The estimateParam returns the 95% confidence interval for the parameter estimates
+
+Changes from version  0.7.8 to  0.7.9 
+ * In estimateParam the matrix containing the estimated parameter, se, and confidence limits is printed only if verbose = TRUE
+
+Changes from version  0.7.9 to  0.7.10 
+ * The standard error is not returned any more from estimateParam because it only calculated for the untransformed paramter
+
+Changes from version  0.7.10 to  0.7.11 
+ * In estimParam the inversion of the hessian is done in a 'try' statement. NAs are returned for the standard error and confidence limits if the hessian is not invertible
+
+Changes from version  0.7.11 to  0.7.12 
+ * Corrected typo in estimParam
+
+Changes from version  0.7.12 to  0.7.13 
+ * In estimateParam a bug was fixed, the function that return the class of a variable is 'class', not 'typeof'
+
+Changes from version  0.7.13 to  0.7.14 
+ * In estimateParam removed 'browser'
+
+Changes from version  0.7.14 to  0.7.15 
+ * estimParam returns the value of the 'objective' function
+
+Changes from version  0.7.15 to  0.7.16 
+ * estimParam returns the convergence status from nlminb
+
+Changes from version  0.7.16 to  0.8.0 
+ * New parameter Wfs was introduced
+
+Changes from version  0.8.0 to  0.8.1 
+ * Fixed bug in parameters function
+
+Changes from version  0.8.1 to  0.8.2 
+ * Changed the y label of the growth plot produced by plotGrowth
+
+Changes from version  0.8.2 to  0.8.3 
+ * In estimParam removed the lower bound of all parameters except Winf
+ * estimParam returns the message of nlminb
+
+Changes from version  0.8.2 to  0.8.3 
+ * In estimParam removed the lower bound of all parameters except Winf
+ * estimParam returns the message of nlminb
+
+Changes from version  0.8.3 to  0.8.4 
+ * estimParam returns its call, as it is returned from match.call
+
+Changes from version  0.8.4 to  0.8.5 
+ * reloadSteadyStateEstimation, new function that reloads the package without restarting R
+
+Changes from version  0.8.4 to  0.8.5 
+ * reloadSteadyStateEstimation, new function that reloads the package without restarting R
+
+Changes from version  0.8.5 to  0.8.6 
+ * reloadSteadyStateEstimation, removed debuging cat
+
+Changes from version  0.8.5 to  0.8.6 
+ * reloadSteadyStateEstimation, removed debuging cat
+
+Changes from version  0.8.6 to  0.9.0 
+ * Changed the filenames to more apropriate ones
+ * The getParams also returns yield (yield per recruit) in order to be used for finding Fmsy (Fmsyr)
+ * Weight at recruitment is set to 1mg
+ * Checked all equations to match with Ken&Beyer(2013)
+
+Changes from version  0.8.6 to  0.9.0 
+ * Changed the filenames to more apropriate ones
+ * The getParams also returns yield (yield per recruit) in order to be used for finding Fmsy (Fmsyr)
+ * Weight at recruitment is set to 1mg
+ * Checked all equations to match with Ken&Beyer(2013)
+
+Changes from version  0.8.6 to  0.9.0 
+ * Changed the filenames to more apropriate ones
+ * The getParams also returns yield (yield per recruit) in order to be used for finding Fmsy (Fmsyr)
+ * Weight at recruitment is set to 1mg
+ * Checked all equations to match with Ken&Beyer(2013)
+
+Changes from version  0.9.0 to  0.9.1 
+ * estimateParam accepts data in a data.frame with columns 'Weight' and 'Freq'
+ * plotFit plots also data.frames
+
+Changes from version  0.9.1 to  0.9.2 
+ * plotFit does not plot the points of the actual data, only histograms
+
+Changes from version  0.9.2 to  0.9.3 
+ * simulateData3 returns a usable data.frame containing the data. The estimation using the data frame is much faster
+ * Added parameter u, i.e the width of the sigmoid selectivity curve going from 0 to 1
+
+Changes from version  0.9.3 to  0.9.4 
+ * fixed bug in 'parameters', false warning
+
+Changes from version  0.9.4 to  0.9.5 
+ * simulateData3 returns more reasonable data.frame with weight classess of 5 grams
+
+Changes from version  0.9.4 to  0.9.5 
+ * simulateData3 returns more reasonable data.frame with weight classess of 5 grams
+
+Changes from version  0.9.5 to  0.9.6 
+ * getParams returns the vonBertalanffy parameters M and K, and the ratio M/K
+
+Changes from version  0.9.6 to  0.9.7 
+ * some code optimizations
+ * simulateData3 produces better data.frames
+
+Changes from version  0.9.6 to  0.9.7 
+ * some code optimizations
+ * simulateData3 produces better data.frames
+
+Changes from version  0.9.7 to  0.9.8 
+ * getParams has now less arguments
+ * simulateData3 was change to accomodate the changes in getParams
+
+Changes from version  0.9.8 to  0.9.9 
+ * getParams, the ranges where the biological reference points are searched were increased
+
+Changes from version  0.9.9 to  0.9.10 
+ * getParams, biological reference points are only returned if no error is occured while serching for them
+
+Changes from version  0.9.10 to  0.9.11 
+ * removed Frasier selectivity
+
+Changes from version  0.9.11 to  0.9.12 
+ * removed Frasier selectivity
+
+Changes from version  0.9.12 to  0.9.13 
+ * fixed typo in the show method of Parameters
+
+Changes from version  0.9.13 to  0.9.14 
+ * simulateData3 returns a data.frame keeping also the weight classes that have frequency 0
+
+Changes from version  0.9.14 to  0.9.15 
+ * simulateData3 has argument wcw to change the weight class width, this is also returned as an attribute on the data.frame
+
+Changes from version  0.9.15 to  0.9.16 
+ * Added helper function 'sample2df' that takes a sample and returns a data.frame with Weight and Freq(uencies)
+
+Changes from version  0.9.16 to  0.9.17 
+ * sample2df returns a data.frame as it should
+ * simulateData3 asks if multicore is available and uses sapply if not
+ * simulateData3 has boolean argument 'retDF' about returning a data.frame
+
+Changes from version  0.9.16 to  0.9.17 
+ * sample2df returns a data.frame as it should
+ * simulateData3 asks if multicore is available and uses sapply if not
+ * simulateData3 has boolean argument 'retDF' about returning a data.frame
+
+Changes from version  0.9.17 to  0.9.18 
+ * simulateData3 has boolean argument 'retDF' about returning a data.frame
+
+Changes from version  0.9.18 to  0.9.19 
+ * estimateParam accepts also upper bounds for the parameters
+
+Changes from version  0.9.19 to  0.9.20 
+ * estimateParam accepts also upper bounds for the parameters
+
+Changes from version  0.9.20 to  0.9.21 
+ * added method 'as.list' for Parameters objects
+
+Changes from version  0.9.21 to  0.9.22 
+ * added method 'as.list' for Parameters objects
+
+Changes from version  0.9.22 to  0.9.23 
+ * 'parameters' accepts now non-transformed parameters using the boolean argument 'transformed'
+
+Changes from version  0.9.23 to  0.9.24 
+ * added method 'as.list' for Parameters objects
+
+Changes from version  0.9.24 to  0.9.25 
+ * added method 'as.list' for Parameters objects, also in the NAMESPACE
+
+Changes from version  0.9.25 to  0.9.26 
+ * plotGrowth has ... argument
+
+Changes from version  0.9.26 to  0.9.27 
+ * plotGrowth and plotMortality had been changed, cex were removed and margins were adjusted
+
+Changes from version  0.9.27 to  0.9.28 
+ * added tmclapply function, i.e. timed mclapply
+ * added getRandomParameters function that returns a 'Parameters' object with random parameters
+
+Changes from version  0.9.28 to  0.9.29 
+ * tmclapply shows estimated time to completion
+
+Changes from version  0.9.29 to  0.9.30 
+ * estimateParam: cleaner return structure
+
+Changes from version  0.9.30 to  0.9.31 
+ * estimateParam: verbose=getOption('verbose')
+
+Changes from version  0.9.31 to  0.9.32 
+ * tmclapply has a nicer ETC
+ * getRandomParameters has two new arguments to return only parameter vectors with a minimum Rrel and Fmsy
+
+Changes from version  0.9.32 to  0.9.33 
+ * implemented method 'setlogWinf<-' that changes the asymptotic weight and changing Wfs accordingly
+
+Changes from version  0.9.33 to  0.9.34 
+ * fixed small typo in 'setlogWinf'
+
+Changes from version  0.9.34 to  0.9.35 
+ * fixed small typo in 'setlogWinf'

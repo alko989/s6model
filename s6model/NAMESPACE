@@ -1,0 +1,32 @@
+import(numDeriv)
+export("getParams",
+       "getParams2",
+       "simulateData",
+       "simulateData3",
+       "minimizeme",
+       "minimizeme2",
+       "estimateParam",
+       "estimateParam2",
+       "estimateMultidata",
+       "parameters",
+       "getY",
+       "getCor",
+       "reloadSteadyStateEstimation",
+       "sample2df",
+       "tmclapply",
+       "getRandomParameters",
+       "getRandomParameters.fixedWinf")
+exportMethods(
+    "lines",
+    "plotFit",
+    "difference",
+    "plotGrowth",
+    "plotMortality",
+    "plot",
+    "show",
+    "as.list",
+    "setlogWinf<-"
+)
+exportClasses(
+    "Parameters" 
+)
