@@ -1,8 +1,9 @@
 Package: s6model
 Type: Package
-Title: Parameter estimation using a single-sepcies steady-state size-based model
-Version: 0.9.35
-Date: 2014-03-26
+Title: Parameter estimation using a single-sepcies steady-state
+        size-based model
+Version: 0.9.37
+Date: 2014-04-09
 Author: Alexandros Kokkalis
 Maintainer: Alexandros Kokkalis <alko@aqua.dtu.dk>
 Description: Contains functions for the estimation of mortality and

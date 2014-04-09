@@ -454,3 +454,9 @@ Changes from version  0.9.33 to  0.9.34
 
 Changes from version  0.9.34 to  0.9.35 
  * fixed small typo in 'setlogWinf'
+
+Changes from version  0.9.35 to  0.9.36 
+ * Added simplify2dataframe function for use with tmclapply
+
+Changes from version  0.9.36 to  0.9.37 
+ * Renamed the reload function to reloadS6modelPackage

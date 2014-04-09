@@ -1,6 +1,6 @@
-reloadSteadyStateEstimation <- function() {
-  detach("package:steadyStateEstimation", unload=TRUE)
-  library(steadyStateEstimation)
+reloadS6modelPackage <- function() {
+  detach("package:s6model", unload=TRUE)
+  library(s6model)
 }
     
 

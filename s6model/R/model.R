@@ -373,7 +373,7 @@ getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
   getRandomParameters(parameter.names, parameter.value,, Rrel.gt=Rrel.gt, Fmsy.gt=Fmsy.gt)
 }
 
-tmclapply <- function(X, FUN, ...){
+tmclapply <- function(X, FUN, ..., simplify=TRUE){
   aplfun <- if(require(multicore)) mclapply else lapply
   start <- Sys.time()
   pb <- txtProgressBar(min = 0, max = 100, style=3)
@@ -397,6 +397,9 @@ tmclapply <- function(X, FUN, ...){
     res
   })
   cat(difftime(Sys.time(), start, units="mins"), "mins\n")
-  results
+  if (simplify) simplify2dataframe(results) else results
 } 
 
+simplify2dataframe <- function(dd) {
+  data.frame(t(simplify2array(dd)))
+}

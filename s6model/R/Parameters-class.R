@@ -154,7 +154,7 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
        eval(parse(text=paste("comp@" , n, sep="")))) {
       val1 <- exp(eval(parse(text=paste("base@" , n, sep="")))) * eval(parse(text=paste("base@scale" , substr(n, 4, nchar(n)), sep="")))
       val2 <- exp(eval(parse(text=paste("comp@" , n, sep="")))) * eval(parse(text=paste("comp@scale" , substr(n, 4, nchar(n)), sep="")))
-      res[substr(n, 4, nchar(n)), ] <<- c(val1,val2, val1 - val2,100*(val1-val2)/val1)
+      res[substr(n, 4, nchar(n)), ] <<- c(val1,val2, val1 - val2,val1/val2-1)
     } else {
       NA
     }

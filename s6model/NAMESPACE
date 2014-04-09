@@ -11,11 +11,12 @@ export("getParams",
        "parameters",
        "getY",
        "getCor",
-       "reloadSteadyStateEstimation",
+       "reloadS6modelPackage",
        "sample2df",
        "tmclapply",
        "getRandomParameters",
-       "getRandomParameters.fixedWinf")
+       "getRandomParameters.fixedWinf",
+       "simplify2dataframe")
 exportMethods(
     "lines",
     "plotFit",
