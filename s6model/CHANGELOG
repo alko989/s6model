@@ -460,3 +460,9 @@ Changes from version  0.9.35 to  0.9.36
 
 Changes from version  0.9.36 to  0.9.37 
  * Renamed the reload function to reloadS6modelPackage
+
+Changes from version  0.9.37 to  0.9.38 
+ * 'tmclapply' has FALSE as default value for 'simplify' argument
+
+Changes from version  0.9.38 to  0.9.39 
+ * 'parameters' accepts a base parameters object, makes it easier to change few parameter values of existing objects

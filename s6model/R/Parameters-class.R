@@ -253,9 +253,9 @@ setMethod("getCor", c("Parameters"), function(object) {
   cov2cor(solve(attr(object, "hessian")))
 })
 
-parameters <- function(names= c(), vals = c(), transformed=TRUE)
+parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Parameters"))
   {
-    res <- new("Parameters")
+    res <- base
     mats <- wfs <- etaf <- 0
     
     for(i in seq(along=names))
