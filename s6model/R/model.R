@@ -373,10 +373,11 @@ getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
   getRandomParameters(parameter.names, parameter.value,, Rrel.gt=Rrel.gt, Fmsy.gt=Fmsy.gt)
 }
 
-tmclapply <- function(X, FUN, ..., simplify=FALSE){
+tmclapply <- function(X, FUN, ..., simplify=FALSE, progressbar=TRUE){
   aplfun <- if(require(multicore)) mclapply else lapply
   start <- Sys.time()
-  pb <- txtProgressBar(min = 0, max = 100, style=3)
+  if(progressbar)
+      pb <- txtProgressBar(min = 0, max = 100, style=3)
   results <- local({
     f <- fifo(tempfile(), open="w+b", blocking=TRUE)
     if (inherits(fork(), "masterProcess")) {
@@ -384,16 +385,24 @@ tmclapply <- function(X, FUN, ..., simplify=FALSE){
       while(progress < 1 && !isIncomplete(f)) {
         msg <- readBin(f, "double")
         progress <- progress + as.numeric(msg)
-        setTxtProgressBar(pb, progress * 100)
+        if(progressbar)
+            setTxtProgressBar(pb, progress * 100)
         tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
         cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
+        if( ! progressbar) cat("\r")
       } 
       exit()
     }
-    res <- aplfun(X, function(x) {rr <- FUN(x); writeBin(1/length(X), f); rr})
+    res <- aplfun(X, function(x) {
+      rr <- FUN(x)
+      writeBin(1/length(X), f)
+      rr
+    })
     close(f)
-    setTxtProgressBar(pb,100)
-    close(pb)
+    if(progressbar) {
+      setTxtProgressBar(pb,100)
+      close(pb)
+    }
     res
   })
   cat(difftime(Sys.time(), start, units="mins"), "mins\n")
