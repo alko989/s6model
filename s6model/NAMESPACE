@@ -1,4 +1,5 @@
 import(numDeriv)
+import(methods)
 export("getParams",
        "getParams2",
        "simulateData",
