@@ -1,11 +1,9 @@
-s6model
-=======
+# s6model
 
 Data-poor stock assessment using the s6model
 
 
-Installation
-============
+##Installation
 
 Using [devtools](http://cran.r-project.org/web/packages/devtools/index.html):
 
