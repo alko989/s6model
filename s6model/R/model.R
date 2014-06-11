@@ -56,7 +56,7 @@ getParams <- function(p = new("Parameters"), FF=NULL,isSurvey=FALSE, calcBRPs=FA
       }
     if( ! (optim.fmsy | optim.fmsyr | optim.Rrel)) {    
       pdfN <-  fishing / sum(fishing * c(delta, 0))
-      pdfN.approx <- approxfun(w, pdfN, yleft=0, yright=0)
+      pdfN.approx <- approxfun(w, pdfN, yleft=0, yright=.Machine$double.xmin)
       cdf <-approxfun(w, cumsum(pdfN * c(delta,0)), yleft=0, yright=1)
     }
     B <- sum((psi_m  * N * w)[-M] * delta)

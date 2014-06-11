@@ -8,12 +8,10 @@ minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSu
 {
   params <- parameters(c(names, fixed.names), c(theta, fixed.vals))  
   if(class(data) == "data.frame") {
-    
     return(with(getParams(params,isSurvey),
-                sum( - data$Freq * log(pdfN.approx(as.numeric(as.character(data$Weight)) )))))
+                sum( - data$Freq * log(pdfN.approx(data$Weight)) )))
   }
-  return(with(getParams(params,isSurvey),
-              sum(-log(pdfN.approx(data)))))
+  return(with(getParams(params,isSurvey), sum(-log(pdfN.approx(data)))))
 }
 
 estimateParam <-
@@ -27,11 +25,17 @@ estimateParam <-
     p <- parameters()
     if(is.null(lower))
         lower <- rep(-Inf, length(names))
-    lower[which(names == "Winf")] <- 
+    
+    ## lower[which(names == "Winf")] <- 
+    ##     if(class(data)=="data.frame") 
+    ##         log((max(data$Weight) + 1) / p@scaleWinf)
+    ##     else
+    ##         log((max(data) + 1) / p@scaleWinf)
+    start[which(names == "Winf")] <- 
         if(class(data)=="data.frame") 
-            log((max(data$Weight) + 1) / p@scaleWinf)
+            (max(data$Weight) + 1) / p@scaleWinf
         else
-            log((max(data) + 1) / p@scaleWinf)
+            (max(data) + 1) / p@scaleWinf
         
     scales <- sapply(names, function(n) get(paste0("getscale", n))(p))
     

@@ -481,3 +481,9 @@ Changes from version  0.9.40 to  0.9.41
 
 Changes from version  0.9.41 to  0.9.42 
  * Added imports numderiv in the DESCRITPION file
+
+Changes from version  0.9.42 to  0.9.43 
+ * pdfN.approx is equal to .Machne$double.xmin instead of zero for values larger than Winf
+ * difference returns the percent difference for each variable
+ * minimizeme assumes data.frame with Weight column of class numeric
+ * Winf has maximum observed as starting value, not as lower bound

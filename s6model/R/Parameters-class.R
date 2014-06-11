@@ -154,7 +154,7 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
        eval(parse(text=paste("comp@" , n, sep="")))) {
       val1 <- exp(eval(parse(text=paste("base@" , n, sep="")))) * eval(parse(text=paste("base@scale" , substr(n, 4, nchar(n)), sep="")))
       val2 <- exp(eval(parse(text=paste("comp@" , n, sep="")))) * eval(parse(text=paste("comp@scale" , substr(n, 4, nchar(n)), sep="")))
-      res[substr(n, 4, nchar(n)), ] <<- c(val1,val2, val1 - val2,val1/val2-1)
+      res[substr(n, 4, nchar(n)), ] <<- c(val1,val2, val1 - val2,abs((val1-val2)/(mean(val1,val2)))*100)
     } else {
       NA
     }
@@ -195,6 +195,7 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
                    pch=".", cex=3)
             lines(density(rep(data$Weight, data$Freq)), col=2, lty=2)
             hist(rep(data$Weight, data$Freq), breaks = seq(0, max(data$Weight) + max(data$Weight) / 35 +1 , length.out=35) , add=T, freq=F)
+            legend("topright",, c("fitted PDF", "Data kernel density"), col=c("blue","red"), lty=1)
           })
 setGeneric("plotGrowth", function(object, ...) {standardGeneric("plotGrowth")})
 setMethod("plotGrowth", c("Parameters"),
