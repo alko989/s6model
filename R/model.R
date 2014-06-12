@@ -1,18 +1,35 @@
-## Function for calculation of the steady-state single-species size-spectrum
-## Author: Alexandros Kokkalis
-## 
-## Work in constant progress
-## Changelog
-## * 2012-6-22 Made function getParams that calculates the size-spectrum,
-##             growth, mortality, SSB and yield
-## * 2012-6-23 Sampling function
-## * 2012-6-26 Added pdf and cdf functions
-##  *** The changelog is moved to an extra file ***
-
-getParams <- function(p = new("Parameters"), FF=NULL,isSurvey=FALSE, calcBRPs=FALSE, optim.fmsy=FALSE, optim.fmsyr = FALSE, optim.Rrel =FALSE)
-  {
+#' Returns a list with all parameters and functions
+#' 
+#' Given a Parameters object, it returns as a list all relevant parameters and
+#' corresponding functions like pdf and cdf.
+#' 
+#' 
+#' @param p A Parameters object
+#' @param FF Numeric. Fishing mortality. This argument is ignored if all optim.* are FALSE 
+#' @param calcBRPs Boolean. If true, calculates biological reference points.
+#' @param isSurvey boolean, if TRUE a survey selectivity is used for the pdf
+#' @param optim.fmsy Logical.
+#' @param optim.fmsyr Logical.
+#' @param optim.Rrel Logical
+#' @return \itemize{
+#' \item If optim.* are all FALSE, an invisible list, containing all model parameters, the cdf, the pdf
+#' functions. spawning stock biomass (SSB), yield. If calcBRPs is TRUE also Fmsy.
+#' \item If optim.fmsy is TRUE, only the yield per Rmax is returned
+#' \item If optim.fmsyr is TRUE, only the yield per recruit is returned
+#' \item If optim.Rrel is TRUE, only the R/Rmax - 0.5 is returned
+#' }
+#' @author alko
+#' @seealso \code{\link{parameters}}
+#' @keywords misc
+#' @examples
+#' 
+#'  getParams()
+#' 
+#' @export getParams
+getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE, 
+                      optim.fmsy=FALSE, optim.fmsyr = FALSE, optim.Rrel =FALSE) {
     if(class(p) != "Parameters")
-      stop("Wrong input argument in getParams. Use the Parameters class instead.")
+      stop("Wrong input argument in getParams. Use the Parameters class instead.")  
     Winf <- exp(p@logWinf) * p@scaleWinf
     Fm <- exp(p@logFm) * p@scaleFm
     if(optim.fmsy | optim.fmsyr | optim.Rrel)
@@ -46,14 +63,14 @@ getParams <- function(p = new("Parameters"), FF=NULL,isSurvey=FALSE, calcBRPs=FA
     N <- exp(- cumsum((m / g)[-1] * delta)) / g[-1]
     N <- c(1/g[1], N)
     N[M] <- 0
-     if(isSurvey)
-      {
-        fishing <- psi_S * N
-      }
+    if(isSurvey)
+    {
+      fishing <- psi_S * N
+    }
     else
-      {
-        fishing <- psi_F * Fm * N
-      }
+    {
+      fishing <- psi_F * Fm * N
+    }
     if( ! (optim.fmsy | optim.fmsyr | optim.Rrel)) {    
       pdfN <-  fishing / sum(fishing * c(delta, 0))
       pdfN.approx <- approxfun(w, pdfN, yleft=0, yright=.Machine$double.xmin)
@@ -61,6 +78,7 @@ getParams <- function(p = new("Parameters"), FF=NULL,isSurvey=FALSE, calcBRPs=FA
     }
     B <- sum((psi_m  * N * w)[-M] * delta)
     Rrel <- 1 - (Winf^(1-n) * w_egg/(epsilon_r * (1 - epsilon_a) * A * B))## * (w_r/w_egg)^(a-1)
+
     Y <- Fm * Rrel * sum((psi_F * N * w)[-M] * delta)
     YR <- Fm * sum((psi_F * N * w)[-M] * delta)
     
@@ -76,144 +94,19 @@ getParams <- function(p = new("Parameters"), FF=NULL,isSurvey=FALSE, calcBRPs=FA
     vb.K <- A * Winf^(n-1) / 3
     vb.MK <- vb.M / vb.K
     if(optim.fmsy)
-        return(Y)
-    else if(optim.fmsyr)
-        return(YR)
-    else if(optim.Rrel)
-        return(Rrel - 0.5)
-    else
-        return(invisible(as.list(environment())))
-  }
-
-getParams2 <- function(p = new("Parameters"), isSurveY=FALSE)
-    {
-    if(class(p) != "Parameters")
-      stop("Wrong input argument in getParams. Use the Parameters class instead.")
-    Winf <- exp(p@logWinf) * p@scaleWinf
-    Fm <- exp(p@logFm) * p@scaleFm
-    A <- exp(p@logA) * p@scaleA
-    n <- exp(p@logn) *p@scalen
-    eta_F <- exp(p@logeta_F) * p@scaleeta_F
-    eta_m <- exp(p@logeta_m) * p@scaleeta_m
-    a <- exp(p@loga) *  p@scalea
-    epsilon_a <- exp(p@logepsilon_a) * p@scaleepsilon_a
-    epsilon_r <- exp(p@logepsilon_r) * p@scaleepsilon_r
-    M <- 300
-   
-    w_r <- w_egg<- 0.001
-    Delta <- (log(Winf) - log(w_r)) / (M - 1)
-    w <- exp(log(w_r) + (1:M - 1) * Delta)
-    
-    wrel <- w/Winf
-    delta <- diff(c(w, Winf))
-    
-    u <- 10
-    psi_F <- (1 + (w / (eta_F * Winf))^-u )^-1
-    ## psi_F.func <- function(ww) (1 + (ww / (eta_F * Winf))^-u)^-1
-    psi_m <- (1 + (w / (eta_m * Winf))^-u )^-1
-    ## psi_m.func <- function(ww) (1 + (ww / (eta_m * Winf))^-u)^-1
-    m <- a * A * w^(n - 1) +  Fm * psi_F
-    m[M] <- Inf
-    ## m.func <- function(ww) a*h*ww^(n-1) + Fm * psi_F.func(ww)
-    g <- A*w^n *(1 - (w/Winf)^(1-n) * (epsilon_a + (1 - epsilon_a) * psi_m))
-    ##g.func <- function(ww) h*ww^n*(1-(ww/Winf)^(1-n) * (epsilon_a + (1 - epsilon_a) * psi_m.func(ww)))
-    N <- cumprod(exp(Delta)^(-m/g*w))/(g*w_r)
-    ## N.approx <- approxfun(w, N, yleft = 0, yright = 0) 
-    ## if(require(multicore)) {
-    ##  N.func <- function(x) unlist(mclapply(x, function(ww) exp(-integrate(function(x) m.func(x)/g.func(x), lower = w_r, upper = ww)$value) / g.func(ww)))
-    ## } else {
-    ##  N.func <- function(x) unlist(lapply(x, function(ww) exp(-integrate(function(x) m.func(x)/g.func(x), lower = w_r, upper = ww)$value) / g.func(ww))) 
-    ## }
-    ## N1 <- N[1]
-    ## N <- N / N1
-    N[M] <- 0
-    if(isSurvey)
-      {
-        psiSurvey <- 1
-        fishing <- psiSurvey * N
-        pdfN <- fishing / sum(fishing * delta)
-      }
-    else
-      {
-        fishing <- psi_F * Fm * N
-        pdfN <-  fishing / sum(fishing * delta)
-      }
-    pdfN.approx <- approxfun(w, pdfN, yleft=0, yright=0)
-    ## pdfN.func <- function(ww) fishing.func(ww) / fishsum
-    ## cdf <-approxfun(w, cumsum(pdfN), yleft=0, yright=0)
-    cdf <-approxfun(w, cumsum(pdfN * delta), yleft=0, yright=1)
-    B <- sum(psi_m  * N * w * delta)
-    ## Rrel <-(1 - (Winf^(1-n) * w_r^(1+n))/(epsilon_r*B))/ h * w_r^(n+1)
-    Rrel <- 1 - Winf^(1-n)/(epsilon_r * (1 - epsilon_a) * A * B) * (w_r/w_egg)^(a-1)
-    ##Y <- Fm * Rrel* sum(psi_F * N  * w * delta) 
-    Y <- Fm * Rrel * sum(psi_F * N * w * delta)
-    #N0 <- exp(- cumsum((a * A * w^(n - 1)) / g * delta)) / g
-    ##N0 <- N0 / N0[1]
-    #norm = A*(eta_F * Winf)^(n+1) * (1 - (eta_F)^(1 - n))* N0[which(w >= (eta_F * Winf))][1]
-    #YpR = Fm * sum(psi_F * N  * w * delta)  / norm
-    Fmsy <- optimise(f=getY2, interval=c(0,10), maximum=TRUE, p=p)$maximum
-    FoverFmsy <- Fm/Fmsy
+      return(Y)
+    if(optim.fmsyr)
+      return(YR)
+    if(optim.Rrel)
+      return(Rrel - 0.5)
+  
     return(invisible(as.list(environment())))
   }
 
 
-
-
-simulateData <- function(samplesize= 1000, params = parameters())
-{
-  sam <- c()
-  with(getParams(params), {
-    cdf.sim <- function(F, ...) {
-      res <- NULL
-      i <- 0
-      while(is.null(res))
-        {
-          U <- runif(1)
-          res <- tryCatch(uniroot(function(x) {cdf(x) - U}, c(w_r, Winf))$root,
-                          error=function(e)
-                          {
-                            i <- i + 1
-                            if(i > 999)
-                              warning(" ** No sample found after 1000 tries **")
-                            warning(paste("Error message: ",  e$message))
-                            return(NULL)
-                          })
-        }
-      return(res)
-    }
-    
-    for(i in 1:samplesize)
-      sam <<-  c(sam, cdf.sim(cdf))
-
-  })
-  return(sam)
-}
-
-simulateData2 <- function(samplesize= 1000, params = parameters(), ...)
-{
-  sam <- c()
-  with(getParams(params, ...), {
-    cdf.sim <- function() {
-      res <- NULL
-      i <- 0
-      while(is.null(res))
-      {
-        U <- runif(1)
-        res <- uniroot(function(x) {cdf(x) - U}, c(w_r, Winf))$root
-      }
-      return(res)
-    }
-    sam <<- simplify2array(mclapply(1:samplesize, function(x) cdf.sim()))
-  })
-  table <- as.data.frame(table(cut(sam, seq(0,20000, 50), labels=seq(25, 20000 - 25, 50) )))
-  names(table) <- c("Weight","Freq")
-  table <- table[table$Freq > 0, ]
-  return(list(sample = sam, parameters = params, Fmsy = getParams(params,calcBRPs=TRUE)$Fmsy, table= table))
-}
-
 simulateData3 <- function(samplesize= 1000, params = parameters(), wcw = 5, keepZeros=TRUE, retDF=TRUE, ...)
 {
-  applyfun <- if(require(multicore)) mclapply else sapply
+  applyfun <- if(require(parallel)) mclapply else sapply
   sam <- c()
   with(getParams(params, ...), {
     sam <<- simplify2array(applyfun(runif(samplesize), function(u) uniroot(function(x) {cdf(x) - u}, c(w_r, Winf))$root))
@@ -232,96 +125,6 @@ sample2df <- function(sam, wcw, keepZeros=TRUE) {
   attr(df, "wcw") <- wcw
   df
 }
-
-getY <- function(F, p)
-  {
-    Winf <- exp(p@logWinf) * p@scaleWinf
-    A <- exp(p@logA) * p@scaleA
-    n <- exp(p@logn) *p@scalen
-    Wfs <- exp(p@logWfs) * p@scaleWfs
-    eta_m <- exp(p@logeta_m) * p@scaleeta_m
-    a <- exp(p@loga) *  p@scalea
-    epsilon_a <- exp(p@logepsilon_a) * p@scaleepsilon_a
-    epsilon_r <- exp(p@logepsilon_r) * p@scaleepsilon_r
-    M <- p@M
-    w_r <- w_egg <- 0.001
-    Delta <- (log(Winf) - log(w_r)) / (M - 1)
-    w <- exp(log(w_r) + (1:M - 1) * Delta)
-    rm(Delta)
-    wrel <- w/Winf
-    delta <- diff(c(w, Winf))
-    u <- 10
-    psi_F <- (1 + (w / Wfs)^-u )^-1
-    psi_m <- (1 + (w / (eta_m * Winf))^-u )^-1
-    m <- a * A * w^(n - 1) +  F * psi_F
-    m[M] <- Inf
-    g <- A*w^n *(1 - (w/Winf)^(1-n) * (epsilon_a + (1 - epsilon_a) * psi_m))
-    N <- exp(- cumsum(m / g * delta)) / (g * w_r)
-    N[M] <- 0
-    B <- sum(psi_m  * N * w * delta)
-    Rrel <- 1 - Winf^(1-n) * w_r / (epsilon_r * (1 - epsilon_a) * A * B)
-    F * Rrel * sum(psi_F * N * w * delta)
-  
-  }
-getY2 <- function(F, p = parameters())
-  {
-    Winf <- exp(p@logWinf) * p@scaleWinf
-    A <- exp(p@logA) * p@scaleA
-    n <- exp(p@logn) *p@scalen
-    eta_F <- exp(p@logeta_F) * p@scaleeta_F
-    eta_m <- exp(p@logeta_m) * p@scaleeta_m
-    a <- exp(p@loga) *  p@scalea
-    epsilon_a <- exp(p@logepsilon_a) * p@scaleepsilon_a
-    epsilon_r <- exp(p@logepsilon_r) * p@scaleepsilon_r
-    M <- 300
-    w_r <- w_egg <- 0.001
-    Delta <- (log(Winf) - log(w_r)) / (M - 1)
-    w <- exp(log(w_r) + (1:M - 1) * Delta)
-    wrel <- w/Winf
-    delta <- diff(c(w, Winf))
-    u <- 10
-    psi_F <- (1 + (w / (eta_F * Winf))^-u )^-1
-    psi_m <- (1 + (w / (eta_m * Winf))^-u )^-1
-    m <- a * A * w^(n - 1) +  F * psi_F
-    m[M] <- Inf
-    g <- A*w^n *(1 - (w/Winf)^(1-n) * (epsilon_a + (1 - epsilon_a) * psi_m))
-    N <- cumprod(exp(Delta)^(-m/g*w))/(g*w_r)
-    N[M] <- 0
-    B <- sum(psi_m  * N * w * delta)
-    Rrel <- 1 - Winf^(1-n)/(epsilon_r * (1 - epsilon_a) * A * B) * (w_r/w_egg)^(a-1)
-    F * Rrel * sum(psi_F * N * w * delta)
-  
-  }
-getYR <- function(F, p = parameters())
-  {
-    Winf <- exp(p@logWinf) * p@scaleWinf
-    A <- exp(p@logA) * p@scaleA
-    n <- exp(p@logn) *p@scalen
-    eta_F <- exp(p@logeta_F) * p@scaleeta_F
-    eta_m <- exp(p@logeta_m) * p@scaleeta_m
-    a <- exp(p@loga) *  p@scalea
-    epsilon_a <- exp(p@logepsilon_a) * p@scaleepsilon_a
-    epsilon_r <- exp(p@logepsilon_r) * p@scaleepsilon_r
-    M <- 1000
-    w_r <- w_egg <- 0.001
-    Delta <- (log(Winf) - log(w_r)) / (M - 1)
-    w <- exp(log(w_r) + (1:M - 1) * Delta)
-    rm(Delta)
-    wrel <- w/Winf
-    delta <- diff(c(w, Winf))
-    u <- 10
-    psi_F <- (1 + (w / (eta_F * Winf))^-u )^-1
-    psi_m <- (1 + (w / (eta_m * Winf))^-u )^-1
-    m <- a * A * w^(n - 1) +  F * psi_F
-    m[M] <- Inf
-    g <- A*w^n *(1 - (w/Winf)^(1-n) * (epsilon_a + (1 - epsilon_a) * psi_m))
-    N <- exp(- cumsum(m / g * delta)) / (g * w_r)
-    N[M] <- 0
-    B <- sum(psi_m  * N * w * delta)
-    Rrel <- 1 - Winf^(1-n)/(epsilon_r * (1 - epsilon_a) * A * B) * (w_r/w_egg)^(a-1)
-    F * Rrel * sum(psi_m * N * w * delta)
-  }
-
 
 rparam <- function(value, range.sd, range.cv, lb= -Inf, ub = Inf, unif=FALSE)
 {
@@ -374,13 +177,13 @@ getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
 }
 
 tmclapply <- function(X, FUN, ..., simplify=FALSE, progressbar=TRUE){
-  aplfun <- if(require(multicore)) mclapply else lapply
+  aplfun <- if(require(parallel)) mclapply else lapply
   start <- Sys.time()
   if(progressbar)
       pb <- txtProgressBar(min = 0, max = 100, style=3)
   results <- local({
     f <- fifo(tempfile(), open="w+b", blocking=TRUE)
-    if (inherits(fork(), "masterProcess")) {
+    if (inherits(parallel:::mcfork(), "masterProcess")) {
       progress <- 0.0
       while(progress < 1 && !isIncomplete(f)) {
         msg <- readBin(f, "double")
@@ -391,7 +194,7 @@ tmclapply <- function(X, FUN, ..., simplify=FALSE, progressbar=TRUE){
         cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
         if( ! progressbar) cat("\r")
       } 
-      exit()
+      parallel:::exit()
     }
     res <- aplfun(X, function(x) {
       rr <- FUN(x)

@@ -487,3 +487,10 @@ Changes from version  0.9.42 to  0.9.43
  * difference returns the percent difference for each variable
  * minimizeme assumes data.frame with Weight column of class numeric
  * Winf has maximum observed as starting value, not as lower bound
+
+Changes from version  0.9.43 to  0.10.0 
+ * Removed unused functions, like getY, getYR, reloads6model, simulateData, simulateData2
+ * Removed bootstrap argument from estimateParam
+ * Added roxygen comments
+ * Changed from multicore to parallel
+ * estimateParam default names are Fm, Winf and Wfs

@@ -1,4 +1,3 @@
-
 setClass("Parameters",
          representation(logWinf="numeric",          # Asymptotic weight
                         logFm="numeric",            # Fishing mortality
@@ -254,6 +253,38 @@ setMethod("getCor", c("Parameters"), function(object) {
   cov2cor(solve(attr(object, "hessian")))
 })
 
+
+
+#' Constructor for the Parameters Class
+#' 
+#' Easier constructor for the Parameters class.
+#' 
+#' The values in 'vals' should be given as logarithms of the parameter values.
+#' 
+#' @param names String vector. Contains the names of the parameters that will
+#' have non default values.
+#' @param vals Numeric vector. The corresponding values.
+#' @param transformed Boolean. If TRUE vals should contain the transformed parameter values.
+#' @param base Parameters object. The parameter values will be used instead of the default values.
+#' @return Returns an object of the Parameters class
+#' @author alko
+#' @seealso \code{\link{Parameters-class}}, ~~~
+#' @keywords constructor
+#' @examples
+#' 
+#' \dontrun{
+#' ## Without any arguments gives a Parameters object with default values
+#' parameters()
+#' 
+#' ## Changing some parameters gives the corresponding object
+#' par1 <- parameters(c("Winf", "Fm", "Wfs"), c(log(1000 / 10000), log(0.4 / 0.25), log(100 / 1000)))
+#' par2 <- parameters(c("Winf", "Fm", "Wfs"), c(1000 , 0.4, 100), transformed=FALSE)
+#'
+#' ## Check if the two objects are equal
+#' all.equal(par1, par2)
+#' }
+#' 
+#' @export parameters
 parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Parameters"))
   {
     res <- base
