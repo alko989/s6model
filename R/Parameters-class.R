@@ -1,3 +1,42 @@
+#' The Parameters class and constructor
+#'
+#' A class that contains all model parameters
+#'
+#' @section Slots:
+#' \describe{
+#'   \item{\code{logWinf}:}{Numeric scalar. Asymptotic weight}
+#'   \item{\code{logFm}:}{Numeric scalar. Fishing mortality}
+#'   \item{\code{logA}:}{Numeric scalar. Growth parameter}
+#'   \item{\code{logn}:}{Numeric scalar. Exponent of consumption}
+#'   \item{\code{logeta_F}:}{Numeric scalar. 50\% retention size, relative to asymptotic weight}
+#'   \item{\code{logeta_m}:}{Numeric scalar. 50\% maturation size, relative to asymptotic weight}
+#'   \item{\code{logeta_S}:}{Numeric scalar. 50\% retention size (survey), relative to asymptotic weight}
+#'   \item{\code{loga}:}{Numeric scalar. Physiological mortality}
+#'   \item{\code{logepsilon_a}:}{Numeric scalar. Allocation to activity}
+#'   \item{\code{logepsilon_r}:}{Numeric scalar. Recruitment efficiency}
+#'   \item{\code{logWfs}:}{Numeric scalar. 50\% retention size}
+#'   \item{\code{logu}:}{Numeric scalar. Selectivity parameter, width o}
+#'   \item{\code{M}:}{Numeric scalar. Number of internal weight classes}
+#'   \item{\code{scaleWinf}:}{Numeric scalar. Scale of asymptotic weight}
+#'   \item{\code{scaleFm}:}{Numeric scalar. Scale of fishing mortality}
+#'   \item{\code{scaleA}:}{Numeric scalar. Scale of growth parameter}
+#'   \item{\code{scalen}:}{Numeric scalar. Scale of exponent of consumption}
+#'   \item{\code{scaleeta_F}:}{Numeric scalar. Scale of 50\% retantion size}
+#'   \item{\code{scaleeta_m}:}{Numeric scalar. Scale of 50\% maturation size}
+#'   \item{\code{scaleeta_S}:}{Numeric scalar. Scale of survey gear 50\% retantion size}
+#'   \item{\code{scalea}:}{Numeric scalar. Scale of the physiological mortality}
+#'   \item{\code{scaleepsilon_a}:}{Numeric scalar. Scale of the allocation to activity}
+#'   \item{\code{scaleepsilon_r}:}{Numeric scalar. Scale of recruitment efficiency}
+#'   \item{\code{scaleWfs}:}{Numeric scalar. Scale of size of 50\% retention}
+#'   \item{\code{scaleu}:}{Numeric scalar.}
+
+#' }
+#' @author alko
+#' 
+#' @exportClass Parameters
+#' @name Parameters
+#' @aliases Parameters-class
+#' @rdname helloworld-methods
 setClass("Parameters",
          representation(logWinf="numeric",          # Asymptotic weight
                         logFm="numeric",            # Fishing mortality
@@ -79,17 +118,34 @@ setMethod("getscaleWfs","Parameters", function(object){ return(object@scaleWfs) 
 setGeneric("getscaleu",function(object){standardGeneric ("getscaleu")})
 setMethod("getscaleu","Parameters", function(object){ return(object@scaleu) })
 
-setGeneric("setlogWinf<-",function(object,value){standardGeneric("setlogWinf<-")})
+##' Takes a Parameters object and changes its asymptotic weight
+##'
+##' The asymptotic weight is changed, along with the relative and absolute sizes of 50\% retention
+##' @param object \code{Parameters} object 
+##' @param value Numeric. The new asymptotic weight
+##' @return \code{Parameters} object with changed asymptotic weight, and absolute and
+##' relative 50\% retention sizes
+##' @author alko
+##' @export
+setGeneric("Winf<-",function(object,value){standardGeneric("Winf<-")})
 setReplaceMethod(
-    f="setlogWinf",
+    f="Winf",
     signature="Parameters",
     definition=function(object,value){
-      object@logWinf <- value
-      eF <- exp(object@logeta_F) * object@scaleeta_F
-      winf <- exp(object@logWinf)* object@scaleWinf
-      object@logWfs <- log(eF*winf/object@scaleWfs)
-      return (object)
+        object@logWinf <- log(value/object@scaleWinf)
+        eF <- exp(object@logeta_F) * object@scaleeta_F
+        winf <- exp(object@logWinf)* object@scaleWinf
+        object@logWfs <- log(eF*winf/object@scaleWfs)
+        return (object)
     })
+
+setGeneric("Winf", function(self) standardGeneric("Winf"))
+setMethod("Winf", 
+	signature(self = "Parameters"), 
+	function(self) {
+		exp(self@logWinf)*self@scaleWinf
+	}
+)
 
 formatEntry <- function(..., width=20) {
   res <- c()
@@ -125,7 +181,7 @@ setMethod("show", "Parameters",
 
 
 setMethod(f="plot", signature="Parameters",
-          definition=function(x,y=NULL, xlim=c(0.001, 1), ...) {
+          definition=function(x, xlim=c(0.001, 1), ...) {
             p <- getParams(x)
             plot.default(p$w / p$Winf, p$N*(p$w^2), log="xy",
                          main="Biomass with respect to relative weight",
@@ -137,12 +193,21 @@ setMethod(f="plot", signature="Parameters",
 setMethod(f="lines", signature="Parameters",
           definition=function(x, ...){
             p <- getParams(x)
-            plot.xy(xy.coords(p$w / p$Winf, p$N*(p$w^2)), type=type)
+            lines(xy.coords(p$w / p$Winf, p$N*(p$w^2)))
           })
 setMethod(f="as.list", signature="Parameters",
           definition=function(x) {
             with(getParams(x), list(Winf=Winf, Fm=Fm, Wfs=Wfs, eta_m=eta_m, epsilon_r=epsilon_r, epsilon_a=epsilon_a, A=A, a=a,n=n))
           })
+##' Difference between two \code{Parameters} objects
+##' 
+##' @param base \code{Parameters} object. First object
+##' @param comp \code{Parameters} object. Second object
+##' @return TRUE if they are the same. If there are differences, a data.frame is returned
+##' with the untransformed parameter values of the two objects, the relative difference (base - comp)
+##' and the percent difference 
+##' @author alko
+##' @export
 setGeneric("difference", function(base, comp) {
   standardGeneric ("difference")
 })
@@ -161,7 +226,20 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
   if(dim(res)[1] == 0) return( TRUE)
   round(res,4)
 })
-
+##' Visualizing fit of s6model
+##'
+##'
+##' @title plotFit
+##' @name plotFit-methods
+##' @aliases plotFit
+##' @param object A \code{Parameters} object
+##' @param data Numeric vector or data.frame with columns Weight and Freq.
+##' @param add Boolean. If TRUE, the plot is added to an existing graphics device.
+##' @param ... Extra named arguments are passed to the plotting function
+##' @return invisible NULL
+##' @docType methods
+##' @export 
+##' @author alko
 setGeneric("plotFit", function(object, data, add, ...)
            {standardGeneric ("plotFit")} )
 setMethod("plotFit", c("Parameters", "numeric", "missing"),
@@ -178,7 +256,8 @@ setMethod("plotFit", c("Parameters", "numeric", "logical"),
                  xlab="Weight (g)",
                  ylab="Probability",
                  col="blue", ...)
-            hist(data, freq=FALSE, add=TRUE, breaks="FD", )
+            hist(data, freq=FALSE, add=TRUE, breaks="FD")
+            invisible(NULL)
           })
 setMethod("plotFit", c("Parameters", "data.frame", "logical"),
           function(object, data, add,...) {
@@ -195,7 +274,15 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
             lines(density(rep(data$Weight, data$Freq)), col=2, lty=2)
             hist(rep(data$Weight, data$Freq), breaks = seq(0, max(data$Weight) + max(data$Weight) / 35 +1 , length.out=35) , add=T, freq=F)
             legend("topright",, c("fitted PDF", "Data kernel density"), col=c("blue","red"), lty=1)
+            invisible(NULL)
           })
+##' Plots growth function
+##'
+##' @param object A \code{Parameters} object
+##' @param ... Additional arguments for plot
+##' @return Invisible \code{NULL}
+##' @author alko
+##' @export
 setGeneric("plotGrowth", function(object, ...) {standardGeneric("plotGrowth")})
 setMethod("plotGrowth", c("Parameters"),
           function(object, ...) {
@@ -221,15 +308,22 @@ setMethod("plotGrowth", c("Parameters"),
             ticksat <- as.vector(sapply(pow, function(p) (2:10)*10^p))
             axis(1, 10^pow, tcl=0.5, labels=NA)
             axis(1, ticksat, labels=NA, tcl=0.25, lwd=0, lwd.ticks=1)
+            invisible(NULL)
           })
 
+##' Makes a plot of natural and fishing mortalities
+##' @param object A \code{Parameters} object
+##' @param ... Additional arguments for plot
+##' @return Invisible \code{NULL}
+##' @author alko
+##' @export
 setGeneric("plotMortality", function(object, ...) {standardGeneric("plotMortality")})
 setMethod("plotMortality", c("Parameters"),
           function(object, ...) {
             p <- getParams(object)
             plot(p$w / p$Winf, p$m , type="n", lwd=2, 
                  xlab=expression(w/W[infinity]),  log="x", ylab="",xaxt="n", yaxt="n", ... )
-            title(ylab=expression(Mortality~~(y^-1)), line=1.4)
+            title(ylab=parse(text="Mortality~~(y^-1)"), line=1.4)
             lines(p$w/p$Winf, p$psi_F* p$Fm, lwd=3, lty="dotted")
             lines(p$w / p$Winf, p$m - p$psi_F * p$Fm, lty=2, lwd=3)
             lines(p$w / p$Winf, p$m, lty=1, lwd=3)
@@ -242,8 +336,17 @@ setMethod("plotMortality", c("Parameters"),
             abline(v=p$eta_F, lwd=1, lty=2)
             mtext(expression(eta[F]), side=1, at=p$eta_F, line=0)
             ##legend("topright", legend=c("natural mortality", "total mortality", "fishing mortality"), lty=c(1,2,1), col=c(1,1,"lightgrey"),lwd=c(2,2,10))
+            invisible(NULL)
           })
 
+##' Returns the correlation matrix of the parameters
+##'
+##' 
+##' @param object A \code{Parameters} object returned by \code{estimateParam}, i.e. having
+##' an attribute hessian
+##' @return The correlation matrix
+##' @author alko
+##' @export
 setGeneric("getCor", function(object) {standardGeneric("getCor")})
 setMethod("getCor", c("Parameters"), function(object) {
   if(is.null(attr(object, "hessian"))) {
@@ -263,16 +366,14 @@ setMethod("getCor", c("Parameters"), function(object) {
 #' 
 #' @param names String vector. Contains the names of the parameters that will
 #' have non default values.
-#' @param vals Numeric vector. The corresponding values.
+#' @param vals Numeric vector. The corresponding values, transformed if \code{transformed} is TRUE.
 #' @param transformed Boolean. If TRUE vals should contain the transformed parameter values.
-#' @param base Parameters object. The parameter values will be used instead of the default values.
+#' @param base \code{Parameters} object. The parameter values will be used instead of the default values.
 #' @return Returns an object of the Parameters class
 #' @author alko
-#' @seealso \code{\link{Parameters-class}}, ~~~
 #' @keywords constructor
 #' @examples
 #' 
-#' \dontrun{
 #' ## Without any arguments gives a Parameters object with default values
 #' parameters()
 #' 
@@ -282,8 +383,15 @@ setMethod("getCor", c("Parameters"), function(object) {
 #'
 #' ## Check if the two objects are equal
 #' all.equal(par1, par2)
-#' }
-#' 
+#'
+#' ## Take a Parameters object and change one parameter
+#' par <- parameters(c("Winf", "a", "Fm", "Wfs"), c(1000, 0.4, 0.2, 100), transformed = FALSE)
+#' changeMatsize <- parameters("eta_m", 0.3, transformed =FALSE, base=par)
+#'
+#' difference(par, changeMatsize)
+#' ##       base comp difference percent.difference
+#' ## eta_m 0.25  0.3      -0.05                 20
+#' @rdname Parameters
 #' @export parameters
 parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Parameters"))
   {

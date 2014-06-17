@@ -49,14 +49,11 @@ kernel density estimate of the data.}
 }
 \value{
 A Parameters object, containing the estimated parameters.
-
-Parameters object with the fitted
 }
 \description{
 Parameter estimation minimizing the negative log likelihood, using the
-nlminb function
-
-Similar to estimateParam, but accepting both commercial and survey data
+nlminb function. \code{estimateParam} uses data from commercial catches or surveys.
+\code{estimateMultidata} uses both sources
 }
 \examples{
 ## Simulate some data
@@ -66,8 +63,6 @@ sam <- simulateData3(params=parameters("a", 0.5, transformed=FALSE))
 estimateParam(names="a", data=sam$sample, plotFit=TRUE)
 }
 \author{
-alko
-
 alko
 }
 \keyword{optimize}

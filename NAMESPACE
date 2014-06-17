@@ -8,10 +8,11 @@ export("getParams",
        "parameters",
        "getCor",
        "sample2df",
-       "tmclapply",
+       ##"tmclapply",
        "getRandomParameters",
-       "getRandomParameters.fixedWinf",
-       "simplify2dataframe")
+       "getRandomParameters.fixedWinf"
+       ##, "simplify2dataframe"
+       )
 exportMethods(
     "lines",
     "plotFit",
@@ -21,7 +22,7 @@ exportMethods(
     "plot",
     "show",
     "as.list",
-    "setlogWinf<-"
+    "Winf<-"
 )
 exportClasses(
     "Parameters" 

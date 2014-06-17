@@ -494,3 +494,13 @@ Changes from version  0.9.43 to  0.10.0
  * Added roxygen comments
  * Changed from multicore to parallel
  * estimateParam default names are Fm, Winf and Wfs
+Add comments here
+Add comments here
+Add comments here
+Add comments here
+Add comments here
+Add comments here
+Add comments here
+
+Changes from version  0.10.0 to  0.10.1 
+ * Added documentation for more functions

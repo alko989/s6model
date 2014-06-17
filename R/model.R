@@ -25,7 +25,7 @@
 #' 
 #'  getParams()
 #' 
-#' @export getParams
+#' @export
 getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE, 
                       optim.fmsy=FALSE, optim.fmsyr = FALSE, optim.Rrel =FALSE) {
     if(class(p) != "Parameters")
@@ -103,7 +103,24 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
     return(invisible(as.list(environment())))
   }
 
-
+##' Simulates catch-at-weight data using the s6model
+##'
+##' Simulate a data set of individual catch weight or 
+##' @param samplesize Integer. Number of simulated individuals
+##' @param params Object of class \code{Parameters}. Model parameters
+##' @param wcw Numeric. Weight class width. If \code{retDF} is FALSE, \code{wcw} is ignored
+##' @param keepZeros Logical. If TRUE the resulting data.frame includes weight classes with zero individuals. Otherwise these weight classes are dropped. Ignored if \code{retDF} is FALSE
+##' @param retDF Logical. If TRUE a data.frame is returned with columns Weight (weight classes) and Freq (numbers per weight class)
+##' @param ... Extra named arguments passed to \code{getParams}
+##' @return Invisible list with
+##' \itemize{
+##'   \item `sample` containing weights of individuals,
+##'   \item `parameters` the parameters as a \code{Parameters} object
+##'   \item `Fmsy` the Fmsy of the given parameters
+##'   \item `df` A data.frame with columns Weight and Freq with number per weight class. This is returned only if \code{retDF} is TRUE
+##' }
+##' @author alko
+##' @export
 simulateData3 <- function(samplesize= 1000, params = parameters(), wcw = 5, keepZeros=TRUE, retDF=TRUE, ...)
 {
   applyfun <- if(require(parallel)) mclapply else sapply
@@ -113,9 +130,17 @@ simulateData3 <- function(samplesize= 1000, params = parameters(), wcw = 5, keep
   })
   res <- list(sample = sam, parameters = params, Fmsy = getParams(params,calcBRPs=TRUE)$Fmsy)
   if(retDF) res$df <- sample2df(sam, wcw, keepZeros=keepZeros)
-  return(res)  
+  return(invisible(res))  
 }
-
+##' Convert a vector sample to data.frame with counts per weight class
+##'
+##' Takes a vector containing individual catch weights and returns a data.frame with numbers per weight class
+##' @param sam Numeric vector. Individual weights
+##' @param wcw Numeric. Weight class width
+##' @param keepZeros Logical. If TRUE the resulting data.frame includes weight classes with zero individuals. Otherwise these weight classes are dropped.
+##' @return A data.frame with columns Weight and Freq with number per weight class.
+##' @author alko
+##' @export
 sample2df <- function(sam, wcw, keepZeros=TRUE) {
   df <- as.data.frame(table(cut(sam, seq(0,max(sam) + wcw, wcw),
                                 labels=seq(wcw/2, max(sam) + wcw/2, wcw) )), stringsAsFactors=FALSE)
@@ -148,7 +173,23 @@ rparam <- function(value, range.sd, range.cv, lb= -Inf, ub = Inf, unif=FALSE)
     return(res)    
   }
 }
-
+##' Random model parameters
+##'
+##' Random model parameters with constraints in Fmsy and relative recruitment (Rrel = R/Rmax)
+##' @param parameter.names Character vector. Names of the parameters
+##' @param parameter.value Numeric vector. Parameter mean values
+##' @param parameter.sd Numeric vector. Standard deviation of the parameters
+##' @param parameter.cv Numeric vector. Coefficient of variation of log transformed parameters
+##' @param parameter.lbound Numeric vector. Lower bound of the distributions
+##' @param parameter.ubound Numeric vector. Upper bound of the distributions
+##' @param parameter.unif Logical vector. Use uniformly distributed parameters
+##' @param Rrel.gt Numeric. Relative recruitment constraint. It allows parameters that lead
+##' to Rrel at least equal to Rrel.gt
+##' @param Fmsy.gt Numeric. Fmsy constraint. It allows parameters that lead
+##' to Fmsy at least equal to Fmsy.gt
+##' @return \code{Parameters}
+##' @author alko
+##' @export
 getRandomParameters <-
     function(parameter.names=c("A", "n" ,"eta_m","eta_F", "a" ,"Fm","Winf","epsilon_a", "epsilon_r"),
              parameter.value =c(4.5,0.75 , 0.25  ,  0.05 , 0.35,0.25,  1e4 ,    0.8    ,     0.1    ),
@@ -170,48 +211,56 @@ getRandomParameters <-
       }
     }
 
+##' Random parameters with fixed Winf
+##'
+##' Shorthand function for a specific asymptotic weight
+##' @param winf Numeric. Asymptotic weight
+##' @return \code{Parameters}
+##' @author alko
+##' @rdname getRandomParameters
+##' @export
 getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
   parameter.names <- c("A", "n" ,"eta_m","eta_F", "a" ,"Fm","Winf","epsilon_a", "epsilon_r")
   parameter.value <- c(4.5,0.75 , 0.25  ,  0.05 , 0.35,0.25,  winf ,    0.8    ,     0.1    )
   getRandomParameters(parameter.names, parameter.value,, Rrel.gt=Rrel.gt, Fmsy.gt=Fmsy.gt)
 }
 
-tmclapply <- function(X, FUN, ..., simplify=FALSE, progressbar=TRUE){
-  aplfun <- if(require(parallel)) mclapply else lapply
-  start <- Sys.time()
-  if(progressbar)
-      pb <- txtProgressBar(min = 0, max = 100, style=3)
-  results <- local({
-    f <- fifo(tempfile(), open="w+b", blocking=TRUE)
-    if (inherits(parallel:::mcfork(), "masterProcess")) {
-      progress <- 0.0
-      while(progress < 1 && !isIncomplete(f)) {
-        msg <- readBin(f, "double")
-        progress <- progress + as.numeric(msg)
-        if(progressbar)
-            setTxtProgressBar(pb, progress * 100)
-        tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
-        cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
-        if( ! progressbar) cat("\r")
-      } 
-      parallel:::exit()
-    }
-    res <- aplfun(X, function(x) {
-      rr <- FUN(x)
-      writeBin(1/length(X), f)
-      rr
-    })
-    close(f)
-    if(progressbar) {
-      setTxtProgressBar(pb,100)
-      close(pb)
-    }
-    res
-  })
-  cat(difftime(Sys.time(), start, units="mins"), "mins\n")
-  if (simplify) simplify2dataframe(results) else results
-} 
+## tmclapply <- function(X, FUN, ..., simplify=FALSE, progressbar=TRUE){
+##   aplfun <- if(require(parallel)) mclapply else lapply
+##   start <- Sys.time()
+##   if(progressbar)
+##       pb <- txtProgressBar(min = 0, max = 100, style=3)
+##   results <- local({
+##     f <- fifo(tempfile(), open="w+b", blocking=TRUE)
+##     if (inherits(parallel:::mcfork(), "masterProcess")) {
+##       progress <- 0.0
+##       while(progress < 1 && !isIncomplete(f)) {
+##         msg <- readBin(f, "double")
+##         progress <- progress + as.numeric(msg)
+##         if(progressbar)
+##             setTxtProgressBar(pb, progress * 100)
+##         tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
+##         cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
+##         if( ! progressbar) cat("\r")
+##       } 
+##       parallel:::exit()
+##     }
+##     res <- aplfun(X, function(x) {
+##       rr <- FUN(x)
+##       writeBin(1/length(X), f)
+##       rr
+##     })
+##     close(f)
+##     if(progressbar) {
+##       setTxtProgressBar(pb,100)
+##       close(pb)
+##     }
+##     res
+##   })
+##   cat(difftime(Sys.time(), start, units="mins"), "mins\n")
+##   if (simplify) simplify2dataframe(results) else results
+## } 
 
-simplify2dataframe <- function(dd) {
-  data.frame(t(simplify2array(dd)))
-}
+## simplify2dataframe <- function(dd) {
+##   data.frame(t(simplify2array(dd)))
+## }
