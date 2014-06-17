@@ -22,7 +22,8 @@ exportMethods(
     "plot",
     "show",
     "as.list",
-    "Winf<-"
+    "Winf<-",
+    "Winf"
 )
 exportClasses(
     "Parameters" 
