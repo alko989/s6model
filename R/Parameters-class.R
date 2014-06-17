@@ -37,6 +37,7 @@
 #' @name Parameters
 #' @aliases Parameters-class
 #' @rdname helloworld-methods
+#' @export
 setClass("Parameters",
          representation(logWinf="numeric",          # Asymptotic weight
                         logFm="numeric",            # Fishing mortality
