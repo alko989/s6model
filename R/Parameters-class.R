@@ -127,6 +127,7 @@ setMethod("getscaleu","Parameters", function(object){ return(object@scaleu) })
 ##' @return \code{Parameters} object with changed asymptotic weight, and absolute and
 ##' relative 50\% retention sizes
 ##' @author alko
+##' @rdname Winf
 ##' @export
 setGeneric("Winf<-",function(object,value){standardGeneric("Winf<-")})
 setReplaceMethod(
@@ -140,6 +141,8 @@ setReplaceMethod(
         return (object)
     })
 
+@rdname Winf
+@export
 setGeneric("Winf", function(self) standardGeneric("Winf"))
 setMethod("Winf", 
 	signature(self = "Parameters"), 
