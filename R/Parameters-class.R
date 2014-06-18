@@ -141,8 +141,8 @@ setReplaceMethod(
         return (object)
     })
 
-@rdname Winf
-@export
+##' @rdname Winf
+##' @export
 setGeneric("Winf", function(self) standardGeneric("Winf"))
 setMethod("Winf", 
 	signature(self = "Parameters"), 
