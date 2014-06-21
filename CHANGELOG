@@ -504,3 +504,7 @@ Add comments here
 
 Changes from version  0.10.0 to  0.10.1 
  * Added documentation for more functions
+
+Changes from version  0.10.1 to  0.10.2 
+ * Added argument fixed.transformed to estimatParam
+ * Exported Winf

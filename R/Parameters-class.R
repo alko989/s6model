@@ -142,6 +142,7 @@ setReplaceMethod(
     })
 
 ##' @rdname Winf
+##' @param self \code{Parameters} object 
 ##' @export
 setGeneric("Winf", function(self) standardGeneric("Winf"))
 setMethod("Winf", 

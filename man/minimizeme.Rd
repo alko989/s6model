@@ -32,7 +32,7 @@ The observed values, fished individuals in grams}
 Numeric scalar. The negative log likelihood for the given parameters and observations.
 }
 \description{
-\code{minimizeme} is supposed to be used by an optimizer (e.g. \code{optim})
+\code{minimizeme} is mainly used by an optimizer (e.g. \code{optim})
 to estimate parameters.
 }
 \examples{

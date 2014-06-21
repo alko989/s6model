@@ -8,8 +8,8 @@ estimateParam(names = c("Fm", "Winf", "Wfs"),
   data = simulateData3(parameters(), samplesize = 1000)$sample,
   start = rep(0.5, length(names)), lower = rep(-Inf, length(names)),
   upper = rep(Inf, length(names)), fixed.names = c(),
-  fixed.vals = numeric(0), plotFit = FALSE, isSurvey = FALSE,
-  verbose = getOption("verbose"), ...)
+  fixed.vals = numeric(0), fixed.transformed = TRUE, plotFit = FALSE,
+  isSurvey = FALSE, verbose = getOption("verbose"), ...)
 
 estimateMultidata(names = c("Fm", "Winf", "Wfs"),
   surdata = simulateData3(parameters(), samplesize = 1000, isSurvey =
@@ -22,7 +22,7 @@ estimateMultidata(names = c("Fm", "Winf", "Wfs"),
 \item{names}{String vector. The parameters to be estimated.}
 
 \item{data}{Numeric vector or data.frame with columns Weight and Freq.
-Weight of individual fish (vector) or frequencies per weight class (data.frame).}
+Weight of individual fish (vector) or frequencies per weight class \code{data.frame}.}
 
 \item{start}{Numeric vector. Initial values of the parameters.}
 
@@ -33,6 +33,8 @@ Weight of individual fish (vector) or frequencies per weight class (data.frame).
 \item{fixed.names}{String vector. Names of constants.}
 
 \item{fixed.vals}{Numeric vector. Transformed values of constants.}
+
+\item{fixed.transformed}{Logical. If FALSE the constants are not transformed.}
 
 \item{plotFit}{Boolean. If TRUE a plot is produced with the fited pdf and the
 kernel density estimate of the data.}

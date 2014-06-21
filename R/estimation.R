@@ -1,6 +1,6 @@
 #' The negative log likelihood for given parameters and data
 #' 
-#' \code{minimizeme} is supposed to be used by an optimizer (e.g. \code{optim}) 
+#' \code{minimizeme} is mainly used by an optimizer (e.g. \code{optim}) 
 #' to estimate parameters.
 #' 
 #' 
@@ -56,12 +56,13 @@ minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSu
 #' 
 #' @param names String vector. The parameters to be estimated.
 #' @param data Numeric vector or data.frame with columns Weight and Freq.
-#' Weight of individual fish (vector) or frequencies per weight class (data.frame).
+#' Weight of individual fish (vector) or frequencies per weight class \code{data.frame}.
 #' @param start Numeric vector. Initial values of the parameters.
 #' @param lower The lower bound for the parameter estimation.
 #' @param upper The upper bound for the parameter estimation.
 #' @param fixed.names String vector. Names of constants.
 #' @param fixed.vals Numeric vector. Transformed values of constants.
+#' @param fixed.transformed Logical. If FALSE the constants are not transformed.
 #' @param plotFit Boolean. If TRUE a plot is produced with the fited pdf and the
 #' kernel density estimate of the data.
 #' @param isSurvey Boolean. If TRUE the data are assumed to be from a survey.
@@ -84,7 +85,7 @@ estimateParam <-
            data=simulateData3(parameters(), samplesize=1000)$sample,
            start= rep(0.5, length(names)),
            lower=rep(-Inf, length(names)), upper=rep(Inf, length(names)),
-           fixed.names=c(), fixed.vals=numeric(0),
+           fixed.names=c(), fixed.vals=numeric(0), fixed.transformed = TRUE,
            plotFit=FALSE, isSurvey=FALSE, verbose=getOption("verbose"), ...) {
     p <- parameters()
     
@@ -92,6 +93,11 @@ estimateParam <-
       ifelse(class(data)=="data.frame", (max(data$Weight) + 1) / p@scaleWinf, (max(data) + 1) / p@scaleWinf)
     
     scales <- sapply(names, function(n) get(paste0("getscale", n))(p))
+
+    if( ! fixed.transformed) {
+        fixed.scales <- sapply(fixed.names, function(n) get(paste0("getscale", n))(p))
+        fixed.vals <- log(fixed.vals / fixed.scales)
+    }
     
     useapply <- ifelse(require(parallel), mclapply, lapply)
     
