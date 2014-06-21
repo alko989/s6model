@@ -121,15 +121,19 @@ setMethod("getscaleu","Parameters", function(object){ return(object@scaleu) })
 
 ##' Takes a Parameters object and changes its asymptotic weight
 ##'
-##' The asymptotic weight is changed, along with the relative and absolute sizes of 50\% retention
-##' @param object \code{Parameters} object 
+##' The asymptotic weight is changed, along with the relative and absolute sizes of 50\% retention 
 ##' @param value Numeric. The new asymptotic weight
 ##' @return \code{Parameters} object with changed asymptotic weight, and absolute and
 ##' relative 50\% retention sizes
 ##' @author alko
-##' @rdname Winf
+##' @docType methods
+##' @rdname Winf-methods
 ##' @export
 setGeneric("Winf<-",function(object,value){standardGeneric("Winf<-")})
+
+##' @rdname Winf-methods
+##' @aliases Winf<--methods, Winf<-,Parameters-method
+##' @name Winfsetter
 setReplaceMethod(
     f="Winf",
     signature="Parameters",
@@ -141,14 +145,18 @@ setReplaceMethod(
         return (object)
     })
 
-##' @rdname Winf
-##' @param self \code{Parameters} object 
+##' @param object \code{Parameters} object 
 ##' @export
-setGeneric("Winf", function(self) standardGeneric("Winf"))
+##' @docType methods
+##' @rdname Winf-methods
+setGeneric("Winf", function(object) standardGeneric("Winf"))
+
+##' @rdname Winf-methods
+##' @aliases Winf,Parameters-method
 setMethod("Winf", 
-	signature(self = "Parameters"), 
-	function(self) {
-		exp(self@logWinf)*self@scaleWinf
+	signature(object = "Parameters"), 
+	function(object) {
+		exp(object@logWinf) * object@scaleWinf
 	}
 )
 
@@ -206,16 +214,21 @@ setMethod(f="as.list", signature="Parameters",
           })
 ##' Difference between two \code{Parameters} objects
 ##' 
-##' @param base \code{Parameters} object. First object
-##' @param comp \code{Parameters} object. Second object
+## ##' @param base \code{Parameters} object. First object
+## ##' @param comp \code{Parameters} object. Second object
 ##' @return TRUE if they are the same. If there are differences, a data.frame is returned
 ##' with the untransformed parameter values of the two objects, the relative difference (base - comp)
 ##' and the percent difference 
 ##' @author alko
+##' @docType methods
+##' @rdname difference-methods
 ##' @export
 setGeneric("difference", function(base, comp) {
   standardGeneric ("difference")
 })
+
+##' @rdname difference-methods
+##' @aliases difference,Parameters,Parameters-method
 setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
   res <- data.frame(base=numeric(), comp=numeric(),difference=numeric(),percent.difference=numeric(), stringsAsFactors=FALSE)
   r <- sapply(slotNames("Parameters"), function(n) {
@@ -231,6 +244,7 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
   if(dim(res)[1] == 0) return( TRUE)
   round(res,4)
 })
+
 ##' Visualizing fit of s6model
 ##'
 ##'
@@ -243,14 +257,22 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
 ##' @param ... Extra named arguments are passed to the plotting function
 ##' @return invisible NULL
 ##' @docType methods
+##' @rdname plotFit-methods
+##' @docType methods
 ##' @export 
 ##' @author alko
 setGeneric("plotFit", function(object, data, add, ...)
            {standardGeneric ("plotFit")} )
+##' @rdname plotFit-methods
+##' @aliases plotFit,Parameters,numeric,missing-method
 setMethod("plotFit", c("Parameters", "numeric", "missing"),
           function(object, data,...) {plotFit(object, data, FALSE,...)})
+##' @rdname plotFit-methods
+##' @aliases plotFit,Parameters,data.frame,missing-method
 setMethod("plotFit", c("Parameters", "data.frame", "missing"),
           function(object, data,...) {plotFit(object, data, FALSE,...)})
+##' @rdname plotFit-methods
+##' @aliases plotFit,Parameters,numeric,logical-method
 setMethod("plotFit", c("Parameters", "numeric", "logical"),
           function(object, data, add,...) {
             p <- getParams(object)
@@ -264,6 +286,8 @@ setMethod("plotFit", c("Parameters", "numeric", "logical"),
             hist(data, freq=FALSE, add=TRUE, breaks="FD")
             invisible(NULL)
           })
+##' @rdname plotFit-methods
+##' @aliases plotFit,Parameters,data.frame,logical-method
 setMethod("plotFit", c("Parameters", "data.frame", "logical"),
           function(object, data, add,...) {
             p <- getParams(object)
@@ -287,8 +311,12 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
 ##' @param ... Additional arguments for plot
 ##' @return Invisible \code{NULL}
 ##' @author alko
-##' @export
+##' @docType methods
+##' @rdname plotGrowthMortality
+##'  @export
 setGeneric("plotGrowth", function(object, ...) {standardGeneric("plotGrowth")})
+##' @rdname plotFit-methods
+##' @aliases plotGrowth,Parameters-methods
 setMethod("plotGrowth", c("Parameters"),
           function(object, ...) {
             p <- getParams(object)
@@ -317,12 +345,14 @@ setMethod("plotGrowth", c("Parameters"),
           })
 
 ##' Makes a plot of natural and fishing mortalities
-##' @param object A \code{Parameters} object
-##' @param ... Additional arguments for plot
 ##' @return Invisible \code{NULL}
 ##' @author alko
+##' @rdname plotFit-methods
+##' @docType methods
 ##' @export
 setGeneric("plotMortality", function(object, ...) {standardGeneric("plotMortality")})
+##' @rdname plotFit-methods
+##' @aliases plotMortality,Parameters-method
 setMethod("plotMortality", c("Parameters"),
           function(object, ...) {
             p <- getParams(object)
@@ -351,8 +381,12 @@ setMethod("plotMortality", c("Parameters"),
 ##' an attribute hessian
 ##' @return The correlation matrix
 ##' @author alko
+##' @rdname getCor-methods
+##' @docType methods
 ##' @export
 setGeneric("getCor", function(object) {standardGeneric("getCor")})
+##' @aliases getCor,Parameters-method
+##' @rdname getCor-methods
 setMethod("getCor", c("Parameters"), function(object) {
   if(is.null(attr(object, "hessian"))) {
     warning("Object does not contain hessian")

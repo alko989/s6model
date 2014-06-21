@@ -2,10 +2,32 @@
 \docType{methods}
 \name{plotFit-methods}
 \alias{plotFit}
+\alias{plotFit,Parameters,data.frame,logical-method}
+\alias{plotFit,Parameters,data.frame,missing-method}
+\alias{plotFit,Parameters,numeric,logical-method}
+\alias{plotFit,Parameters,numeric,missing-method}
 \alias{plotFit-methods}
+\alias{plotGrowth,Parameters-method}
+\alias{plotGrowth,Parameters-methods}
+\alias{plotMortality}
+\alias{plotMortality,Parameters-method}
 \title{plotFit}
 \usage{
 plotFit(object, data, add, ...)
+
+\S4method{plotFit}{Parameters,numeric,missing}(object, data, add, ...)
+
+\S4method{plotFit}{Parameters,data.frame,missing}(object, data, add, ...)
+
+\S4method{plotFit}{Parameters,numeric,logical}(object, data, add, ...)
+
+\S4method{plotFit}{Parameters,data.frame,logical}(object, data, add, ...)
+
+\S4method{plotGrowth}{Parameters}(object, ...)
+
+plotMortality(object, ...)
+
+\S4method{plotMortality}{Parameters}(object, ...)
 }
 \arguments{
 \item{object}{A \code{Parameters} object}
@@ -18,11 +40,17 @@ plotFit(object, data, add, ...)
 }
 \value{
 invisible NULL
+
+Invisible \code{NULL}
 }
 \description{
 Visualizing fit of s6model
+
+Makes a plot of natural and fishing mortalities
 }
 \author{
+alko
+
 alko
 }
 
