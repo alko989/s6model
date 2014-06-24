@@ -5,8 +5,7 @@
 #' 
 #' 
 #' @param theta Numeric vector of *transformed* parameter values
-#' @param data Numeric vector or data.frame with columns named Weight and Freq.
-#'   The observed values, fished individuals in grams
+#' @param data Numeric vector, or \code{data.frame} with columns named Weight and Freq. The observed values, fished individuals in grams
 #' @param names String vector. Contains the names of the parameter vector theta.
 #' @param fixed.names String vector. Names of constants.
 #' @param fixed.vals Numeric vector. Transformed values of constants.
@@ -14,6 +13,7 @@
 #' @return Numeric scalar. The negative log likelihood for the given parameters and observations.
 #' @author alko
 #' @keywords optimize
+#' @note If data is a list containing both sample and df, the \code{data.frame} df will be used.
 #' @examples 
 #'  
 #' \dontrun{
@@ -35,14 +35,16 @@
 #' 
 #' @export minimizeme
 #' @rdname minimizeme
-minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSurvey=FALSE)
-{
-  params <- parameters(c(names, fixed.names), c(theta, fixed.vals))  
-  if(class(data) == "data.frame") {
-    return(with(getParams(params,isSurvey),
-                sum( - data$Freq * log(pdfN.approx(data$Weight)) )))
-  }
-  return(with(getParams(params,isSurvey), sum(-log(pdfN.approx(data)))))
+minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSurvey=FALSE) {
+    params <- parameters(c(names, fixed.names), c(theta, fixed.vals))  
+    if(class(data) == "data.frame") {
+        return(with(getParams(params,isSurvey),
+                    sum( - data$Freq * log(pdfN.approx(data$Weight)) )))
+    } else if( class(data) == "numeric") {
+        return(with(getParams(params,isSurvey), sum(-log(pdfN.approx(data)))))
+    } else {
+        stop("data appears not to be numeric vector or data.frame")
+    }
 }
 
 
@@ -55,7 +57,7 @@ minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSu
 #' 
 #' 
 #' @param names String vector. The parameters to be estimated.
-#' @param data Numeric vector or data.frame with columns Weight and Freq.
+#' @param data Numeric vector, or \code{data.frame} with columns Weight and Freq, or \code{list} with a numeric vector named `sample` or a \code{data.frame} named `df`.
 #' Weight of individual fish (vector) or frequencies per weight class \code{data.frame}.
 #' @param start Numeric vector. Initial values of the parameters.
 #' @param lower The lower bound for the parameter estimation.
@@ -69,6 +71,7 @@ minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSu
 #' @param verbose Boolean. If TRUE the estimated confidence intervals are printed.
 #' @param ... Additional named arguments passed to plotFit
 #' @return A Parameters object, containing the estimated parameters.
+#' @note If data is a list containing both sample and df, the \code{data.frame} df will be used.
 #' @author alko
 #' @keywords optimize
 #' @examples
@@ -82,13 +85,21 @@ minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSu
 #' @export estimateParam
 estimateParam <-
   function(names = c("Fm", "Winf", "Wfs"),
-           data=simulateData3(parameters(), samplesize=1000)$sample,
+           data=simulateData3(parameters(), samplesize=1000),
            start= rep(0.5, length(names)),
            lower=rep(-Inf, length(names)), upper=rep(Inf, length(names)),
            fixed.names=c(), fixed.vals=numeric(0), fixed.transformed = TRUE,
            plotFit=FALSE, isSurvey=FALSE, verbose=getOption("verbose"), ...) {
     p <- parameters()
-    
+
+    if(class(data) == "list") {
+        if("df" %in% names(data)) {
+            data <- data$df
+        } else if ("sample" %in% names(data)) {
+            data <- data$sample
+        } else stop("`data` is a list not containing an element named sample or df.")
+    }
+
     start[which(names == "Winf")] <- 
       ifelse(class(data)=="data.frame", (max(data$Weight) + 1) / p@scaleWinf, (max(data) + 1) / p@scaleWinf)
     
@@ -135,7 +146,6 @@ estimateParam <-
 
 ##' @param surdata Same as data. Survey data.
 ##' @param comdata Same as data. Commercial data.
-##' @author alko
 ##' @rdname minimizeme
 minimizemeMultidata <- function(theta, surdata, comdata, names, fixed.names=c(), fixed.vals=c())
   {
