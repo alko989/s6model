@@ -13,8 +13,7 @@ minimizemeMultidata(theta, surdata, comdata, names, fixed.names = c(),
 \arguments{
 \item{theta}{Numeric vector of *transformed* parameter values}
 
-\item{data}{Numeric vector or data.frame with columns named Weight and Freq.
-The observed values, fished individuals in grams}
+\item{data}{Numeric vector, or \code{data.frame} with columns named Weight and Freq. The observed values, fished individuals in grams}
 
 \item{names}{String vector. Contains the names of the parameter vector theta.}
 
@@ -35,6 +34,9 @@ Numeric scalar. The negative log likelihood for the given parameters and observa
 \code{minimizeme} is mainly used by an optimizer (e.g. \code{optim})
 to estimate parameters.
 }
+\note{
+If data is a list containing both sample and df, the \code{data.frame} df will be used.
+}
 \examples{
 \dontrun{
 ## Simulate some data with default parameter values and fishing mortality Fm = 0.3
@@ -54,8 +56,6 @@ mtext(paste("Estimated Fm = ", round(est.Fm, 2)), at=est.Fm)
 }
 }
 \author{
-alko
-
 alko
 }
 \keyword{optimize}

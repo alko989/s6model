@@ -5,11 +5,11 @@
 \title{Estimates parameters using the given data and maybe some parameters}
 \usage{
 estimateParam(names = c("Fm", "Winf", "Wfs"),
-  data = simulateData3(parameters(), samplesize = 1000)$sample,
-  start = rep(0.5, length(names)), lower = rep(-Inf, length(names)),
-  upper = rep(Inf, length(names)), fixed.names = c(),
-  fixed.vals = numeric(0), fixed.transformed = TRUE, plotFit = FALSE,
-  isSurvey = FALSE, verbose = getOption("verbose"), ...)
+  data = simulateData3(parameters(), samplesize = 1000), start = rep(0.5,
+  length(names)), lower = rep(-Inf, length(names)), upper = rep(Inf,
+  length(names)), fixed.names = c(), fixed.vals = numeric(0),
+  fixed.transformed = TRUE, plotFit = FALSE, isSurvey = FALSE,
+  verbose = getOption("verbose"), ...)
 
 estimateMultidata(names = c("Fm", "Winf", "Wfs"),
   surdata = simulateData3(parameters(), samplesize = 1000, isSurvey =
@@ -21,7 +21,7 @@ estimateMultidata(names = c("Fm", "Winf", "Wfs"),
 \arguments{
 \item{names}{String vector. The parameters to be estimated.}
 
-\item{data}{Numeric vector or data.frame with columns Weight and Freq.
+\item{data}{Numeric vector, or \code{data.frame} with columns Weight and Freq, or \code{list} with a numeric vector named `sample` or a \code{data.frame} named `df`.
 Weight of individual fish (vector) or frequencies per weight class \code{data.frame}.}
 
 \item{start}{Numeric vector. Initial values of the parameters.}
@@ -56,6 +56,9 @@ A Parameters object, containing the estimated parameters.
 Parameter estimation minimizing the negative log likelihood, using the
 nlminb function. \code{estimateParam} uses data from commercial catches or surveys.
 \code{estimateMultidata} uses both sources
+}
+\note{
+If data is a list containing both sample and df, the \code{data.frame} df will be used.
 }
 \examples{
 ## Simulate some data

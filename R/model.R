@@ -132,6 +132,7 @@ simulateData3 <- function(samplesize= 1000, params = parameters(), wcw = 5, keep
   if(retDF) res$df <- sample2df(sam, wcw, keepZeros=keepZeros)
   return(invisible(res))  
 }
+
 ##' Convert a vector sample to data.frame with counts per weight class
 ##'
 ##' Takes a vector containing individual catch weights and returns a data.frame with numbers per weight class
