@@ -208,6 +208,8 @@ setMethod(f="lines", signature="Parameters",
             p <- getParams(x)
             lines(xy.coords(p$w / p$Winf, p$N*(p$w^2)))
           })
+##' @export
+##' @aliases as.list,Parameters-method
 setMethod(f="as.list", signature="Parameters",
           definition=function(x) {
             with(getParams(x), list(Winf=Winf, Fm=Fm, Wfs=Wfs, eta_m=eta_m, epsilon_r=epsilon_r, epsilon_a=epsilon_a, A=A, a=a,n=n))
@@ -263,48 +265,57 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
 ##' @author alko
 setGeneric("plotFit", function(object, data, add, ...)
            {standardGeneric ("plotFit")} )
-##' @rdname plotFit-methods
+
+##'  @rdname plotFit-methods
 ##' @aliases plotFit,Parameters,numeric,missing-method
 setMethod("plotFit", c("Parameters", "numeric", "missing"),
           function(object, data,...) {plotFit(object, data, FALSE,...)})
+
 ##' @rdname plotFit-methods
 ##' @aliases plotFit,Parameters,data.frame,missing-method
 setMethod("plotFit", c("Parameters", "data.frame", "missing"),
           function(object, data,...) {plotFit(object, data, FALSE,...)})
+
 ##' @rdname plotFit-methods
 ##' @aliases plotFit,Parameters,numeric,logical-method
 setMethod("plotFit", c("Parameters", "numeric", "logical"),
           function(object, data, add,...) {
             p <- getParams(object)
-            par(lwd=2)
-            plotFunc <- ifelse(add, c(lines), c(plot)) [[1]]
-            plotFunc(p$w, p$pdfN.approx(p$w), type="l",
-                 main="Fitted pdf and histogram of the simulated data",
-                 xlab="Weight (g)",
-                 ylab="Probability",
-                 col="blue", ...)
+            if(add == FALSE) {
+                plot(p$w, p$pdfN.approx(p$w), type="l", col="blue",
+                     main="Fitted pdf and histogram of the simulated data",
+                     xlab="Weight (g)",
+                     ylab="Probability")
+            } else {
+                lines(p$w, p$pdfN.approx(p$w), col="blue", ...)
+            }
             hist(data, freq=FALSE, add=TRUE, breaks="FD")
             invisible(NULL)
           })
+
 ##' @rdname plotFit-methods
 ##' @aliases plotFit,Parameters,data.frame,logical-method
 setMethod("plotFit", c("Parameters", "data.frame", "logical"),
-          function(object, data, add,...) {
-            p <- getParams(object)
-            par(lwd=2)
-            plotFunc <- ifelse(add, c(lines), c(plot)) [[1]]
-            plotFunc(p$w, p$pdfN.approx(p$w), type="l",
-                 main="Fitted pdf and histogram of the simulated data",
-                 xlab="Weight (g)",
-                 ylab="Probability",
-                 col="blue", ..., xlim=range(data$Weight))
-            points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
-                   pch=".", cex=3)
-            lines(density(rep(data$Weight, data$Freq)), col=2, lty=2)
-            hist(rep(data$Weight, data$Freq), breaks = seq(0, max(data$Weight) + max(data$Weight) / 35 +1 , length.out=35) , add=T, freq=F)
-            legend("topright",, c("fitted PDF", "Data kernel density"), col=c("blue","red"), lty=1)
-            invisible(NULL)
+          function(object, data, add, ...) {
+              p <- getParams(object)
+              if(add == FALSE) {
+                  plot(p$w, p$pdfN.approx(p$w), type="l",
+                       main="Fitted pdf and histogram of the simulated data",
+                       xlab="Weight (g)",
+                       ylab="Probability")
+              } else {
+                  lines(p$w, p$pdfN.approx(p$w), col="blue", ...)
+              }
+              points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
+                     pch=".", cex=3)
+              lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
+              ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
+              lines(p$w, p$pdfN.approx(p$w), col="blue", lwd = 2, ...)
+              legend("topright", , c("fitted PDF", "Data kernel density"), col=c("blue","red"),
+                     lty=1, lwd=2, seg.len=5)
+              invisible(NULL)
           })
+
 ##' Plots growth function
 ##'
 ##' @param object A \code{Parameters} object

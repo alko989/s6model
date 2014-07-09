@@ -513,3 +513,4 @@ Documented rest of methods
 Changes from version  0.10.2 to  0.10.3 
  * minimizeme and estimateParam accept the list returned by simulateData3 as data input
 
+Fixed tmclapply, exported, documented

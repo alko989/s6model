@@ -46,6 +46,8 @@ Invisible \code{NULL}
 \description{
 Visualizing fit of s6model
 
+
+
 Makes a plot of natural and fishing mortalities
 }
 \author{

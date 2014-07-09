@@ -174,6 +174,7 @@ rparam <- function(value, range.sd, range.cv, lb= -Inf, ub = Inf, unif=FALSE)
     return(res)    
   }
 }
+
 ##' Random model parameters
 ##'
 ##' Random model parameters with constraints in Fmsy and relative recruitment (Rrel = R/Rmax)
@@ -226,41 +227,53 @@ getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
   getRandomParameters(parameter.names, parameter.value,, Rrel.gt=Rrel.gt, Fmsy.gt=Fmsy.gt)
 }
 
-## tmclapply <- function(X, FUN, ..., simplify=FALSE, progressbar=TRUE){
-##   aplfun <- if(require(parallel)) mclapply else lapply
-##   start <- Sys.time()
-##   if(progressbar)
-##       pb <- txtProgressBar(min = 0, max = 100, style=3)
-##   results <- local({
-##     f <- fifo(tempfile(), open="w+b", blocking=TRUE)
-##     if (inherits(parallel:::mcfork(), "masterProcess")) {
-##       progress <- 0.0
-##       while(progress < 1 && !isIncomplete(f)) {
-##         msg <- readBin(f, "double")
-##         progress <- progress + as.numeric(msg)
-##         if(progressbar)
-##             setTxtProgressBar(pb, progress * 100)
-##         tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
-##         cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
-##         if( ! progressbar) cat("\r")
-##       } 
-##       parallel:::exit()
-##     }
-##     res <- aplfun(X, function(x) {
-##       rr <- FUN(x)
-##       writeBin(1/length(X), f)
-##       rr
-##     })
-##     close(f)
-##     if(progressbar) {
-##       setTxtProgressBar(pb,100)
-##       close(pb)
-##     }
-##     res
-##   })
-##   cat(difftime(Sys.time(), start, units="mins"), "mins\n")
-##   if (simplify) simplify2dataframe(results) else results
-## } 
+##' Multicore lapply function with progress bar
+##'
+##' Wrapper around parallel::mclapply function with text progress bar
+##' @param X  a vector (atomic or list) or an expressions vector.  Other
+##' objects (including classed objects) will be coerced by `as.list`.
+##' @param FUN the function to be applied to (`mclapply`) each element of `X` or (`mcmapply`) in parallel to `...`.
+##' @param ... Optional arguments to FUN
+##' @param progressbar Logical. If TRUE a text progress bar is shown.
+##' @return Result from mclapply
+##' @note If mclapply is not available, lapply is used instead.
+##' @author alko
+##' @export
+tmclapply <- function(X, FUN, ..., progressbar=TRUE){
+  aplfun <- if(require(parallel)) mclapply else lapply
+  start <- Sys.time()
+  if(progressbar)
+      pb <- txtProgressBar(min = 0, max = 100, style=3)
+  results <- local({
+    f <- fifo(tempfile(), open="w+b", blocking=TRUE)
+    if (inherits(parallel:::mcfork(), "masterProcess")) {
+      progress <- 0.0
+      while(progress < 1 && !isIncomplete(f)) {
+        msg <- readBin(f, "double")
+        progress <- progress + as.numeric(msg)
+        if(progressbar)
+            setTxtProgressBar(pb, progress * 100)
+        tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
+        cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
+        if( ! progressbar) cat("\r")
+      } 
+      parallel:::mcexit()
+    }
+    res <- aplfun(X, function(x) {
+      rr <- FUN(x)
+      writeBin(1/length(X), f)
+      rr
+    })
+    close(f)
+    if(progressbar) {
+      setTxtProgressBar(pb,100)
+      close(pb)
+    }
+    res
+  })
+  cat(difftime(Sys.time(), start, units="mins"), "mins\n")
+  results
+} 
 
 ## simplify2dataframe <- function(dd) {
 ##   data.frame(t(simplify2array(dd)))
