@@ -514,3 +514,6 @@ Changes from version  0.10.2 to  0.10.3
  * minimizeme and estimateParam accept the list returned by simulateData3 as data input
 
 Fixed tmclapply, exported, documented
+
+Changes from version  0.10.3 to  0.10.4 
+ * Not (ab)using ifelse to select btw mclapply and lapply
