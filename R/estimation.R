@@ -110,7 +110,7 @@ estimateParam <-
         fixed.vals <- log(fixed.vals / fixed.scales)
     }
     
-    useapply <- ifelse(require(parallel), mclapply, lapply)
+    useapply <- if(require(parallel)) mclapply else lapply
     
     sd <- mean <- rep(0, length(names))
     
