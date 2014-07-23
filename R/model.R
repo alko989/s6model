@@ -69,7 +69,7 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
     }
     else
     {
-      fishing <- psi_F * Fm * N
+      fishing <- psi_F * N
     }
     if( ! (optim.fmsy | optim.fmsyr | optim.Rrel)) {    
       pdfN <-  fishing / sum(fishing * c(delta, 0))
