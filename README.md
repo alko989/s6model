@@ -1,6 +1,10 @@
 # s6model
 
+[![Build Status](https://travis-ci.org/alko989/s6model.svg?branch=master)](https://travis-ci.org/alko989/s6model)
+
 Data-poor stock assessment using the s6model
+
+
 
 
 ##Installation
