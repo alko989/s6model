@@ -517,3 +517,7 @@ Fixed tmclapply, exported, documented
 
 Changes from version  0.10.3 to  0.10.4 
  * Not (ab)using ifelse to select btw mclapply and lapply
+
+Changes from version  0.10.4 to  0.10.5 
+ * Added some tests for Parameters
+ * parameters initialization using Winf respects default eta_F and changed Wfs accordingly
