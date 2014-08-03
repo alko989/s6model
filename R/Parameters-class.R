@@ -447,7 +447,13 @@ parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Param
   {
     res <- base
     mats <- wfs <- etaf <- 0
-    
+    if(length(names) == 1)  {
+        if(names=="Winf") {
+            res@logWinf <- log(vals / getscaleWinf(res))
+            res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F * exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
+            return(res)
+        }
+    }
     for(i in seq(along=names))
       if(names[i] %in% c("M")) {
         eval(parse(text=paste("res@", names[i]," <- ", vals[i], sep="" )))
