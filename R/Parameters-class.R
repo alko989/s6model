@@ -497,6 +497,9 @@ parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Param
       }
       res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F* exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
     }
+    if(etaf == 0 & wfs ==0) {
+        res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F * exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
+    }
     if(exp(res@logWinf)*res@scaleWinf <= exp(res@logWfs)*res@scaleWfs)
         warning("The start of fishing occurs at a weight equal or greater than the asymptotic weight")
     res    

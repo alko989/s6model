@@ -13,7 +13,9 @@ test_that("A Parameters object is correctly initialized", {
     p.Winf <- parameters("Winf", Winf, transformed=FALSE)
     expect_equal(exp(p.Winf@logWinf)*p@scaleWinf, Winf)
     expect_equal(exp(p.trWinf@logWinf)*p@scaleWinf, Winf)    
-    
+
+    p1 <- parameters(c("Winf", "a"), c(Winf, a), transformed=FALSE)
+    expect_equal(exp(p1@logWfs) * p@scaleWfs, Winf * exp(p1@logeta_F) * p@scaleeta_F)
     
     p.transformed <- parameters(names = c("a", "A", "Winf", "Wfs"),
                                 vals = c(log(0.11 / p@scalea), log(3.91 / p@scaleA),
@@ -26,9 +28,7 @@ test_that("A Parameters object is correctly initialized", {
 
     expect_equal(parameters(c("Winf", "eta_F"), c(23456, 1234/23456), FALSE),
                  parameters(c("Winf", "Wfs"), c(23456,   1234), FALSE))
-
-   
-
+    
     expect_warning(parameters(c("Winf", "Wfs"), c(1000, 1000), FALSE))
     expect_warning(parameters(c("Winf", "Wfs"), c(1000, 1001), FALSE))
     expect_warning(etaFWfs <- parameters(c("Winf", "eta_F", "Wfs"), c(1000, 0.1, 800), FALSE))
