@@ -450,7 +450,11 @@ parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Param
     mats <- wfs <- etaf <- 0
     if(length(names) == 1)  {
         if(names=="Winf") {
-            res@logWinf <- log(vals / getscaleWinf(res))
+            if(transformed) {
+                res@logWinf <- vals
+            } else {
+                res@logWinf <- log(vals / getscaleWinf(res))
+            }
             res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F * exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
             return(res)
         }

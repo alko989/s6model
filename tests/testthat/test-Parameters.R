@@ -6,6 +6,13 @@ test_that("A Parameters object is correctly initialized", {
     a <- 0.123
     p.a <- parameters("a", log(a / p@scalea))
     expect_equal(exp(p.a@loga)*p@scalea, a)
+
+    Winf <- 162534
+    trWinf <- log(Winf / p@scaleWinf)
+    p.trWinf <- parameters("Winf", trWinf, transformed=TRUE)
+    p.Winf <- parameters("Winf", Winf, transformed=FALSE)
+    expect_equal(exp(p.Winf@logWinf)*p@scaleWinf, Winf)
+    expect_equal(exp(p.trWinf@logWinf)*p@scaleWinf, Winf)    
     
     
     p.transformed <- parameters(names = c("a", "A", "Winf", "Wfs"),
