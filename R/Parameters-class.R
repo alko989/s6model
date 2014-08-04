@@ -213,7 +213,7 @@ setMethod(f="lines", signature="Parameters",
 ##' @aliases as.list,Parameters-method
 setMethod(f="as.list", signature="Parameters",
           definition=function(x) {
-            with(getParams(x), list(Winf=Winf, Fm=Fm, Wfs=Wfs, eta_m=eta_m, epsilon_r=epsilon_r, epsilon_a=epsilon_a, A=A, a=a,n=n))
+            with(getParams(x), list(Winf=Winf, Fm=Fm, Wfs=Wfs, eta_m=eta_m, epsilon_r=epsilon_r, epsilon_a=epsilon_a, A=A, a=a, n=n, u=u))
           })
 ##' Difference between two \code{Parameters} objects
 ##' 

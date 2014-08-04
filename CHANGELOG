@@ -521,3 +521,4 @@ Changes from version  0.10.3 to  0.10.4
 Changes from version  0.10.4 to  0.10.5 
  * Added some tests for Parameters
  * parameters initialization using Winf respects default eta_F and changed Wfs accordingly
+as.list(Parameter): added documentation, returns also u
