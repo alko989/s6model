@@ -525,3 +525,6 @@ as.list(Parameter): added documentation, returns also u
 
 Changes from version  0.10.5 to  0.10.6 
  * Fixed bug where Wfs was wrong if eta_F and Wfs were not estimated
+
+Changes from version  0.10.6 to  0.10.7 
+ * Added warning in getParams with mismatched Wfs/eta_F Parameters object

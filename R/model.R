@@ -43,6 +43,7 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
     epsilon_r <- exp(p@logepsilon_r) * p@scaleepsilon_r
     Wfs <- exp(p@logWfs) * p@scaleWfs
     eta_F <- Wfs/Winf
+    if(p@logeta_F != log(eta_F / p@scaleeta_F)) warning("Wfs and eta_F do not match! Wfs was used and eta_F was returned correctly")
     p@logeta_F <- log(eta_F / p@scaleeta_F)
     u <-exp(p@logu) * p@scaleu
     M <- p@M
