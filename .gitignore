@@ -12,3 +12,4 @@
 # Build packages
 *.tar.gz
 .Rproj.user
+*.Rproj
