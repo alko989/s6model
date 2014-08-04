@@ -209,6 +209,7 @@ setMethod(f="lines", signature="Parameters",
             lines(xy.coords(p$w / p$Winf, p$N*(p$w^2)))
           })
 ##' @export
+##' @rdname Parameters
 ##' @aliases as.list,Parameters-method
 setMethod(f="as.list", signature="Parameters",
           definition=function(x) {
