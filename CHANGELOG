@@ -528,3 +528,4 @@ Changes from version  0.10.5 to  0.10.6
 
 Changes from version  0.10.6 to  0.10.7 
  * Added warning in getParams with mismatched Wfs/eta_F Parameters object
+Show includes u in the printout of a Parameters object

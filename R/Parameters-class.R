@@ -186,7 +186,7 @@ setMethod("show", "Parameters",
                 formatEntry("  eps_a = ",   exp(object@logepsilon_a) * object@scaleepsilon_a),"\t|\n",
                 formatEntry("|","  eta_S = ",exp(object@logeta_S)*object@scaleeta_S),"\t|",
                 formatEntry("  Wfs = ", exp(object@logWfs) * object@scaleWfs), "\t|",
-                formatEntry(""),"\t|\n",
+                formatEntry("  u = ", exp(object@logu) * object@scaleu),"\t|\n",
                 sep="")
             cat("+",rep("-", 71), "+\n", sep="")
             cat("\n")
