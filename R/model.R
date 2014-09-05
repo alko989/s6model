@@ -53,7 +53,13 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
     w <- exp(log(w_r) + (1:M - 1) * Delta)
 
     delta <- diff(w)
-    psi_F <- (1 + (w / Wfs)^-u )^-1
+
+    ##psi_F <- (1 + (w / Wfs)^-u )^-1
+    ww <- which(w < Wfs)
+    psi_F <- exp(-(w[ww]-Wfs)^2 / (2*100^2))
+    ww <- which(w >= Wfs)
+    psi_F <- c(psi_F, exp(-(w[ww]-Wfs)^2 / (2*100000^2)))
+
     psi_S <- (1 + (w / (eta_S * Winf))^-u )^-1
        
     psi_m <- (1 + (w / (eta_m * Winf))^-10 )^-1
