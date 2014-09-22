@@ -56,9 +56,9 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
 
     ##psi_F <- (1 + (w / Wfs)^-u )^-1
     ww <- which(w < Wfs)
-    psi_F <- exp(-(w[ww]-Wfs)^2 / (2*100^2))
+    psi_F <- exp(-(w[ww]-Wfs)^2 / (2*200^2))
     ww <- which(w >= Wfs)
-    psi_F <- c(psi_F, exp(-(w[ww]-Wfs)^2 / (2*100000^2)))
+    psi_F <- c(psi_F, exp(-(w[ww]-Wfs)^2 / (2*u^2)))
 
     psi_S <- (1 + (w / (eta_S * Winf))^-u )^-1
        
