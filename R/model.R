@@ -28,8 +28,8 @@
 #' @export
 getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE, 
                       optim.fmsy=FALSE, optim.fmsyr = FALSE, optim.Rrel =FALSE) {
-    if(class(p) != "Parameters")
-      stop("Wrong input argument in getParams. Use the Parameters class instead.")  
+    if( ! is(p,"Parameters"))
+        stop("Wrong input argument in getParams. Use the Parameters class instead.")  
     Winf <- exp(p@logWinf) * p@scaleWinf
     Fm <- exp(p@logFm) * p@scaleFm
     if(optim.fmsy | optim.fmsyr | optim.Rrel)

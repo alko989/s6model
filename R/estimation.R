@@ -37,10 +37,10 @@
 #' @rdname minimizeme
 minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSurvey=FALSE) {
     params <- parameters(c(names, fixed.names), c(theta, fixed.vals))  
-    if(class(data) == "data.frame") {
+    if(is(data, "data.frame")) {
         return(with(getParams(params,isSurvey),
                     sum( - data$Freq * log(pdfN.approx(data$Weight)) )))
-    } else if( class(data) == "numeric") {
+    } else if(is(data, "numeric")) {
         return(with(getParams(params,isSurvey), sum(-log(pdfN.approx(data)))))
     } else {
         stop("data appears not to be numeric vector or data.frame")
@@ -92,7 +92,7 @@ estimateParam <-
            plotFit=FALSE, isSurvey=FALSE, verbose=getOption("verbose"), ...) {
     p <- parameters()
 
-    if(class(data) == "list") {
+    if(is(data, "list")) {
         if("df" %in% names(data)) {
             data <- data$df
         } else if ("sample" %in% names(data)) {
@@ -101,7 +101,7 @@ estimateParam <-
     }
 
     start[which(names == "Winf")] <- 
-      ifelse(class(data)=="data.frame", (max(data$Weight) + 1) / p@scaleWinf, (max(data) + 1) / p@scaleWinf)
+      ifelse(is(data, "data.frame"), (max(data$Weight) + 1) / p@scaleWinf, (max(data) + 1) / p@scaleWinf)
     
     scales <- sapply(names, function(n) get(paste0("getscale", n))(p))
 
@@ -130,7 +130,7 @@ estimateParam <-
     
     ci <- matrix(rep(NA, length(names)*3),ncol=3, dimnames = list(names, c("Estimate","Lower", "Upper")))
     st.er <- NA
-    if(class(vcm) != "try-error") {
+    if( ! is(vcm, "try-error")) {
       st.er <- sqrt(diag(vcm)) 
       ci <- cbind(exp(res)*scales, exp(outer(1.96 * st.er, c(-1,1), '*') + res) * scales)
     }

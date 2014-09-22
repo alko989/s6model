@@ -163,7 +163,7 @@ setMethod("Winf",
 formatEntry <- function(..., width=20) {
   res <- c()
   for(arg in list(...)) {
-    if(class(arg) == "numeric") {
+    if(is(arg, "numeric")) {
       res <- c(res,round(arg, 4))
     } else {
       res <- c(res, arg)
