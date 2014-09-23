@@ -1,6 +1,7 @@
 # History files
 .Rhistory
 .RData
+.Rprofile
 
 # Example code in package build process
 *-Ex.R
@@ -13,3 +14,4 @@
 *.Rproj
 packrat/lib*/
 packrat/src/
+packrat
