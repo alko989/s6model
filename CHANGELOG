@@ -530,3 +530,7 @@ Changes from version  0.10.6 to  0.10.7
  * Added warning in getParams with mismatched Wfs/eta_F Parameters object
 Show includes u in the printout of a Parameters object
 Wrong check for mismatch btw etaF/Wfs in getParams
+
+Changes from version  0.10.7 to  0.10.8 
+ * TMB code for Fmsy and parameter estimation
+ * removed unnecessary numDeriv:: when using the imported hessian and jacobian functions

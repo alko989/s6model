@@ -2,6 +2,7 @@
 
 export("Winf<-")
 export(Winf)
+export(calcFmsy)
 export(difference)
 export(estimateParam)
 export(getCor)
@@ -21,3 +22,5 @@ exportMethods(as.list)
 import(methods)
 importFrom(numDeriv,hessian)
 importFrom(numDeriv,jacobian)
+useDynLib(calcFmsy)
+useDynLib(s6model)
