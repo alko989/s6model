@@ -120,10 +120,10 @@ estimateParam <-
     if(estim$convergence != 0) warning(estim$message)
     
     res <- estim$par
-    h <- numDeriv::hessian(minimizeme, estim$par, data=data,
+    h <- hessian(minimizeme, estim$par, data=data,
                            names=names, fixed.names=fixed.names,
                            fixed.vals=fixed.vals,isSurvey=isSurvey)
-    s <- numDeriv::jacobian(minimizeme, estim$par, data=data,
+    s <- jacobian(minimizeme, estim$par, data=data,
                             names=names, fixed.names=fixed.names,
                             fixed.vals=fixed.vals,isSurvey=isSurvey)
     vcm <- try(solve(h))
