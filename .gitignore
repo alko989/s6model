@@ -4,12 +4,12 @@
 
 # Example code in package build process
 *-Ex.R
-
 # Temporary files
 *~
 *#
-
 # Build packages
 *.tar.gz
 .Rproj.user
 *.Rproj
+packrat/lib*/
+packrat/src/
