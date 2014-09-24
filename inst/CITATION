@@ -1,0 +1,6 @@
+## citHeader("To cite s6model in publications, please use:")
+## citEntry(entry="article",
+##    title = "Limits to reliability of size-based fishing status estimation for data-poor stocks",
+##    author = person(given="Alexandros", family="Kokkalis", email="alko@aqua.dtu.dk"),
+##    note   = "In review"
+## )
