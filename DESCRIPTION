@@ -12,6 +12,8 @@ Description: Contains functions to estimate parameters of the model and
 License: GPL
 Depends:
     R (>= 2.14)
+LinkingTo:
+    TMB
 Imports:
     numDeriv,
     methods

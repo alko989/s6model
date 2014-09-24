@@ -285,6 +285,7 @@ tmclapply <- function(X, FUN, ..., progressbar=TRUE){
 ##' @author alko
 ##' @export
 calcFmsy <- function(params=NULL) {
+  require(TMB)
   if(is.null(params)) return (NULL)
   if(is(params, "Parameters")) {
     params <- as.list(params)
@@ -293,7 +294,7 @@ calcFmsy <- function(params=NULL) {
       stop("params is of class ", class(params))
   def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.35, M=1000)
   sapply(names(params), function(x) def[x] <<- params[x])
-  obj <- MakeADFun(def, list(logF = log(0.2)), DLL="calcFmsy")
+  obj <- MakeADFun(def, list(logF = log(0.2)), DLL="s6model")
   obj$env$tracemgc=FALSE
   opt <- try(do.call("optim", obj))
   res <- try(sdreport(obj)$val)
