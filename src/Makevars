@@ -1,0 +1,1 @@
+PKG_CXXFLAGS :=  $(filter-out -g, $(CXXFLAGS))
