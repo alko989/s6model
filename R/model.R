@@ -285,7 +285,7 @@ tmclapply <- function(X, FUN, ..., progressbar=TRUE){
 ##' @author alko
 ##' @export
 calcFmsy <- function(params=NULL) {
-  require(TMB)
+  if(!require(TMB)) stop("TMB package not installed.")
   if(is.null(params)) return (NULL)
   if(is(params, "Parameters")) {
     params <- as.list(params)
@@ -296,6 +296,7 @@ calcFmsy <- function(params=NULL) {
   sapply(names(params), function(x) def[x] <<- params[x])
   obj <- MakeADFun(def, list(logF = log(0.2)), DLL="s6model")
   obj$env$tracemgc=FALSE
+  obj$env$silent <- TRUE; newtonOption(trace=0); config(trace.optimize = 0,DLL="s6model")
   opt <- try(do.call("optim", obj))
   res <- try(sdreport(obj)$val)
   if(is(res, "try-error"))
