@@ -18,3 +18,5 @@ packrat
 
 *.o
 *.so
+
+*.bak
