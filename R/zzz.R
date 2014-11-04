@@ -1,5 +1,5 @@
 #' @useDynLib s6model
-use.onLoad <- function(lib, pkg) {
+.onLoad <- function(lib, pkg) {
   library.dynam("s6model", pkg, lib)
 }
 
