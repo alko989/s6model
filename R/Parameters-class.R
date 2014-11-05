@@ -210,7 +210,7 @@ setMethod(f="lines", signature="Parameters",
           })
 ##' @export
 ##' @rdname Parameters
-##' @param x, Parameters object
+##' @param x Parameters object
 ##' @aliases as.list,Parameters-method
 setMethod(f="as.list", signature="Parameters",
           definition=function(x) {
