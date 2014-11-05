@@ -26,6 +26,6 @@ getVersion <- function() {
 #' @export
 addVersion <- function(cex=0.5, col="#12345655") {
     v <- getVersion()
-    if(grepl("@", v)) v <- substr(v, 1, nchar(v)-32)
+    if(grepl("@", v)) v <- substr(v, 1, nchar(v)-30)
     mtext(v, side=4, line=-0.3, adj=0.01, col = col, cex = cex)
 }
