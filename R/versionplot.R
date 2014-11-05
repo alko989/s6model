@@ -1,5 +1,5 @@
-getVersion <- function() {
-  pd <- packageDescription("s6model")
+getVersion <- function(pkg=packageName()) {
+  pd <- packageDescription(pkg)
   v <- paste0(pd$Package, "_v", pd$Version)
   if(is.null(pd$GithubRef))
     return(v)
