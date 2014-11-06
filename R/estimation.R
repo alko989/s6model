@@ -184,7 +184,7 @@ estimateMultidata <-
 
 ##' @export
 estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.35,
-                         DLL="s6", tracemgc=FALSE, map=list(loga=factor(NA)), random=c()) {
+                         DLL="s6model", tracemgc=FALSE, map=list(loga=factor(NA)), random=c()) {
   tryer <- try({
     wcw <- attr(df,"wcw")
     nms <- c("Fm","Winf","Wfs")
