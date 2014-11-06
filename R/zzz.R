@@ -1,8 +1,11 @@
 #' @useDynLib s6model
+#' @useDynLib calcFmsy
 .onLoad <- function(lib, pkg) {
-  library.dynam("s6model", pkg, lib)
-}
+   packageStartupMessage("Loading ", getVersion(),"\n")  
+ }
 
 .onUnload <- function (lib) {
   library.dynam.unload("s6model", lib)
+  library.dynam.unload("calcFmsy", lib)
 }
+

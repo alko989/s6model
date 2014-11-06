@@ -9,7 +9,7 @@ estimateParam(names = c("Fm", "Winf", "Wfs"),
   length(names)), lower = rep(-Inf, length(names)), upper = rep(Inf,
   length(names)), fixed.names = c(), fixed.vals = numeric(0),
   fixed.transformed = TRUE, plotFit = FALSE, isSurvey = FALSE,
-  verbose = getOption("verbose"), ...)
+  verbose = getOption("verbose"), useTMB = TRUE, ...)
 
 estimateMultidata(names = c("Fm", "Winf", "Wfs"),
   surdata = simulateData3(parameters(), samplesize = 1000, isSurvey =
