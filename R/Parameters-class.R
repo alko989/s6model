@@ -210,6 +210,7 @@ setMethod(f="lines", signature="Parameters",
           })
 ##' @export
 ##' @rdname Parameters
+##' @param x Parameters object
 ##' @aliases as.list,Parameters-method
 setMethod(f="as.list", signature="Parameters",
           definition=function(x) {
@@ -334,13 +335,13 @@ setMethod("plotGrowth", c("Parameters"),
             p <- getParams(object)
             ylim.min <- max(p$g) / 100
             ylim.max <- max(p$g)
-            plot(p$w / p$Winf, p$g, type="n", lwd=3, 
+            plot(p$w / p$Winf, p$g, type="n", 
                  xlab="",  log="xy", ylab="",
                  xlim=c(0.01, 1), ylim=c( ylim.min- ylim.min*0.01, ylim.max + ylim.max*0.6), yaxt="n",xaxt="n", ...)
             polygon(c(p$w/p$Winf, 1 ), c(p$psi_m, 0) * ylim.min * 3 + ylim.min, border="lightgrey",col="lightgrey")
             lines(p$w / p$Winf, p$g, lwd=3)
-            abline(v=p$eta_m, lty=2)
-            axis(4, at=c(ylim.min, ylim.min * 4), labels=NA, col.axis="grey28",)
+            abline(v=p$eta_m, lty=2, lwd=1.5)
+            axis(4, at=c(ylim.min, ylim.min * 4), labels=NA, col.axis="grey28")
             mtext(c(0,100),at=c(ylim.min, ylim.min * 4), side=4, line=0.5)
             mtext(side=4, at=ylim.min * 2, text="% mature individuals", line=1.2, col="grey28")
             pow <- 1:3
@@ -369,8 +370,9 @@ setMethod("plotMortality", c("Parameters"),
           function(object, ...) {
             p <- getParams(object)
             plot(p$w / p$Winf, p$m , type="n", lwd=2, 
-                 xlab=expression(w/W[infinity]),  log="x", ylab="",xaxt="n", yaxt="n", ... )
-            title(ylab=parse(text="Mortality~~(y^-1)"), line=1.4)
+                 xlab="",  log="x", ylab="",xaxt="n", yaxt="n", ... )
+            title(xlab=expression(w/W[infinity]), family="cmmi10")
+            title(ylab="Mortality (1/y)", line=1.4)
             lines(p$w/p$Winf, p$psi_F* p$Fm, lwd=3, lty="dotted")
             lines(p$w / p$Winf, p$m - p$psi_F * p$Fm, lty=2, lwd=3)
             lines(p$w / p$Winf, p$m, lty=1, lwd=3)

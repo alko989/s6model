@@ -276,35 +276,7 @@ tmclapply <- function(X, FUN, ..., progressbar=TRUE){
   })
   cat(difftime(Sys.time(), start, units="mins"), "mins\n")
   results
-}
-
-##' Calculates the Fmsy reference point
-##'
-##' @param params An object of class \code{Parameters} 
-##' @return numeric F that leads to MSY
-##' @author alko
-##' @export
-calcFmsy <- function(params=NULL) {
-  if(!require(TMB)) stop("TMB package not installed.")
-  if(is.null(params)) return (NULL)
-  if(is(params, "Parameters")) {
-    params <- as.list(params)
-  }
-  if( ! is(params,"list"))
-      stop("params is of class ", class(params))
-  def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.35, M=1000)
-  sapply(names(params), function(x) def[x] <<- params[x])
-  obj <- MakeADFun(def, list(logF = log(0.2)), DLL="s6model")
-  obj$env$tracemgc=FALSE
-  obj$env$silent <- TRUE; newtonOption(trace=0); config(trace.optimize = 0,DLL="s6model")
-  opt <- try(do.call("optim", obj))
-  res <- try(sdreport(obj)$val)
-  if(is(res, "try-error"))
-      return(NULL)
-  names(res) <- NULL
-  res
-}
-
+} 
 
 ## simplify2dataframe <- function(dd) {
 ##   data.frame(t(simplify2array(dd)))
