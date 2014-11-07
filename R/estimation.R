@@ -141,7 +141,7 @@ estimateParam <-
     if(verbose) print(ci)
     return(structure(p, par=res, hessian=h, jacobian=s, st.er=st.er, ci=ci, 
                      objective=estim$objective, convergence=estim$convergence, 
-                     nlminbMessage=estim$message, call=match.call()))
+                     nlminbMessage=estim$message, call=match.call(), version=getVersion()))
 }
 
 ##' @param surdata Same as data. Survey data.
