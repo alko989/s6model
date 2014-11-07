@@ -16,7 +16,6 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logFm);
   PARAMETER(logWinf);
   PARAMETER(logWfs);
-  PARAMETER(x);
   //PARAMETER(u);
   Type u = 10.0;
   vector<Type> Nvec(nwc);
@@ -50,7 +49,6 @@ Type objective_function<Type>::operator() ()
       nll += -log(Nvec(i)/totalFishing) * freq(i);
   }
   nll -= dnorm(loga, meanloga, sdloga, true);
-  nll += pow(x,2);
   return nll;
 }
 

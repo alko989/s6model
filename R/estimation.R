@@ -192,7 +192,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m
     data <- list(wcw=wcw, nwc=dim(df)[1], freq=df$Freq, n=n, epsilon_a=epsilon_a,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(0.35), sdloga = 0.35*0.5 )
     pars <- list(loga=log(0.35), logFm = log(0.5), logWinf = log((max(df$Weight) + 2 * wcw)),
-                 logWfs = log(min(df$Weight[df$Freq > 0])), x=0)
+                 logWfs = log(min(df$Weight[df$Freq > 0])))
     obj <- MakeADFun(data = data, parameters = pars, DLL = DLL, map=map, random=random,
                      checkParameterOrder=TRUE)
     obj$env$tracemgc <- FALSE
@@ -202,14 +202,15 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m
     config(trace.optimize = 0,DLL=DLL)
     opt <- nlminb(obj$par, obj$fn, obj$gr)
     vals <- sdreport(obj)$value[nms]
-    Fmsy <- calcFmsy(parameters(c(nms, "n", "epsilon_a", "epsilon_r", "A", "eta_m", "a"),
-                                as.numeric(c(vals, n, epsilon_a, epsilon_r, A, eta_m, a)),
-                                transformed=FALSE))
+    estpars <- parameters(c(nms, "n", "epsilon_a", "epsilon_r", "A", "eta_m", "a"),
+                          as.numeric(c(vals, n, epsilon_a, epsilon_r, A, eta_m, a)),
+                          transformed=FALSE)
+    Fmsy <- calcFmsy(estpars)
     opt$convergence
   })
   if(class(tryer) == "try-error") {
     return(tryer)
   }
   structure(data.frame(Fm=vals["Fm"], Winf=vals["Winf"], Wfs=vals["Wfs"], FFmsy=vals["Fm"]/Fmsy, row.names=NULL),
-            est.Fmsy=Fmsy,est.FFmsy=vals["Fm"]/Fmsy, obj=obj, opt=opt)
+            est.Fmsy=Fmsy,est.FFmsy=vals["Fm"]/Fmsy, obj=obj, opt=opt, estpars=estpars)
 }
