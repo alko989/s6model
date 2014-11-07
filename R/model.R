@@ -101,8 +101,9 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
       return(YR)
     if(optim.Rrel)
       return(Rrel - 0.5)
-  
-    return(invisible(as.list(environment())))
+    res <- as.list(environment())
+    attr(res, "version") <- getVersion()
+    return(invisible(res))
   }
 
 ##' Simulates catch-at-weight data using the s6model
@@ -132,6 +133,7 @@ simulateData3 <- function(samplesize= 1000, params = parameters(), wcw = 5, keep
   })
   res <- list(sample = sam, parameters = params, Fmsy = getParams(params,calcBRPs=TRUE)$Fmsy)
   if(retDF) res$df <- sample2df(sam, wcw, keepZeros=keepZeros)
+  attr(res, "version") <- getVersion()
   return(invisible(res))  
 }
 
