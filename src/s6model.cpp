@@ -2,7 +2,7 @@
 template<class Type>
 Type objective_function<Type>::operator() ()
 {
-  DATA_INTEGER(wcw);
+  DATA_INTEGER(binsize);
   DATA_INTEGER(nwc);
   DATA_VECTOR(freq);
   DATA_SCALAR(n);
@@ -31,7 +31,7 @@ Type objective_function<Type>::operator() ()
   Type cumsum, totalFishing, delta, w, psi_m, psi_F, g, m, N;
   cumsum=0.0;
   totalFishing = 0.0;  
-  delta = wcw;
+  delta = binsize;
   for(int j=0; j<nwc; j++) {
     w = delta * (j + 1);
     psi_m = 1 / (1 + pow(w / (Winf * eta_m), -10));

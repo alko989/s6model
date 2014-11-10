@@ -3,12 +3,12 @@
 \alias{sample2df}
 \title{Convert a vector sample to data.frame with counts per weight class}
 \usage{
-sample2df(sam, wcw, keepZeros = TRUE)
+sample2df(sam, binsize, keepZeros = TRUE)
 }
 \arguments{
 \item{sam}{Numeric vector. Individual weights}
 
-\item{wcw}{Numeric. Weight class width}
+\item{binsize}{Numeric. Weight class width}
 
 \item{keepZeros}{Logical. If TRUE the resulting data.frame includes weight classes with zero individuals. Otherwise these weight classes are dropped.}
 }

@@ -3,7 +3,7 @@
 \alias{simulateData3}
 \title{Simulates catch-at-weight data using the s6model}
 \usage{
-simulateData3(samplesize = 1000, params = parameters(), wcw = 5,
+simulateData3(samplesize = 1000, params = parameters(), binsize = 5,
   keepZeros = TRUE, retDF = TRUE, ...)
 }
 \arguments{
@@ -11,7 +11,7 @@ simulateData3(samplesize = 1000, params = parameters(), wcw = 5,
 
 \item{params}{Object of class \code{Parameters}. Model parameters}
 
-\item{wcw}{Numeric. Weight class width. If \code{retDF} is FALSE, \code{wcw} is ignored}
+\item{binsize}{Numeric. Weight class width. If \code{retDF} is FALSE, \code{binsize} is ignored}
 
 \item{keepZeros}{Logical. If TRUE the resulting data.frame includes weight classes with zero individuals. Otherwise these weight classes are dropped. Ignored if \code{retDF} is FALSE}
 

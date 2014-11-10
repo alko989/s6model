@@ -184,24 +184,27 @@ estimateMultidata <-
 
 ##' @export
 estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.35,
-                         DLL="s6model", tracemgc=FALSE, map=list(loga=factor(NA)), random=c()) {
+                         DLL="s6model", verbose=FALSE, map=list(loga=factor(NA)), random=c()) {
   if(! require(TMB)) stop("TMB is not installed!")
   tryer <- try({
-    wcw <- attr(df,"wcw")
+    binsize <- attr(df,"binsize")
     nms <- c("Fm","Winf","Wfs")
-    data <- list(wcw=wcw, nwc=dim(df)[1], freq=df$Freq, n=n, epsilon_a=epsilon_a,
+    data <- list(binsize=binsize, nwc=dim(df)[1], freq=df$Freq, n=n, epsilon_a=epsilon_a,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(0.35), sdloga = 0.35*0.5 )
-    pars <- list(loga=log(0.35), logFm = log(0.5), logWinf = log((max(df$Weight) + 2 * wcw)),
+    pars <- list(loga=log(0.35), logFm = log(0.5), logWinf = log((max(df$Weight) + 2 * binsize)),
                  logWfs = log(min(df$Weight[df$Freq > 0])))
     obj <- MakeADFun(data = data, parameters = pars, DLL = DLL, map=map, random=random,
                      checkParameterOrder=TRUE)
-    obj$env$tracemgc <- FALSE
-    obj$env$inner.control$trace <- FALSE
-    obj$env$silent <- TRUE
-    newtonOption(trace=0)
-    config(trace.optimize = 0,DLL=DLL)
+    obj$env$tracemgc <- verbose
+    obj$env$inner.control$trace <- verbose
+    obj$env$silent <- ! verbose
+    if(! verbose) {
+      newtonOption(trace=0)
+      config(trace.optimize = 0,DLL=DLL)
+    }
     opt <- nlminb(obj$par, obj$fn, obj$gr)
-    vals <- sdreport(obj)$value[nms]
+    sdr <- sdreport(obj)
+    vals <- sdr$value[nms]
     estpars <- parameters(c(nms, "n", "epsilon_a", "epsilon_r", "A", "eta_m", "a"),
                           as.numeric(c(vals, n, epsilon_a, epsilon_r, A, eta_m, a)),
                           transformed=FALSE)
@@ -212,5 +215,5 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m
     return(tryer)
   }
   structure(data.frame(Fm=vals["Fm"], Winf=vals["Winf"], Wfs=vals["Wfs"], FFmsy=vals["Fm"]/Fmsy, row.names=NULL),
-            est.Fmsy=Fmsy,est.FFmsy=vals["Fm"]/Fmsy, obj=obj, opt=opt, estpars=estpars)
+            est.Fmsy=Fmsy,est.FFmsy=vals["Fm"]/Fmsy, obj=obj, opt=opt, sdr = sdr, estpars=estpars)
 }

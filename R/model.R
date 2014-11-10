@@ -112,7 +112,7 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
 ##' Simulate a data set of individual catch weight or 
 ##' @param samplesize Integer. Number of simulated individuals
 ##' @param params Object of class \code{Parameters}. Model parameters
-##' @param wcw Numeric. Weight class width. If \code{retDF} is FALSE, \code{wcw} is ignored
+##' @param binsize Numeric. Weight class width. If \code{retDF} is FALSE, \code{binsize} is ignored
 ##' @param keepZeros Logical. If TRUE the resulting data.frame includes weight classes with zero individuals. Otherwise these weight classes are dropped. Ignored if \code{retDF} is FALSE
 ##' @param retDF Logical. If TRUE a data.frame is returned with columns Weight (weight classes) and Freq (numbers per weight class)
 ##' @param ... Extra named arguments passed to \code{getParams}
@@ -125,7 +125,7 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
 ##' }
 ##' @author alko
 ##' @export
-simulateData3 <- function(samplesize= 1000, params = parameters(), wcw = 5, keepZeros=TRUE, retDF=TRUE, ...)
+simulateData3 <- function(samplesize= 1000, params = parameters(), binsize = 5, keepZeros=TRUE, retDF=TRUE, ...)
 {
   applyfun <- if(require(parallel)) mclapply else sapply
   sam <- c()
@@ -133,7 +133,7 @@ simulateData3 <- function(samplesize= 1000, params = parameters(), wcw = 5, keep
     sam <<- simplify2array(applyfun(runif(samplesize), function(u) uniroot(function(x) {cdf(x) - u}, c(w_r, Winf))$root))
   })
   res <- list(sample = sam, parameters = params, Fmsy = getParams(params,calcBRPs=TRUE)$Fmsy)
-  if(retDF) res$df <- sample2df(sam, wcw, keepZeros=keepZeros)
+  if(retDF) res$df <- sample2df(sam, binsize, keepZeros=keepZeros)
   attr(res, "version") <- getVersion()
   return(invisible(res))  
 }
@@ -142,18 +142,18 @@ simulateData3 <- function(samplesize= 1000, params = parameters(), wcw = 5, keep
 ##'
 ##' Takes a vector containing individual catch weights and returns a data.frame with numbers per weight class
 ##' @param sam Numeric vector. Individual weights
-##' @param wcw Numeric. Weight class width
+##' @param binsize Numeric. Weight class width
 ##' @param keepZeros Logical. If TRUE the resulting data.frame includes weight classes with zero individuals. Otherwise these weight classes are dropped.
 ##' @return A data.frame with columns Weight and Freq with number per weight class.
 ##' @author alko
 ##' @export
-sample2df <- function(sam, wcw, keepZeros=TRUE) {
-  df <- as.data.frame(table(cut(sam, seq(0,max(sam) + wcw, wcw),
-                                labels=seq(wcw/2, max(sam) + wcw/2, wcw) )), stringsAsFactors=FALSE)
+sample2df <- function(sam, binsize, keepZeros=TRUE) {
+  df <- as.data.frame(table(cut(sam, seq(0,max(sam) + binsize, binsize),
+                                labels=seq(binsize/2, max(sam) + binsize/2, binsize) )), stringsAsFactors=FALSE)
   names(df) <- c("Weight","Freq")
   if (! keepZeros) df <- df[df$Freq > 0, ]
   df$Weight <- as.numeric(df$Weight)
-  attr(df, "wcw") <- wcw
+  attr(df, "binsize") <- binsize
   df
 }
 
@@ -309,3 +309,21 @@ calcFmsy <- function(params=NULL) {
 ## simplify2dataframe <- function(dd) {
 ##   data.frame(t(simplify2array(dd)))
 ## }
+
+##' @title Change the bin size of a weight frequency data.frame
+##' 
+##' @param df data.frame with colums 'Weight' and 'Freq'
+##' @param binsize numeric, the bin size in grams
+##' @param keepZeros logical, if TRUE the bins with zero observation are not removed
+##' @export
+##' 
+##' @examples 
+##' ## Simulate a data set with bin size equal to 100 gr
+##' dat <- simulateData3(binsize=100)
+##' 
+##' ## Change the bin size to 200 gr
+##' dat <- changeBinsize(dat$df, binsize = 200)
+##' @return data.frame with weight frequencies binned with bin size \code{binsize}
+changeBinsize <- function(df, binsize = 10, keepZeros = TRUE) {
+  sample2df(rep(df$Weight, df$Freq), binsize, keepZeros=keepZeros)
+}
