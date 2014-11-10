@@ -16,7 +16,6 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logFm);
   PARAMETER(logWinf);
   PARAMETER(logWfs);
-  //PARAMETER(u);
   Type u = 10.0;
   vector<Type> Nvec(nwc);
   Type Fm = exp(logFm);
@@ -27,7 +26,6 @@ Type objective_function<Type>::operator() ()
   ADREPORT(Winf);
   ADREPORT(Wfs);
   ADREPORT(a);
-  //ADREPORT(u);
   Type cumsum, totalFishing, delta, w, psi_m, psi_F, g, m, N;
   cumsum=0.0;
   totalFishing = 0.0;  
