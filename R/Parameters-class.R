@@ -173,9 +173,9 @@ formatEntry <- function(..., width=20) {
 setMethod("show", "Parameters",
           function(object) {
             width <- min(floor(getOption("width") / 5), 20)
-            cat(" _________________________________ \n")
-            cat("| An object of class 'Parameters' |\n")
-            cat("|_________________________________|",rep("_", width * 3 - 32), "\n", sep="")
+            cat(" ___________________________________\n")
+            cat("|  An object of class 'Parameters'  |\n")
+            cat("|___________________________________|",rep("_", width * 3 - 34), "\n", sep="")
             cat("|", formatEntry("  Winf  = ",exp(object@logWinf)*object@scaleWinf, width = width), 
                 "|", formatEntry("  A = ", exp(object@logA) * object@scaleA, width = width),
                 "|", formatEntry("  eps_r = ",exp(object@logepsilon_r)*object@scaleepsilon_r, width = width), "|\n",
