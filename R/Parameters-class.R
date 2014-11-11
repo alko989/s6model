@@ -29,14 +29,13 @@
 #'   \item{\code{scaleepsilon_r}:}{Numeric scalar. Scale of recruitment efficiency}
 #'   \item{\code{scaleWfs}:}{Numeric scalar. Scale of size of 50\% retention}
 #'   \item{\code{scaleu}:}{Numeric scalar.}
-
 #' }
 #' @author alko
 #' 
 #' @exportClass Parameters
 #' @name Parameters
 #' @aliases Parameters-class
-#' @rdname helloworld-methods
+#' @rdname Parameters
 #' @export
 setClass("Parameters",
          representation(logWinf="numeric",          # Asymptotic weight
@@ -193,30 +192,30 @@ setMethod("show", "Parameters",
             cat("\n")
           })
 
+#' @export
+#' @rdname Parameters
+plot.Parameters <- function(x, xlim=c(0.001, 1), ...) {
+  p <- getParams(x)
+  plot.default(p$w / p$Winf, p$N*(p$w^2), log="xy",
+               main="Biomass with respect to relative weight",
+               xlab="w/Winf", ylab="Biomass",
+               xlim=xlim,
+               type="l", ...)
+}
 
-setMethod(f="plot", signature="Parameters",
-          definition=function(x, xlim=c(0.001, 1), ...) {
-            p <- getParams(x)
-            plot.default(p$w / p$Winf, p$N*(p$w^2), log="xy",
-                         main="Biomass with respect to relative weight",
-                         xlab="w/Winf", ylab="Biomass",
-                         xlim=xlim,
-                         type="l", ...)
-          })
+#' @export
+#' @rdname Parameters
+lines.Parameters <- function(x, ...){
+  p <- getParams(x)
+  lines(xy.coords(p$w / p$Winf, p$N*(p$w^2)))
+}
 
-setMethod(f="lines", signature="Parameters",
-          definition=function(x, ...){
-            p <- getParams(x)
-            lines(xy.coords(p$w / p$Winf, p$N*(p$w^2)))
-          })
 ##' @export
 ##' @rdname Parameters
-##' @param x Parameters object
-##' @aliases as.list,Parameters-method
-setMethod(f="as.list", signature="Parameters",
-          definition=function(x) {
-            with(getParams(x), list(Winf=Winf, Fm=Fm, Wfs=Wfs, eta_m=eta_m, epsilon_r=epsilon_r, epsilon_a=epsilon_a, A=A, a=a, n=n, u=u))
-          })
+as.list.Parameters <- function(x) {
+  with(getParams(x), list(Winf=Winf, Fm=Fm, Wfs=Wfs, eta_m=eta_m, epsilon_r=epsilon_r, epsilon_a=epsilon_a, A=A, a=a, n=n, u=u))
+}
+
 ##' Difference between two \code{Parameters} objects
 ##' 
 ## ##' @param base \code{Parameters} object. First object
@@ -412,12 +411,6 @@ setMethod("getCor", c("Parameters"), function(object) {
 
 
 
-#' Constructor for the Parameters Class
-#' 
-#' Easier constructor for the Parameters class.
-#' 
-#' The values in 'vals' should be given as logarithms of the parameter values.
-#' 
 #' @param names String vector. Contains the names of the parameters that will
 #' have non default values.
 #' @param vals Numeric vector. The corresponding values, transformed if \code{transformed} is TRUE.
