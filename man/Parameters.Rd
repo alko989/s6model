@@ -37,7 +37,7 @@ A class that contains all model parameters
 \section{Slots}{
 
 \describe{
-  \item \code{logWinf}:}{Numeric scalar. Asymptotic weight
+  \item{\code{logWinf}:}{Numeric scalar. Asymptotic weight}
   \item{\code{logFm}:}{Numeric scalar. Fishing mortality}
   \item{\code{logA}:}{Numeric scalar. Growth parameter}
   \item{\code{logn}:}{Numeric scalar. Exponent of consumption}
