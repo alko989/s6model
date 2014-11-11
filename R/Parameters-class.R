@@ -173,22 +173,23 @@ formatEntry <- function(..., width=20) {
 }
 setMethod("show", "Parameters",
           function(object) {
+            width <- min(floor(getOption("width") / 5), 20)
             cat("                     An object of class 'Parameters'\n")
-            cat("+",rep("-", 71), "+\n", sep="")
-            cat(formatEntry("|", "  Winf  = ",exp(object@logWinf)*object@scaleWinf),"\t|", 
-                formatEntry("  A = ", exp(object@logA) * object@scaleA), "\t|",
-                formatEntry("  eps_r = ",exp(object@logepsilon_r)*object@scaleepsilon_r), "\t|\n",
-                formatEntry("|","  Fm    = ", exp(object@logFm) * object@scaleFm),"\t|", 
-                formatEntry("  a = ", exp(object@loga) * object@scalea), "\t|",
-                formatEntry("  eta_m = ", exp(object@logeta_m) * object@scaleeta_m), "\t|\n",
-                formatEntry("|", "  eta_F = ", exp(object@logeta_F) * object@scaleeta_F),"\t|", 
-                formatEntry("  n = ", exp(object@logn) * object@scalen),"\t|",
-                formatEntry("  eps_a = ",   exp(object@logepsilon_a) * object@scaleepsilon_a),"\t|\n",
-                formatEntry("|","  eta_S = ",exp(object@logeta_S)*object@scaleeta_S),"\t|",
-                formatEntry("  Wfs = ", exp(object@logWfs) * object@scaleWfs), "\t|",
-                formatEntry("  u = ", exp(object@logu) * object@scaleu),"\t|\n",
+            cat("+",rep("-", width * 3 + 2), "+\n", sep="")
+            cat("|", formatEntry("  Winf  = ",exp(object@logWinf)*object@scaleWinf, width = width), 
+                "|", formatEntry("  A = ", exp(object@logA) * object@scaleA, width = width),
+                "|", formatEntry("  eps_r = ",exp(object@logepsilon_r)*object@scaleepsilon_r, width = width), "|\n",
+                "|", formatEntry("  Fm    = ", exp(object@logFm) * object@scaleFm, width = width),
+                "|", formatEntry("  a = ", exp(object@loga) * object@scalea, width = width),
+                "|", formatEntry("  eta_m = ", exp(object@logeta_m) * object@scaleeta_m, width = width), "|\n",
+                "|", formatEntry("  eta_F = ", exp(object@logeta_F) * object@scaleeta_F, width = width), 
+                "|", formatEntry("  n = ", exp(object@logn) * object@scalen, width = width),
+                "|", formatEntry("  eps_a = ",   exp(object@logepsilon_a) * object@scaleepsilon_a, width = width),"|\n",
+                "|", formatEntry("  eta_S = ",exp(object@logeta_S)*object@scaleeta_S, width = width),
+                "|", formatEntry("  Wfs = ", exp(object@logWfs) * object@scaleWfs, width = width),
+                "|", formatEntry("  u = ", exp(object@logu) * object@scaleu, width = width),"|\n",
                 sep="")
-            cat("+",rep("-", 71), "+\n", sep="")
+            cat("+",rep("-", width * 3 + 2), "+\n", sep="")
             cat("\n")
           })
 
