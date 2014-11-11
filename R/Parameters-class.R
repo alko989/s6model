@@ -173,8 +173,9 @@ formatEntry <- function(..., width=20) {
 setMethod("show", "Parameters",
           function(object) {
             width <- min(floor(getOption("width") / 5), 20)
-            cat("                     An object of class 'Parameters'\n")
-            cat("+",rep("-", width * 3 + 2), "+\n", sep="")
+            cat(" _________________________________ \n")
+            cat("| An object of class 'Parameters' |\n")
+            cat("|_________________________________|",rep("_", width * 3 - 32), "\n", sep="")
             cat("|", formatEntry("  Winf  = ",exp(object@logWinf)*object@scaleWinf, width = width), 
                 "|", formatEntry("  A = ", exp(object@logA) * object@scaleA, width = width),
                 "|", formatEntry("  eps_r = ",exp(object@logepsilon_r)*object@scaleepsilon_r, width = width), "|\n",
@@ -188,7 +189,7 @@ setMethod("show", "Parameters",
                 "|", formatEntry("  Wfs = ", exp(object@logWfs) * object@scaleWfs, width = width),
                 "|", formatEntry("  u = ", exp(object@logu) * object@scaleu, width = width),"|\n",
                 sep="")
-            cat("+",rep("-", width * 3 + 2), "+\n", sep="")
+            cat("|", rep("_", width), "|", rep("_", width), "|", rep("_", width), "|\n", sep="")
             cat("\n")
           })
 
