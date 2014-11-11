@@ -163,7 +163,7 @@ formatEntry <- function(..., width=20) {
   res <- c()
   for(arg in list(...)) {
     if(is(arg, "numeric")) {
-      res <- c(res,round(arg, 4))
+      res <- c(res,round(arg, ifelse(arg < 10, 4, 1)))
     } else {
       res <- c(res, arg)
     }
