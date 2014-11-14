@@ -186,6 +186,7 @@ estimateMultidata <-
 estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.35,
                          DLL="s6model", verbose=FALSE, map=list(loga=factor(NA)), random=c()) {
   if(! require(TMB)) stop("TMB is not installed!")
+  if(! require(TMB)) stop("TMB is not installed! Please install and try again.")
   tryer <- try({
     binsize <- attr(df,"binsize")
     nms <- c("Fm","Winf","Wfs")
