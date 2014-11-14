@@ -534,3 +534,12 @@ Wrong check for mismatch btw etaF/Wfs in getParams
 Changes from version  0.10.7 to  0.10.8 
  * TMB code for Fmsy and parameter estimation
  * removed unnecessary numDeriv:: when using the imported hessian and jacobian functions
+
+Changes from version  0.10.8 to  0.10.9 
+ * argument `wcw` is now binsize
+ * added version to results and plots
+ * added estimate_TMB and calcFmsy functions
+ * removed numderiv::
+ * styled output
+ * documentation fixes
+ * S3 methods for as.list, lines and plot
