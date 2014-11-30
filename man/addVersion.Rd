@@ -3,7 +3,7 @@
 \alias{addVersion}
 \title{Adds version watermark to a plot}
 \usage{
-addVersion(cex = 0.5, col = "#12345655")
+addVersion(cex = 0.5, col = "#12345655", lengthSHA = 6)
 }
 \arguments{
 \item{cex}{numeric, controls the font size}
