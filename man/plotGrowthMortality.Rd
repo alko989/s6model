@@ -2,9 +2,12 @@
 \docType{methods}
 \name{plotGrowth}
 \alias{plotGrowth}
+\alias{plotMortality}
 \title{Plots growth function}
 \usage{
 plotGrowth(object, ...)
+
+plotMortality(object, ...)
 }
 \arguments{
 \item{object}{A \code{Parameters} object}
@@ -13,11 +16,17 @@ plotGrowth(object, ...)
 }
 \value{
 Invisible \code{NULL}
+
+Invisible \code{NULL}
 }
 \description{
 Plots growth function
+
+Makes a plot of natural and fishing mortalities
 }
 \author{
+alko
+
 alko
 }
 

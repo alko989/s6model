@@ -7,10 +7,6 @@
 \alias{plotFit,Parameters,numeric,logical-method}
 \alias{plotFit,Parameters,numeric,missing-method}
 \alias{plotFit-methods}
-\alias{plotGrowth,Parameters-method}
-\alias{plotGrowth,Parameters-methods}
-\alias{plotMortality}
-\alias{plotMortality,Parameters-method}
 \title{plotFit}
 \usage{
 plotFit(object, data, add, ...)
@@ -22,12 +18,6 @@ plotFit(object, data, add, ...)
 \S4method{plotFit}{Parameters,numeric,logical}(object, data, add, ...)
 
 \S4method{plotFit}{Parameters,data.frame,logical}(object, data, add, ...)
-
-\S4method{plotGrowth}{Parameters}(object, ...)
-
-plotMortality(object, ...)
-
-\S4method{plotMortality}{Parameters}(object, ...)
 }
 \arguments{
 \item{object}{A \code{Parameters} object}
@@ -39,20 +29,14 @@ plotMortality(object, ...)
 \item{...}{Extra named arguments are passed to the plotting function}
 }
 \value{
-invisible NULL
-
-Invisible \code{NULL}
+invisible \code{NULL}
 }
 \description{
 Visualizing fit of s6model
 
 
-
-Makes a plot of natural and fishing mortalities
 }
 \author{
-alko
-
 alko
 }
 
