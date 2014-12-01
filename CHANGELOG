@@ -546,3 +546,10 @@ Changes from version  0.10.8 to  0.10.9
 
 Changes from version  0.10.9 to  0.10.10 
  * added observation error
+
+Changes from version  0.10.10 to  0.10.11 
+ * makeAssessment function that accepts time series of size distributions
+ * new class s6modelResults
+ * print function for s6modelResults
+ * plot function for s6modelResults
+ * relative recruitment is calculated and reported from estimate_TMB
