@@ -30,11 +30,11 @@ addVersion <- function(cex=0.5, col="#12345655", lengthSHA = 6) {
 }
 
 formatVersion <- function(x, showSHA = TRUE, lengthSHA = 6) {
-  pkgname <- regmatches(x, regexpr(pattern = "^[^_]*", v, perl = TRUE))
-  ver <- regmatches(x, regexpr(pattern = "v[0-9.]*", v, perl = TRUE))
+  pkgname <- regmatches(x, regexpr(pattern = "^[^_]*", x, perl = TRUE))
+  ver <- regmatches(x, regexpr(pattern = "v[0-9.]*", x, perl = TRUE))
   res <- paste(pkgname, ver)
   if(grepl("@", x) & showSHA) {
-    sha <- regmatches(x, regexpr(pattern = paste0("[^@]{",lengthSHA, "}$"), v, perl = TRUE))
+    sha <- regmatches(x, regexpr(pattern = paste0("[^@]{",lengthSHA, "}$"), x, perl = TRUE))
     res <- paste0(res, " (@", sha, ")")
   }
   res
