@@ -10,7 +10,10 @@
 \method{print}{s6modelResults}(x, ...)
 
 \method{plot}{s6modelResults}(x, ..., what = "FFmsy", use.rownames = FALSE,
-  years = NULL, xlab = NULL, ylab = NULL)
+  years = NULL, xlab = NULL, ylab = NULL, ylim = NULL,
+  addDefault = FALSE, col.def = "white", addhline = 1, col.hline = 1,
+  lty.hline = 2, cex.ver = 0.7, version = TRUE, xaxs = "i",
+  yaxs = "i")
 }
 \description{
 s6modelResults class
