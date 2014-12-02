@@ -83,7 +83,11 @@ addConfidenceShading <- function(x, y, ...) {
 
 ##' @export
 ##' @rdname s6modelResults
-plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE, years = NULL, xlab = NULL, ylab = NULL) {
+plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE, 
+                                years = NULL, xlab = NULL, ylab = NULL, 
+                                ylim = NULL, addDefault = FALSE, col.def = "white",
+                                addhline = 1, col.hline = 1, lty.hline = 2,
+                                cex.ver = 0.7, version = TRUE, xaxs = "i", yaxs = "i") {
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = "F", Winf = expression(W[infinity]), Wfs = "50% retainment size", stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, or Wfs"))
   ylab <- if(is.null(ylab)) yl else ylab
   xlab <- if(is.null(xlab)) "Year" else xlab
@@ -98,9 +102,19 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE, ye
   ys <- x[[what]]
   ylim <- range(ys, attr(x, "CI")[[what]], na.rm = TRUE)
   
-  plot(xs, ys, type="n", ylim=ylim, xlab = "", ylab = "", ...)
+  plot(xs, ys, type="n", ylim=ylim, xlab = "", ylab = "", xaxs = xaxs, yaxs = yaxs, ...)
   title(xlab = xlab, ylab=ylab, line=2)
-  addConfidenceShading(xs, attr(x, "CI")[[what]])
-  lines(xs, ys, lty=2, lwd=3, col= 4)
-  abline(h=1, lwd=2, col="darkgrey")
+  if( ! is.null(attr(x, "CI"))) {
+    addConfidenceShading(xs, attr(x, "CI")[[what]])
+  }
+  if(addDefault){
+    lines(xs, ys, lty=2, lwd=3, col= col.def)
+  }
+  if(!is.null(addhline)) {
+    abline(h=addhline, lwd=2, col=col.hline, lty=lty.hline)
+  }
+  if(version) {
+    addVersion(attr(x, "version"), cex = cex.ver)
+  }
+  box()
 }
