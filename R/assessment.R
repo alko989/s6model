@@ -100,7 +100,7 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE,
     xs <- years
   }
   ys <- x[[what]]
-  ylim <- range(ys, attr(x, "CI")[[what]], na.rm = TRUE)
+  ylim <- if(is.null(ylim)) range(ys, attr(x, "CI")[[what]], na.rm = TRUE) else ylim
   
   plot(xs, ys, type="n", ylim=ylim, xlab = "", ylab = "", xaxs = xaxs, yaxs = yaxs, ...)
   title(xlab = xlab, ylab=ylab, line=2)
