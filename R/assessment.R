@@ -27,14 +27,14 @@ addWeight <- function(df, a, b, lengthcol = "Length") {
 }
 
 ##' @export
-makeAssessment <- function(inputData, a.mean = 0.35, a.sd = 0.175, nsample = 100, probs = seq(0, 1, 0.01)) {
-  ests <- lapply(inputData, function(x) estimate_TMB(x, a=a.mean))
+makeAssessment <- function(inputData, a.mean = 0.35, a.sd = 0.175, nsample = 100, probs = seq(0, 1, 0.01), ...) {
+  ests <- lapply(inputData, function(x) estimate_TMB(x, a=a.mean, ...))
   res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 4) else x[1:4] )
   res <- do.call(rbind.data.frame, res)
   row.names(res) <- names(inputData)
   if(a.sd > 0) {
     ci <- lapply(inputData, function(x) {
-      reps <- lapply(seq(nsample), function(bogus) estimate_TMB(x, a = s6model:::rparam(a.mean, a.sd)))
+      reps <- lapply(seq(nsample), function(bogus) estimate_TMB(x, a = rparam(a.mean, a.sd), ...))
       reps <- lapply(reps, function(x) if(class(x)== "try-error") rep(NA, 4) else x[1:4] )
       reps <- do.call(rbind.data.frame, reps)
       as.data.frame(apply(reps, 2, quantile, probs = probs, na.rm = TRUE))
