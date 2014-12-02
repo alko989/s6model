@@ -189,7 +189,11 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m
   tryer <- try({
     binsize <- attr(df,"binsize")
     nms <- c("Fm","Winf","Wfs")
-    if(is.null(Winf)) Winf <- max(df$Weight) + 2 * binsize
+    if(is.null(Winf))  {
+      Winf <- max(df$Weight) + 2 * binsize
+    } else {
+      map$logWinf  <- factor(NA)
+    }
     data <- list(binsize=binsize, nwc=dim(df)[1], freq=df$Freq, n=n, epsilon_a=epsilon_a,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), sdloga = 0.35*0.5 )
     pars <- list(loga=log(a), x=0, logFm = log(0.5), logWinf = log(Winf),
