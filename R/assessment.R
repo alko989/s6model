@@ -6,12 +6,24 @@
 #' @export
 setClass("s6modelResults")
 
-fitWL <- function(df, colnames = c("Weight", "Length")) {
-  df <- setNames(df[colnames], c("Weight", "Length"))
-  fit <- lm(log(Weight) ~ log(Length), data = df) 
-  a <- exp(fit$coefficients[1])
-  b <- fit$coefficients[2]
-  list(a = a, b = b)
+fitWL <- function(df, colname.weight = "Weight", colname.length = "Length") {
+  if(is(df, "data.frame")) {
+    df <- setNames(df[c(colname.weight, colname.length)], c("Weight", "Length"))
+    w <- which(df$Weight > 0 & df$Length > 0, ! is.na(df$Weight) & ! is.na(df$Length))
+    fit <- lm(log(Weight) ~ log(Length), data = df[w, ]) 
+    a <- as.numeric(exp(fit$coefficients[1]))
+    b <- as.numeric(fit$coefficients[2])
+    res <- list(a = a, b = b)
+  } else if(is(df, "DATRASraw")) {
+    if(nlevels(df[[3]]$Species) != 1) {
+      stop("The DATRASraw object contains data for more than one species")
+    }
+    if(levels(df[[3]]$Species) != levels(df[[1]]$Species)) {
+      warning("The CA and HL parts of the DATRASraw object do not have the same species")
+    }
+    res <- fitWL(df[[1]], colname.weight = "IndWgt", colname.length = "LngtCm")
+  }
+  res
 }
 
 l2w <- function(l, a, b) {
