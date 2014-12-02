@@ -184,7 +184,7 @@ estimateMultidata <-
 
 ##' @export
 estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.35, Winf = NULL, sigma=0.0001,
-                         a.mean = 0.35, a.sd = 0.175, DLL="s6model", verbose=FALSE, map=list(loga=factor(NA), x=factor(NA)), random=c()) {
+                         a.mean = 0.35, a.sd = 0.175, winf.ubound = 2, DLL="s6model", verbose=FALSE, map=list(loga=factor(NA), x=factor(NA)), random=c()) {
   if(! require(TMB)) stop("TMB is not installed! Please install and try again.")
   tryer <- try({
     binsize <- attr(df,"binsize")
@@ -198,15 +198,18 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), sdloga = 0.35*0.5 )
     pars <- list(loga=log(a), x=0, logFm = log(0.5), logWinf = log(Winf),
                  logWfs = log(min(df$Weight[df$Freq > 0])), logSigma=log(sigma))
+    estnames <- names(pars[! names(pars) %in% names(map)])
+    upper <- rep(Inf, length(estnames))
+    upper[which(estnames == "logWinf")] <- log(Winf * winf.ubound)
     obj <- MakeADFun(data = data, parameters = pars, DLL = DLL, map=map, random=random)
     obj$env$tracemgc <- verbose
     obj$env$inner.control$trace <- verbose
     obj$env$silent <- ! verbose
     if(! verbose) {
       newtonOption(trace=0)
-      config(trace.optimize = 0,DLL=DLL)
+      config(trace.optimize = 0, DLL=DLL)
     }
-    opt <- nlminb(obj$par, obj$fn, obj$gr)
+    opt <- nlminb(obj$par, obj$fn, obj$gr, upper = upper)
     sdr <- sdreport(obj)
     vals <- sdr$value[nms]
     estpars <- parameters(c(nms, "n", "epsilon_a", "epsilon_r", "A", "eta_m", "a"),
