@@ -260,7 +260,7 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
 ##' @param data Numeric vector or data.frame with columns Weight and Freq.
 ##' @param add Boolean. If TRUE, the plot is added to an existing graphics device.
 ##' @param ... Extra named arguments are passed to the plotting function
-##' @return invisible NULL
+##' @return invisible \code{NULL}
 ##' @docType methods
 ##' @rdname plotFit-methods
 ##' @docType methods
@@ -329,7 +329,6 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
 ##' @rdname plotGrowthMortality
 ##'  @export
 setGeneric("plotGrowth", function(object, ...) {standardGeneric("plotGrowth")})
-##' @rdname plotFit-methods
 ##' @aliases plotGrowth,Parameters-methods
 setMethod("plotGrowth", c("Parameters"),
           function(object, ...) {
@@ -361,11 +360,10 @@ setMethod("plotGrowth", c("Parameters"),
 ##' Makes a plot of natural and fishing mortalities
 ##' @return Invisible \code{NULL}
 ##' @author alko
-##' @rdname plotFit-methods
+##' @rdname plotGrowthMortality
 ##' @docType methods
 ##' @export
 setGeneric("plotMortality", function(object, ...) {standardGeneric("plotMortality")})
-##' @rdname plotFit-methods
 ##' @aliases plotMortality,Parameters-method
 setMethod("plotMortality", c("Parameters"),
           function(object, ...) {
