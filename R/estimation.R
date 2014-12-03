@@ -198,7 +198,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), sdloga = 0.35*0.5 )
     pars <- list(loga=log(a), x=0, logFm = log(0.5), logWinf = log(Winf),
                  logWfs = log(min(df$Weight[df$Freq > 0])), logSigma=log(sigma))
-    estnames <- names(pars[! names(pars) %in% names(map)])
+    estnames <- names(pars[! names(pars) %in% c(names(map), random)])
     upper <- rep(Inf, length(estnames))
     upper[which(estnames == "logWinf")] <- log(Winf * winf.ubound)
     obj <- MakeADFun(data = data, parameters = pars, DLL = DLL, map=map, random=random)
