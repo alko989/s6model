@@ -92,11 +92,25 @@ makeShading <- function(x, ylow, yhigh, col = grey(0.8), ...) {
   polygon(xs[notna], ys[notna], col = col, border = NA)
 }
 
-addConfidenceShading <- function(x, y, ...) {
-  d <- nrow(y) - 1
-  for(i in seq(1, d / 2)) {
-    s6model:::makeShading(x, y[i, ], y[d - i, ],
-                col=grey(1 - i / (d / 2 )))
+addConfidenceShading <- function(x, y, ..., probs = c(0.05, 0.975), what = "FFmsy") {
+  if(is(y, "s6modelResults")) {
+    r <- attr(y, "Results")
+    w <- sapply(r, function(rr) {
+      if(is(rr, "try-error")) return(rep(NA, 2))
+      sdr <- attr(rr, "sdr")
+      id <- which(names(sdr$value) == ifelse(what == "FFmsy", "Fm", what))
+      c(sdr$value[id] + qnorm(probs) * sdr$sd[id])
+    })
+    if(what == "FFmsy") {
+      w <- sweep(w, 2, y$Fm / y$FFmsy, "/")
+    }
+    makeShading(x, w[1,], w[2, ],  col = "lightgrey")
+  } else {
+    d <- nrow(y) - 1
+    for(i in seq(1, d / 2)) {
+      makeShading(x, y[i, ], y[d - i, ],
+                            col=grey(1 - i / (d / 2 )))
+    }
   }
 }
 
@@ -106,7 +120,8 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE,
                                 years = NULL, xlab = NULL, ylab = NULL, 
                                 ylim = NULL, addDefault = FALSE, col.def = "white",
                                 addhline = 1, col.hline = 1, lty.hline = 2,
-                                cex.ver = 0.7, version = TRUE, xaxs = "i", yaxs = "i") {
+                                cex.ver = 0.7, version = TRUE, xaxs = "i", yaxs = "i",
+                                ci = c("bootstrap", "estimated")) {
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = "F", Winf = expression(W[infinity]), Wfs = "50% retainment size", stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, or Wfs"))
   ylab <- if(is.null(ylab)) yl else ylab
   xlab <- if(is.null(xlab)) "Year" else xlab
@@ -123,9 +138,14 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE,
   
   plot(xs, ys, type="n", ylim=ylim, xlab = "", ylab = "", xaxs = xaxs, yaxs = yaxs, ...)
   title(xlab = xlab, ylab=ylab, line=2)
-  if( ! is.null(attr(x, "CI"))) {
-    addConfidenceShading(xs, attr(x, "CI")[[what]])
-  }
+  if(ci == "bootstrap") {
+    if( ! is.null(attr(x, "CI"))) {
+      addConfidenceShading(xs, attr(x, "CI")[[what]])
+    }
+  } else if(ci == "estimated") {
+    addConfidenceShading(xs, x, what = what)  
+  } else stop(ci, " is not recognized confidence interval")
+  
   if(addDefault){
     lines(xs, ys, lty=2, lwd=3, col= col.def)
   }

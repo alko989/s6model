@@ -13,7 +13,7 @@
   years = NULL, xlab = NULL, ylab = NULL, ylim = NULL,
   addDefault = FALSE, col.def = "white", addhline = 1, col.hline = 1,
   lty.hline = 2, cex.ver = 0.7, version = TRUE, xaxs = "i",
-  yaxs = "i")
+  yaxs = "i", ci = c("bootstrap", "estimated"))
 }
 \description{
 s6modelResults class
