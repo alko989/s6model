@@ -38,16 +38,31 @@ addWeight <- function(df, a, b, lengthcol = "Length") {
   df
 }
 
+
+getalim <- function (est) {
+  if(is.null(attr(est, "estpars"))) { 
+    return(1)
+  }
+  optimize(function(x) {
+    getParams(p = parameters("a", x, FALSE, base = attr(est, "estpars")), optim.Rrel = TRUE, FF = 0)^2
+  }, c(0,2) )$minimum
+}
+
 ##' @export
-makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100, probs = seq(0, 1, 0.01), winf.ubound = 2,...) {
+makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100, 
+                           probs = seq(0, 1, 0.01), winf.ubound = 2,...) {
+  r <- function(x) round(x, 2)
   aplfun <- if(require(parallel)) mclapply else lapply
   ests <- lapply(inputData, function(x) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound, ...))
   res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 4) else x[1:4] )
   res <- do.call(rbind.data.frame, res)
   row.names(res) <- names(inputData)
   if(a.sd > 0) {
-    ci <- lapply(inputData, function(x) {
-      reps <- aplfun(seq(nsample), function(bogus) estimate_TMB(x, a = rparam(a.mean, a.sd), winf.ubound = winf.ubound, ...))
+    ci <- lapply(seq(along.with = inputData), function(i) {
+      alim <- getalim(ests[[i]])
+      cat(paste0("Note: physiological mortality a ~ truncLogNorm(", r(log(a.mean)), ", ", r(a.sd), ", ubound = ", r(alim), ")\n"))
+      as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
+      reps <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, winf.ubound = winf.ubound, ...))
       reps <- aplfun(reps, function(x) {
         if(class(x) != "try-error") {
           x[1:4] 
@@ -56,7 +71,7 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
         }
       })
       reps <- do.call(rbind.data.frame, reps)
-      as.data.frame(apply(reps, 2, quantile, probs = probs, na.rm = TRUE))
+      structure(as.data.frame(apply(reps, 2, quantile, probs = probs, na.rm = TRUE)), alim=alim)
     })
     ci <- setNames(lapply(names(ci[[1]]), function(nm) lapply(ci, function(d) d[[nm]])),names(ci[[1]]))
     ci <- lapply(ci, function(yy) {

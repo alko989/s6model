@@ -7,4 +7,5 @@
 #' @name s6model
 #' @importFrom numDeriv jacobian hessian
 #' @import methods
+#' @importFrom truncdist rtrunc
 NULL
