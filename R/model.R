@@ -327,3 +327,18 @@ calcFmsy <- function(params=NULL) {
 changeBinsize <- function(df, binsize = 10, keepZeros = TRUE) {
   sample2df(rep(df$Weight, df$Freq), binsize, keepZeros=keepZeros)
 }
+
+##' @export
+changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq") {
+    cuts <- seq(0, max(df[weight.col]) + binsize, binsize)
+    labs <- head(cuts + binsize/2, -1)
+    res <- data.frame(Weight = cut(df[[weight.col]], breaks = cuts, labels = labs), Freq = df[[freq.col]])
+    res <- rbind(res, data.frame(Weight = labs, Freq = 0))
+    res <- aggregate(Freq ~ Weight, data = res, FUN = sum )
+    res$Weight <- as.numeric(as.character(res$Weight))
+    res$Freq <- as.numeric(as.character(res$Freq))
+    if (! keepZeros) {
+      res <- res[df$Freq > 0, ]
+    }
+    structure(res, binsize = binsize)
+  }
