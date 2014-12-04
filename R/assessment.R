@@ -105,12 +105,14 @@ addConfidenceShading <- function(x, y, ..., probs = c(0.05, 0.975), what = "FFms
       w <- sweep(w, 2, y$Fm / y$FFmsy, "/")
     }
     makeShading(x, w[1,], w[2, ],  col = "lightgrey")
-  } else {
+  } else if (is(y, "data.frame")){
     d <- nrow(y) - 1
     for(i in seq(1, d / 2)) {
       makeShading(x, y[i, ], y[d - i, ],
                   col=grey(1 - i / (d / grey.intensity )))
     }
+  } else {
+    stop("Only data.frame or s6modelResults are accepted as input by addConfidenceShading")
   }
 }
 
@@ -120,6 +122,7 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE,
                                 years = NULL, xlab = NULL, ylab = NULL, 
                                 ylim = NULL, addDefault = FALSE, col.def = "white",
                                 addhline = 1, col.hline = 1, lty.hline = 2,
+                                addMedian = FALSE, col.median = "white", lty.median = 2,
                                 cex.ver = 0.7, version = TRUE, xaxs = "i", yaxs = "i",
                                 ci = c("bootstrap", "estimated"), grey.intensity = 1) {
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = "F", Winf = expression(W[infinity]), Wfs = "50% retainment size", stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, or Wfs"))
