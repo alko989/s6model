@@ -92,7 +92,7 @@ makeShading <- function(x, ylow, yhigh, col = grey(0.8), ...) {
   polygon(xs[notna], ys[notna], col = col, border = NA)
 }
 
-addConfidenceShading <- function(x, y, ..., probs = c(0.05, 0.975), what = "FFmsy") {
+addConfidenceShading <- function(x, y, ..., probs = c(0.05, 0.975), what = "FFmsy", grey.intensity = 1) {
   if(is(y, "s6modelResults")) {
     r <- attr(y, "Results")
     w <- sapply(r, function(rr) {
@@ -109,7 +109,7 @@ addConfidenceShading <- function(x, y, ..., probs = c(0.05, 0.975), what = "FFms
     d <- nrow(y) - 1
     for(i in seq(1, d / 2)) {
       makeShading(x, y[i, ], y[d - i, ],
-                            col=grey(1 - i / (d / 2 )))
+                  col=grey(1 - i / (d / grey.intensity )))
     }
   }
 }
@@ -121,7 +121,7 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE,
                                 ylim = NULL, addDefault = FALSE, col.def = "white",
                                 addhline = 1, col.hline = 1, lty.hline = 2,
                                 cex.ver = 0.7, version = TRUE, xaxs = "i", yaxs = "i",
-                                ci = c("bootstrap", "estimated")) {
+                                ci = c("bootstrap", "estimated"), grey.intensity = 1) {
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = "F", Winf = expression(W[infinity]), Wfs = "50% retainment size", stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, or Wfs"))
   ylab <- if(is.null(ylab)) yl else ylab
   xlab <- if(is.null(xlab)) "Year" else xlab
@@ -140,7 +140,7 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE,
   title(xlab = xlab, ylab=ylab, line=2)
   if(ci == "bootstrap") {
     if( ! is.null(attr(x, "CI"))) {
-      addConfidenceShading(xs, attr(x, "CI")[[what]])
+      addConfidenceShading(xs, attr(x, "CI")[[what]], grey.intensity = grey.intensity)
     }
   } else if(ci == "estimated") {
     addConfidenceShading(xs, x, what = what)  
