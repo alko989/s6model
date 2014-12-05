@@ -329,7 +329,7 @@ changeBinsize <- function(df, binsize = 10, keepZeros = TRUE) {
 }
 
 ##' @export
-changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq") {
+changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq", verbose = options()$verbose) {
     cuts <- seq(0, max(df[weight.col]) + binsize, binsize)
     labs <- head(cuts + binsize/2, -1)
     res <- data.frame(Weight = cut(df[[weight.col]], breaks = cuts, labels = labs), Freq = df[[freq.col]])
@@ -340,8 +340,10 @@ changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
     if (! keepZeros) {
       res <- res[df$Freq > 0, ]
     }
-    structure(res, binsize = binsize)
-  }##' @export
+    res <- structure(res, binsize = binsize)
+    if(verbose) cat("Done")
+    res
+  }
 
 ##' @export
 findLatest <- function(path = ".", pattern = "") {
