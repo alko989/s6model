@@ -341,4 +341,16 @@ changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
       res <- res[df$Freq > 0, ]
     }
     structure(res, binsize = binsize)
-  }
+  }##' @export
+
+##' @export
+findLatest <- function(path = ".", pattern = "") {
+  library(plyr)
+  files <- dir(path, pattern, ignore.case = TRUE, full.names = TRUE)
+  
+  df <- ldply(files, function(f){
+    data.frame(fn = f, mtime = file.info(f)$mtime, stringsAsFactors = FALSE)
+  })
+  df[order(df$mtime, decreasing = TRUE), ][1,1]
+  
+}
