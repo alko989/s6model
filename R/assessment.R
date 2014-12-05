@@ -107,7 +107,10 @@ makeShading <- function(x, ylow, yhigh, col = grey(0.8), ...) {
   polygon(xs[notna], ys[notna], col = col, border = NA)
 }
 
-addConfidenceShading <- function(x, y, ..., probs = c(0.05, 0.975), what = "FFmsy", grey.intensity = 1) {
+addConfidenceShading <- 
+  function(x, y, ..., probs = c(0.05, 0.975), 
+           what = "FFmsy", grey.intensity = 1.5, 
+           addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2) {
   if(is(y, "s6modelResults")) {
     r <- attr(y, "Results")
     w <- sapply(r, function(rr) {
@@ -126,6 +129,9 @@ addConfidenceShading <- function(x, y, ..., probs = c(0.05, 0.975), what = "FFms
       makeShading(x, y[i, ], y[d - i, ],
                   col=grey(1 - i / (d / grey.intensity )))
     }
+    if(addMedian) {
+      lines(x, y[d/2 + 1, ], col = col.median, lty = lty.median, lwd=lwd.median)
+    }
   } else {
     stop("Only data.frame or s6modelResults are accepted as input by addConfidenceShading")
   }
@@ -137,9 +143,9 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE,
                                 years = NULL, xlab = NULL, ylab = NULL, 
                                 ylim = NULL, addDefault = FALSE, col.def = "white",
                                 addhline = 1, col.hline = 1, lty.hline = 2,
-                                addMedian = FALSE, col.median = "white", lty.median = 2,
+                                addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2,
                                 cex.ver = 0.7, version = TRUE, xaxs = "i", yaxs = "i",
-                                ci = c("bootstrap", "estimated"), grey.intensity = 1) {
+                                ci = c("bootstrap", "estimated", "none"), grey.intensity = 1) {
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = "F", Winf = expression(W[infinity]), Wfs = "50% retainment size", stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, or Wfs"))
   ylab <- if(is.null(ylab)) yl else ylab
   xlab <- if(is.null(xlab)) "Year" else xlab
@@ -156,12 +162,15 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE,
   
   plot(xs, ys, type="n", ylim=ylim, xlab = "", ylab = "", xaxs = xaxs, yaxs = yaxs, ...)
   title(xlab = xlab, ylab=ylab, line=2)
-  if(ci == "bootstrap") {
+  if("bootstrap" %in% ci) {
     if( ! is.null(attr(x, "CI"))) {
-      addConfidenceShading(xs, attr(x, "CI")[[what]], grey.intensity = grey.intensity)
+      addConfidenceShading(xs, attr(x, "CI")[[what]], grey.intensity = grey.intensity, 
+                           addMedian = addMedian, col.median = col.median, lty.median = lty.median, lwd.median = lwd.median)
     }
-  } else if(ci == "estimated") {
+  } else if("estimated" %in% "ci") {
     addConfidenceShading(xs, x, what = what)  
+  } else if("none" %in% ci) {
+    
   } else stop(ci, " is not recognized confidence interval")
   
   if(addDefault){
