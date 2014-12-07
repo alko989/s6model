@@ -28,84 +28,84 @@
 #' @export
 getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE, 
                       optim.fmsy=FALSE, optim.fmsyr = FALSE, optim.Rrel =FALSE) {
-    if( ! is(p,"Parameters"))
-        stop("Wrong input argument in getParams. Use the Parameters class instead.")  
-    Winf <- exp(p@logWinf) * p@scaleWinf
-    Fm <- exp(p@logFm) * p@scaleFm
-    if(optim.fmsy | optim.fmsyr | optim.Rrel)
-        Fm <- FF
-    A <- exp(p@logA) * p@scaleA
-    n <- exp(p@logn) *p@scalen
-    eta_m <- exp(p@logeta_m) * p@scaleeta_m
-    eta_S <- exp(p@logeta_S) * p@scaleeta_S
-    a <- exp(p@loga) *  p@scalea
-    epsilon_a <- exp(p@logepsilon_a) * p@scaleepsilon_a
-    epsilon_r <- exp(p@logepsilon_r) * p@scaleepsilon_r
-    Wfs <- exp(p@logWfs) * p@scaleWfs
-    eta_F <- Wfs/Winf
-    if(!(isTRUE(all.equal(p@logeta_F, log(eta_F / p@scaleeta_F))))) warning("Wfs and eta_F do not match! Wfs was used and eta_F was returned correctly")
-    p@logeta_F <- log(eta_F / p@scaleeta_F)
-    u <-exp(p@logu) * p@scaleu
-    M <- p@M
-   
-    w_r <- w_egg<- 0.001
-    Delta <- (log(Winf) - log(w_r)) / (M - 1)
-    w <- exp(log(w_r) + (1:M - 1) * Delta)
-
-    delta <- diff(w)
-
-    psi_F <- (1 + (w / Wfs)^-u )^-1
-
-    psi_S <- (1 + (w / (eta_S * Winf))^-u )^-1
-       
-    psi_m <- (1 + (w / (eta_m * Winf))^-10 )^-1
-    m <- a * A * w^(n - 1) +  Fm * psi_F
-    m[M] <- Inf
-    g <- A*w^n *(1 - (w/Winf)^(1-n) * (epsilon_a + (1 - epsilon_a) * psi_m))
-    
-    N <- exp(- cumsum((m / g)[-1] * delta)) / g[-1]
-    N <- c(1/g[1], N)
-    N[M] <- 0
-    if(isSurvey)
-    {
-      fishing <- psi_S * N
-    }
-    else
-    {
-      fishing <- psi_F * N
-    }
-    if( ! (optim.fmsy | optim.fmsyr | optim.Rrel)) {    
-      pdfN <-  fishing / sum(fishing * c(delta, 0))
-      pdfN.approx <- approxfun(w, pdfN, yleft=0, yright=.Machine$double.xmin)
-      cdf <-approxfun(w, cumsum(pdfN * c(delta,0)), yleft=0, yright=1)
-    }
-    B <- sum((psi_m  * N * w)[-M] * delta)
-    Rrel <- 1 - (Winf^(1-n) * w_egg/(epsilon_r * (1 - epsilon_a) * A * B))## * (w_r/w_egg)^(a-1)
-
-    Y <- Fm * Rrel * sum((psi_F * N * w)[-M] * delta)
-    YR <- Fm * sum((psi_F * N * w)[-M] * delta)
-    
-    if(calcBRPs) {
-      Fmsy <- optimise(f=getParams, interval=c(0,10), maximum=TRUE, p=p, optim.fmsy=TRUE)$maximum
-      FoverFmsy <- Fm/Fmsy
-      ##Fmsyr <- optimise(f=getParams, interval=c(0,2), maximum=TRUE, p=p, optim.fmsyr=TRUE)$maximum
-      ##FoverFmsyr <- Fm/Fmsyr
-      Fcrash <- try(uniroot(f=getParams, interval=c(1e-25,10), p=p, optim.fmsy=TRUE)$root, silent=TRUE)
-      Flim <-try(uniroot(f=getParams, interval=c(1e-25,10), p=p,  optim.Rrel = TRUE)$root, silent=TRUE)
-    }   
-    vb.M <- a * A * Winf^(n-1)*eta_m^(n-1)
-    vb.K <- A * Winf^(n-1) / 3
-    vb.MK <- vb.M / vb.K
-    if(optim.fmsy)
-      return(Y)
-    if(optim.fmsyr)
-      return(YR)
-    if(optim.Rrel)
-      return(Rrel - 0.5)
-    res <- as.list(environment())
-    attr(res, "version") <- getVersion()
-    return(invisible(res))
+  if( ! is(p,"Parameters"))
+    stop("Wrong input argument in getParams. Use the Parameters class instead.")  
+  Winf <- exp(p@logWinf) * p@scaleWinf
+  Fm <- exp(p@logFm) * p@scaleFm
+  if(optim.fmsy | optim.fmsyr | optim.Rrel)
+    Fm <- FF
+  A <- exp(p@logA) * p@scaleA
+  n <- exp(p@logn) *p@scalen
+  eta_m <- exp(p@logeta_m) * p@scaleeta_m
+  eta_S <- exp(p@logeta_S) * p@scaleeta_S
+  a <- exp(p@loga) *  p@scalea
+  epsilon_a <- exp(p@logepsilon_a) * p@scaleepsilon_a
+  epsilon_r <- exp(p@logepsilon_r) * p@scaleepsilon_r
+  Wfs <- exp(p@logWfs) * p@scaleWfs
+  eta_F <- Wfs/Winf
+  if(!(isTRUE(all.equal(p@logeta_F, log(eta_F / p@scaleeta_F))))) warning("Wfs and eta_F do not match! Wfs was used and eta_F was returned correctly")
+  p@logeta_F <- log(eta_F / p@scaleeta_F)
+  u <-exp(p@logu) * p@scaleu
+  M <- p@M
+  
+  w_r <- w_egg<- 0.001
+  Delta <- (log(Winf) - log(w_r)) / (M - 1)
+  w <- exp(log(w_r) + (1:M - 1) * Delta)
+  
+  delta <- diff(w)
+  
+  psi_F <- (1 + (w / Wfs)^-u )^-1
+  
+  psi_S <- (1 + (w / (eta_S * Winf))^-u )^-1
+  
+  psi_m <- (1 + (w / (eta_m * Winf))^-10 )^-1
+  m <- a * A * w^(n - 1) +  Fm * psi_F
+  m[M] <- Inf
+  g <- A*w^n *(1 - (w/Winf)^(1-n) * (epsilon_a + (1 - epsilon_a) * psi_m))
+  
+  N <- exp(- cumsum((m / g)[-1] * delta)) / g[-1]
+  N <- c(1/g[1], N)
+  N[M] <- 0
+  if(isSurvey)
+  {
+    fishing <- psi_S * N
   }
+  else
+  {
+    fishing <- psi_F * N
+  }
+  if( ! (optim.fmsy | optim.fmsyr | optim.Rrel)) {    
+    pdfN <-  fishing / sum(fishing * c(delta, 0))
+    pdfN.approx <- approxfun(w, pdfN, yleft=0, yright=.Machine$double.xmin)
+    cdf <-approxfun(w, cumsum(pdfN * c(delta,0)), yleft=0, yright=1)
+  }
+  B <- sum((psi_m  * N * w)[-M] * delta)
+  Rrel <- 1 - (Winf^(1-n) * w_egg/(epsilon_r * (1 - epsilon_a) * A * B))## * (w_r/w_egg)^(a-1)
+  
+  Y <- Fm * Rrel * sum((psi_F * N * w)[-M] * delta)
+  YR <- Fm * sum((psi_F * N * w)[-M] * delta)
+  
+  if(calcBRPs) {
+    Fmsy <- optimise(f=getParams, interval=c(0,10), maximum=TRUE, p=p, optim.fmsy=TRUE)$maximum
+    FoverFmsy <- Fm/Fmsy
+    ##Fmsyr <- optimise(f=getParams, interval=c(0,2), maximum=TRUE, p=p, optim.fmsyr=TRUE)$maximum
+    ##FoverFmsyr <- Fm/Fmsyr
+    Fcrash <- try(uniroot(f=getParams, interval=c(1e-25,10), p=p, optim.fmsy=TRUE)$root, silent=TRUE)
+    Flim <-try(uniroot(f=getParams, interval=c(1e-25,10), p=p,  optim.Rrel = TRUE)$root, silent=TRUE)
+  }   
+  vb.M <- a * A * Winf^(n-1)*eta_m^(n-1)
+  vb.K <- A * Winf^(n-1) / 3
+  vb.MK <- vb.M / vb.K
+  if(optim.fmsy)
+    return(Y)
+  if(optim.fmsyr)
+    return(YR)
+  if(optim.Rrel)
+    return(Rrel - 0.5)
+  res <- as.list(environment())
+  attr(res, "version") <- getVersion()
+  return(invisible(res))
+}
 
 ##' Simulates catch-at-weight data using the s6model
 ##'
@@ -198,25 +198,25 @@ rparam <- function(value, range.sd, range.cv, lb= -Inf, ub = Inf, unif=FALSE)
 ##' @author alko
 ##' @export
 getRandomParameters <-
-    function(parameter.names=c("A", "n" ,"eta_m","eta_F", "a" ,"Fm","Winf","epsilon_a", "epsilon_r"),
-             parameter.value =c(4.5,0.75 , 0.25  ,  0.05 , 0.35,0.25,  1e4 ,    0.8    ,     0.1    ),
-             parameter.sd    =c( 0 ,  0  ,   0   ,  0.5  ,  0  , 0  ,   0  ,     0     ,      0     ),
-             parameter.cv    =c(0.5,  0  ,  0.3  ,   0   , 0.5 , 0  ,   0  ,    0.1    ,     0.5    ),
-             parameter.lbound=c( 0 ,  0  ,  0.01 ,   0   ,0.01 , 0  ,   0  ,     0     ,      0     ),
-             parameter.ubound=c(Inf,  0  ,  Inf  ,  Inf  , Inf , 0  ,   0  ,    0.99   ,      Inf   ),
-             parameter.unif  =c(F,F,F,F,F,F,F,F,F), Rrel.gt=-Inf, Fmsy.gt=0) {
-      while(TRUE) {
-        par.vals <- sapply(seq(along.with=parameter.value),
-                           function(x) rparam(parameter.value[x], 
-                                              parameter.sd[x], 
-                                              parameter.cv[x],
-                                              parameter.lbound[x],
-                                              parameter.ubound[x],
-                                              parameter.unif[x]))
-        res <- parameters(parameter.names, par.vals, FALSE)
-        if( getParams(res)$Rrel >=  Rrel.gt & getParams(res, calcBRPs=T)$Fmsy >= Fmsy.gt) return(res)
-      }
+  function(parameter.names=c("A", "n" ,"eta_m","eta_F", "a" ,"Fm","Winf","epsilon_a", "epsilon_r"),
+           parameter.value =c(4.5,0.75 , 0.25  ,  0.05 , 0.35,0.25,  1e4 ,    0.8    ,     0.1    ),
+           parameter.sd    =c( 0 ,  0  ,   0   ,  0.5  ,  0  , 0  ,   0  ,     0     ,      0     ),
+           parameter.cv    =c(0.5,  0  ,  0.3  ,   0   , 0.5 , 0  ,   0  ,    0.1    ,     0.5    ),
+           parameter.lbound=c( 0 ,  0  ,  0.01 ,   0   ,0.01 , 0  ,   0  ,     0     ,      0     ),
+           parameter.ubound=c(Inf,  0  ,  Inf  ,  Inf  , Inf , 0  ,   0  ,    0.99   ,      Inf   ),
+           parameter.unif  =c(F,F,F,F,F,F,F,F,F), Rrel.gt=-Inf, Fmsy.gt=0) {
+    while(TRUE) {
+      par.vals <- sapply(seq(along.with=parameter.value),
+                         function(x) rparam(parameter.value[x], 
+                                            parameter.sd[x], 
+                                            parameter.cv[x],
+                                            parameter.lbound[x],
+                                            parameter.ubound[x],
+                                            parameter.unif[x]))
+      res <- parameters(parameter.names, par.vals, FALSE)
+      if( getParams(res)$Rrel >=  Rrel.gt & getParams(res, calcBRPs=T)$Fmsy >= Fmsy.gt) return(res)
     }
+  }
 
 ##' Random parameters with fixed Winf
 ##'
@@ -248,7 +248,7 @@ tmclapply <- function(X, FUN, ..., progressbar=TRUE){
   aplfun <- if(require(parallel)) mclapply else lapply
   start <- Sys.time()
   if(progressbar)
-      pb <- txtProgressBar(min = 0, max = 100, style=3)
+    pb <- txtProgressBar(min = 0, max = 100, style=3)
   results <- local({
     f <- fifo(tempfile(), open="w+b", blocking=TRUE)
     if (inherits(parallel:::mcfork(), "masterProcess")) {
@@ -257,7 +257,7 @@ tmclapply <- function(X, FUN, ..., progressbar=TRUE){
         msg <- readBin(f, "double")
         progress <- progress + as.numeric(msg)
         if(progressbar)
-            setTxtProgressBar(pb, progress * 100)
+          setTxtProgressBar(pb, progress * 100)
         tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
         cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
         if( ! progressbar) cat("\r")
@@ -330,29 +330,33 @@ changeBinsize <- function(df, binsize = 10, keepZeros = TRUE) {
 
 ##' @export
 changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq", verbose = options()$verbose) {
-    cuts <- seq(0, max(df[weight.col]) + binsize, binsize)
-    labs <- head(cuts + binsize/2, -1)
-    res <- data.frame(Weight = cut(df[[weight.col]], breaks = cuts, labels = labs), Freq = df[[freq.col]])
-    res <- rbind(res, data.frame(Weight = labs, Freq = 0))
-    res <- aggregate(Freq ~ Weight, data = res, FUN = sum )
-    res$Weight <- as.numeric(as.character(res$Weight))
-    res$Freq <- as.numeric(as.character(res$Freq))
-    if (! keepZeros) {
-      res <- res[df$Freq > 0, ]
-    }
-    res <- structure(res, binsize = binsize)
-    if(verbose) cat("Done")
-    res
+  cuts <- seq(0, max(df[weight.col], na.rm = TRUE) + binsize, binsize)
+  labs <- head(cuts + binsize/2, -1)
+  res <- data.frame(Weight = cut(df[[weight.col]], breaks = cuts, labels = labs), Freq = df[[freq.col]])
+  res <- rbind(res, data.frame(Weight = labs, Freq = 0))
+  res <- aggregate(Freq ~ Weight, data = res, FUN = sum )
+  res$Weight <- as.numeric(as.character(res$Weight))
+  res$Freq <- as.numeric(as.character(res$Freq))
+  if (! keepZeros) {
+    res <- res[df$Freq > 0, ]
   }
+  res <- structure(res, binsize = binsize)
+  if(verbose) cat("Done")
+  res
+}
 
 ##' @export
+##' @title Find newest file in folder matching pattern
+##' @description Given a folder and a pattern, rerurns the file that was modified latest.
+##' @param path character, relative or absolute path
+##' @param patterm an optional \link{regular expression}. Only file names which match the regular expression will be returned. Passed to \link{\code{dir}}
+
+##' @seealso \code{dir}
 findLatest <- function(path = ".", pattern = "") {
-  library(plyr)
   files <- dir(path, pattern, ignore.case = TRUE, full.names = TRUE)
   
-  df <- ldply(files, function(f){
+  df <- lapply(files, function(f){
     data.frame(fn = f, mtime = file.info(f)$mtime, stringsAsFactors = FALSE)
   })
-  df[order(df$mtime, decreasing = TRUE), ][1,1]
-  
+  df[order(df$mtime, decreasing = TRUE), ][1,1]  
 }
