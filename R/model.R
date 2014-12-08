@@ -349,7 +349,7 @@ changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
 ##' @title Find newest file in folder matching pattern
 ##' @description Given a folder and a pattern, rerurns the file that was modified latest.
 ##' @param path character, relative or absolute path
-##' @param patterm an optional \link{regular expression}. Only file names which match the regular expression will be returned. Passed to \link{\code{dir}}
+##' @param patterm an optional \code{\link{regex}}. Only file names which match the regular expression will be returned. Passed to \code{\link{dir}}
 
 ##' @seealso \code{dir}
 findLatest <- function(path = ".", pattern = "") {
