@@ -63,26 +63,21 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
       cat(paste0("Note: physiological mortality a ~ truncLogNorm(", r(log(a.mean)), ", ", r(a.sd), ", ubound = ", r(alim), ")\n"))
       as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
       reps <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, winf.ubound = winf.ubound, ...))
-      reps <- aplfun(reps, function(x) {
-        if(class(x) != "try-error") {
-          x[1:4] 
-        } else { 
-          rep(NA, 4) 
-        }
-      })
+      reps[sapply(reps, function(x) is(x, "try-error"))] <- NULL
       reps <- do.call(rbind.data.frame, reps)
       structure(as.data.frame(apply(reps, 2, quantile, probs = probs, na.rm = TRUE)), alim=alim)
     })
-    ci <- setNames(lapply(names(ci[[1]]), function(nm) lapply(ci, function(d) d[[nm]])),names(ci[[1]]))
+    nms <- names(ci[[1]])
+    ci <- lapply(nms, function(nm) lapply(ci, function(d) d[[nm]]))
     ci <- lapply(ci, function(yy) {
       for(w in which(sapply(yy, is.null))) {
         yy[[w]] <- rep(NA, length(probs))
       }
-      do.call(cbind.data.frame, yy)
+      setNames(do.call(cbind.data.frame, yy), names(inputData))
     })
-    attr(res, "CI") <- ci
+    attr(res, "CI") <- setNames(ci, nms)
   } 
-  class(res) <- c("s6modelResults", class(res))
+  class(res) <- c("s6modelResults")
   res <- structure(res, Results = ests, version = getVersion())
   res
 }
