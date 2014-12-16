@@ -41,7 +41,7 @@ addWeight <- function(df, a, b, lengthcol = "Length") {
 
 getalim <- function (est) {
   if(is.null(attr(est, "estpars"))) { 
-    return(1)
+    return(0.8)
   }
   optimize(function(x) {
     getParams(p = parameters("a", x, FALSE, base = attr(est, "estpars")), optim.Rrel = TRUE, FF = 0)^2
