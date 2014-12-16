@@ -203,3 +203,12 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
   }
   box()
 }
+
+##' @export 
+addIcesffmsy <- function(stock, icesfile = "~/Work/mainCode/R/SecondPaper/ICES/ICES-cod.RData",
+                         col="darkgrey", lwd=2, lty = c(2,1,2), ...) {
+  load(icesfile)
+  ices <- ices.cod[[stock]]
+  matplot(ices$Year, ices[ , c("high_F", "F","low_F")] / fmsy(ices), 
+          add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
+}
