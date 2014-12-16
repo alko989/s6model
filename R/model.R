@@ -358,5 +358,8 @@ findLatest <- function(path = ".", pattern = "") {
   df <- lapply(files, function(f){
     data.frame(fn = f, mtime = file.info(f)$mtime, stringsAsFactors = FALSE)
   })
-  df[order(df$mtime, decreasing = TRUE), ][1,1]  
+  df <- do.call(rbind.data.frame, df)
+  latest <- df[order(df$mtime, decreasing = TRUE), ][1,1]  
+  cat(latest)
+  latest
 }
