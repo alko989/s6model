@@ -134,13 +134,13 @@ addConfidenceShading <-
 
 ##' @export
 ##' @rdname s6modelResults
-plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = FALSE, 
+plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE, 
                                 years = NULL, xlab = NULL, ylab = NULL, 
                                 ylim = NULL, addDefault = FALSE, col.def = "white",
                                 addhline = 1, col.hline = 1, lty.hline = 2,
                                 addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2,
                                 cex.ver = 0.7, version = TRUE, xaxs = "i", yaxs = "i",
-                                ci = c("bootstrap", "estimated", "none"), grey.intensity = 1) {
+                                ci = c("bootstrap", "estimated", "none"), grey.intensity = 1.5) {
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = "F", Winf = expression(W[infinity]), Wfs = "50% retainment size", stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, or Wfs"))
   ylab <- if(is.null(ylab)) yl else ylab
   xlab <- if(is.null(xlab)) "Year" else xlab
