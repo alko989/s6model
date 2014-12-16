@@ -187,20 +187,25 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                          eta_m=0.25, a=0.27, Winf = NULL, sigma=0.0001,
                          sdloga = 0.89, winf.ubound = 2, DLL="s6model", 
                          verbose=FALSE, map=list(loga=factor(NA), x=factor(NA)), 
-                         random=c(), isSurvey = FALSE) {
+                         random=c(), isSurvey = FALSE, eta_S = 0.01, usePois = TRUE,
+                         totalYield = 0.000001) {
   if(! require(TMB)) stop("TMB is not installed! Please install and try again.")
   tryer <- try({
     binsize <- attr(df,"binsize")
-    nms <- c("Fm","Winf","Wfs")
     if(is.null(Winf))  {
       Winf <- max(df$Weight) + 2 * binsize
     } else {
       map$logWinf  <- factor(NA)
     }
+    if(! isSurvey) {
+      map$logeta_S <- factor(NA)
+    }
     data <- list(binsize=binsize, nwc=dim(df)[1], freq=df$Freq, n=n, epsilon_a=epsilon_a,
-                 epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), sdloga = sdloga, isSurvey = as.integer(isSurvey) )
+                 epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
+                 sdloga = sdloga, isSurvey = as.integer(isSurvey), usePois = as.integer(usePois),
+                 totalYield = totalYield)
     pars <- list(loga=log(a), x=0, logFm = log(0.5), logWinf = log(Winf),
-                 logWfs = log(min(df$Weight[df$Freq > 0])), logSigma=log(sigma))
+                 logWfs = log(min(df$Weight[df$Freq > 0])), logSigma=log(sigma), logeta_S = log(eta_S))
     estnames <- names(pars[! names(pars) %in% c(names(map), random)])
     upper <- rep(Inf, length(estnames))
     upper[which(estnames == "logWinf")] <- log(Winf * winf.ubound)
@@ -214,9 +219,11 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     }
     opt <- nlminb(obj$par, obj$fn, obj$gr, upper = upper)
     sdr <- sdreport(obj)
-    vals <- sdr$value[nms]
-    estpars <- parameters(c(nms, "n", "epsilon_a", "epsilon_r", "A", "eta_m", "a"),
-                          as.numeric(c(vals, n, epsilon_a, epsilon_r, A, eta_m, a)),
+    nms <- c("Fm","Winf","Wfs", "a", "eta_S")
+    vals <- sdr$value
+    sds <- setNames(sdr$sd, names(vals))
+    estpars <- parameters(c(nms, "n", "epsilon_a", "epsilon_r", "A", "eta_m"),
+                          as.numeric(c(vals[nms], n, epsilon_a, epsilon_r, A, eta_m)),
                           transformed=FALSE)
     Fmsy <- calcFmsy(estpars)
     opt$convergence
@@ -224,6 +231,9 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
   if(class(tryer) == "try-error") {
     return(tryer)
   }
-  structure(data.frame(Fm=vals["Fm"], Winf=vals["Winf"], Wfs=vals["Wfs"], FFmsy=vals["Fm"]/Fmsy, row.names=NULL),
-            est.Fmsy=Fmsy,est.FFmsy=vals["Fm"]/Fmsy, obj=obj, opt=opt, sdr = sdr, estpars=estpars)
+  structure(data.frame(Fm=vals["Fm"], Fm_sd = sds["Fm"], Winf=vals["Winf"], Winf_sd=sds["Winf"],
+                       Fmsy = Fmsy, Wfs = vals["Wfs"], Wfs_sd = sds["Wfs"], FFmsy = vals["Fm"]/Fmsy, 
+                       a = vals["a"], eta_S = vals["eta_S"], sigma = vals["sigma"], R = vals["R"], 
+                       Y = vals["Y"], ssb = vals["ssb"], ssb_sd = sds["ssb"], row.names=NULL),
+            obj=obj, opt=opt, sdr = sdr, estpars=estpars)
 }
