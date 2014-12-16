@@ -9,13 +9,13 @@
 \usage{
 \method{print}{s6modelResults}(x, ...)
 
-\method{plot}{s6modelResults}(x, ..., what = "FFmsy", use.rownames = FALSE,
+\method{plot}{s6modelResults}(x, ..., what = "FFmsy", use.rownames = TRUE,
   years = NULL, xlab = NULL, ylab = NULL, ylim = NULL,
   addDefault = FALSE, col.def = "white", addhline = 1, col.hline = 1,
   lty.hline = 2, addMedian = FALSE, col.median = "white",
   lty.median = 2, lwd.median = 2, cex.ver = 0.7, version = TRUE,
   xaxs = "i", yaxs = "i", ci = c("bootstrap", "estimated", "none"),
-  grey.intensity = 1)
+  grey.intensity = 1.5)
 }
 \description{
 s6modelResults class
