@@ -50,35 +50,59 @@ getalim <- function (est) {
 
 ##' @export
 makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100, 
-                           probs = seq(0, 1, 0.01), winf.ubound = 2,...) {
-  r <- function(x) round(x, 2)
-  aplfun <- if(require(parallel)) mclapply else lapply
-  ests <- lapply(inputData, function(x) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound, ...))
-  res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 4) else x[1:4] )
-  res <- do.call(rbind.data.frame, res)
-  row.names(res) <- names(inputData)
-  if(a.sd > 0) {
-    ci <- lapply(seq(along.with = inputData), function(i) {
-      alim <- getalim(ests[[i]])
-      cat(paste0("Note: physiological mortality a ~ truncLogNorm(", r(log(a.mean)), ", ", r(a.sd), ", ubound = ", r(alim), ")\n"))
-      as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
-      reps <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, winf.ubound = winf.ubound, ...))
-      reps[sapply(reps, function(x) is(x, "try-error"))] <- NULL
-      reps <- do.call(rbind.data.frame, reps)
-      structure(as.data.frame(apply(reps, 2, quantile, probs = probs, na.rm = TRUE)), alim=alim)
-    })
-    nms <- names(ci[[1]])
-    ci <- lapply(nms, function(nm) lapply(ci, function(d) d[[nm]]))
-    ci <- lapply(ci, function(yy) {
-      for(w in which(sapply(yy, is.null))) {
-        yy[[w]] <- rep(NA, length(probs))
-      }
-      setNames(do.call(cbind.data.frame, yy), names(inputData))
-    })
-    attr(res, "CI") <- setNames(ci, nms)
-  } 
-  class(res) <- c("s6modelResults")
-  res <- structure(res, Results = ests, version = getVersion())
+                           probs = seq(0, 1, 0.01), winf.ubound = 2, 
+                           dirout = "results", yield = NULL,
+                           fnout = format.Date(Sys.time(), "results_%Y%m%d_%H%M.RData"), ...) {
+  timeToCompletion <- system.time({
+    r <- function(x) round(x, 2)
+    aplfun <- if(require(parallel)) mclapply else lapply
+    maplfun <- if(require(parallel)) mcmapply else mapply
+    if(is.null(yield)) yield <- rep(0.0001, length(inputData))
+    ests <- mapply(function(x, y) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound, totalYield = y, ...),
+                   inputData, yield, SIMPLIFY = FALSE)
+    res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 6) else x[1:6] )
+    res <- do.call(rbind.data.frame, res)
+    row.names(res) <- names(inputData)
+    if(a.sd > 0 & nsample > 1) {
+      ci <- lapply(seq(along.with = inputData), function(i) {
+        alim <- getalim(ests[[i]])
+        cat(paste0("Note: physiological mortality a ~ truncLogNorm(", 
+                   r(log(a.mean)), ", ", r(a.sd), ", ubound = ", r(alim), ")\n"))
+        as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
+        reps <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, winf.ubound = winf.ubound, 
+                       totalYield = yield[i], ...))
+        reps[sapply(reps, function(x) is(x, "try-error"))] <- NULL
+        notConv <- sapply(reps, function(x) attr(x, "opt")$convergence == 1)
+        reps[notConv] <- NULL
+        reps <- do.call(rbind.data.frame, reps)
+        nrep <- nrow(reps)
+        structure(as.data.frame(apply(reps, 2, quantile, probs = probs, na.rm = TRUE)), 
+                  alim=alim, nreps = nrep, notConv = sum(notConv))
+      })
+      attr(res, "alims") <- sapply(ci, function(x) attr(x, "alim"))
+      attr(res, "reps") <- sapply(ci, function(x) attr(x, "nreps"))
+      attr(res, "notConv") <- sapply(ci, function(x) attr(x, "notConv")) 
+      nms <- names(ci[[1]])
+      ci <- lapply(nms, function(nm) lapply(ci, function(d) d[[nm]]))
+      ci <- lapply(ci, function(yy) {
+        for(w in which(sapply(yy, is.null))) {
+          yy[[w]] <- rep(NA, length(probs))
+        }
+        setNames(do.call(cbind.data.frame, yy), names(inputData))
+      })
+      attr(res, "CI") <- setNames(ci, nms)
+    } 
+    class(res) <- c("s6modelResults", class(res))
+    res <- structure(res, Results = ests, version = getVersion())
+  })
+  if(!is.null(fnout)) {
+    dir.create(dirout, showWarnings = FALSE)
+    out <- file.path(dirout, fnout)
+    opts <- list(...)
+    rm(aplfun, r)
+    save(list = ls(), file = out)
+    cat("All results are saved in:", fnout)
+  }
   res
 }
 
