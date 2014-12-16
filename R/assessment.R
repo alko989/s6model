@@ -172,31 +172,39 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
                                 addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2,
                                 cex.ver = 0.7, version = TRUE, xaxs = "i", yaxs = "i",
                                 ci = c("bootstrap", "estimated", "none"), grey.intensity = 1.5) {
-  yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = "F", Winf = expression(W[infinity]), Wfs = "50% retainment size", stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, or Wfs"))
+  yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = expression(F~(y^-1)), 
+               Winf = expression(W[infinity]~(g)), 
+               Wfs = "50% retainment size (g)", 
+               ssb = "SSB (t)",
+               stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, or Wfs"))
+  g2ton <- if(what == "ssb") 1e6 else 1
   ylab <- if(is.null(ylab)) yl else ylab
   xlab <- if(is.null(xlab)) "Year" else xlab
   
   xs <- seq(dim(x)[1])
   if(use.rownames) {
-    xs <- as.numeric(regmatches(row.names(x), regexpr("[0-9]+", row.names(x), perl = TRUE)))
+    xs <- as.numeric(regmatches(row.names(x), regexpr("[0-9]+", row.names(x))))
   }
   if(! is.null(years) & ! use.rownames) {
     xs <- years
   }
-  ys <- x[[what]]
-  ylim <- if(is.null(ylim)) range(ys, attr(x, "CI")[[what]], na.rm = TRUE) else ylim
+  ys <- x[[what]] / g2ton
+  cidf <- attr(x, "CI")[[what]] / g2ton
+  ylim <- if(is.null(ylim)) range(ys, cidf, na.rm = TRUE) else ylim
   
   plot(xs, ys, type="n", ylim=ylim, xlab = "", ylab = "", xaxs = xaxs, yaxs = yaxs, ...)
   title(xlab = xlab, ylab=ylab, line=2)
   if("bootstrap" %in% ci) {
-    if( ! is.null(attr(x, "CI"))) {
-      addConfidenceShading(xs, attr(x, "CI")[[what]], grey.intensity = grey.intensity, 
-                           addMedian = addMedian, col.median = col.median, lty.median = lty.median, lwd.median = lwd.median)
+    if( ! is.null(cidf)) {
+      addConfidenceShading(xs, cidf, grey.intensity = grey.intensity, 
+                           addMedian = addMedian, col.median = col.median, 
+                           lty.median = lty.median, lwd.median = lwd.median)
     }
   } else if("estimated" %in% "ci") {
     addConfidenceShading(xs, x, what = what)  
   } else if("none" %in% ci) {
-    
+    col.def <- 1
+    addDefault <- TRUE
   } else stop(ci, " is not recognized confidence interval")
   
   if(addDefault){
