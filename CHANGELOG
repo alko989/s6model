@@ -553,3 +553,11 @@ Changes from version  0.10.10 to  0.10.11
  * print function for s6modelResults
  * plot function for s6modelResults
  * relative recruitment is calculated and reported from estimate_TMB
+
+Changes from version  0.10.11 to  0.10.12 
+ * Observation error, independent poisson or gaussian errors
+ * Rmax calculation - SSB, Y, R, N are returned as absolute values, not scaled
+ * function for DATRAS input and manipulation
+ * findLatest file in directory and specific pattern
+ * better makeAssessment and plot functions
+ * bounded phys.mortality

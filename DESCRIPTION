@@ -2,12 +2,13 @@ Package: s6model
 Type: Package
 Title: Data-poor stock assessment using a single-sepcies steady-state
     size-based (s6) model
-Version: 0.10.11
-Date: 2014-12-01
+Version: 0.10.12
+Date: 2014-12-16
 Author: Alexandros Kokkalis
 Maintainer: Alexandros Kokkalis <alko@aqua.dtu.dk>
-Description: Contains functions to estimate parameters of the model and the
-    Fmsy reference point. Functions for simulating data are also available.
+Description: Contains functions to estimate parameters of the model and
+    the Fmsy reference point. Functions for simulating data are also
+    available.
 License: GPL
 Depends:
     R (>= 2.14)
