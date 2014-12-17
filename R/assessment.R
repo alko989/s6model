@@ -134,7 +134,7 @@ makeShading <- function(x, ylow, yhigh, col = grey(0.8), ...) {
 }
 
 addConfidenceShading <- 
-  function(x, y, ..., probs = c(0.05, 0.975), 
+  function(x, y, ..., probs = c(0.025, 0.975), 
            what = "FFmsy", grey.intensity = 1.5, 
            addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2) {
   if(is(y, "s6modelResults")) {
