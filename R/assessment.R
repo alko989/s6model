@@ -55,8 +55,8 @@ getCI <- function (inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, p
   r <- function(x) round(x, 2)
   ci <- lapply(seq(along.with = inputData), function(i) {
     alim <- getalim(ests[[i]])
-    cat(paste0("Note: physiological mortality a ~ truncLogNorm(", 
-               r(log(a.mean)), ", ", r(a.sd), ", ubound = ", r(alim), ")\n"))
+    ## cat(paste0("Note: physiological mortality a ~ truncLogNorm(", 
+    ##           r(log(a.mean)), ", ", r(a.sd), ", ubound = ", r(alim), ")\n"))
     as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
     reps <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, winf.ubound = winf.ubound, 
                                                 totalYield = yield[i], ...))
