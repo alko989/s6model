@@ -86,21 +86,22 @@ getCI <- function (inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, p
 ##' @export
 makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100, 
                            probs = seq(0, 1, 0.01), winf.ubound = 2, 
-                           dirout = "results", yield = NULL,
+                           dirout = "results", yield = NULL, seed = as.integer(rnorm(1, 1000, 100)),
                            fnout = format.Date(Sys.time(), "results_%Y%m%d_%H%M.RData"), ...) {
+  set.seed(seed)
   timeToCompletion <- system.time({
-    if(is.null(yield)) yield <- rep(0.0001, length(inputData))
-    ests <- mapply(function(x, y) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound, totalYield = y, ...),
-                   inputData, yield, SIMPLIFY = FALSE)
-    res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 15) else x[1:15] )
-    res <- do.call(rbind.data.frame, res)
-    row.names(res) <- names(inputData)
-    if(a.sd > 0 & nsample > 1) {
-      attr(res, "CI") <- getCI(inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, probs, ...)
-    } 
+  if(is.null(yield)) yield <- rep(0.0001, length(inputData))
+  ests <- mapply(function(x, y) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound, totalYield = y, ...),
+                 inputData, yield, SIMPLIFY = FALSE)
+  res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 15) else x[1:15] )
+  res <- do.call(rbind.data.frame, res)
+  row.names(res) <- names(inputData)
+  if(a.sd > 0 & nsample > 1) {
+    attr(res, "CI") <- getCI(inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, probs, ...)
+  } 
   })
   opts <- list(...)
-  res <- structure(res, Results = ests, version = getVersion(), timeToCompletion = timeToCompletion,
+  res <- structure(res, Results = ests, version = getVersion(), timeToCompletion = timeToCompletion, seed = seed,
                    opts = list(tmbopts = c(opts, a.mean = a.mean, a.sd = a.sd, 
                                            winf.ubound = winf.ubound, yield = yield), probs = probs))
   class(res) <- c("s6modelResults", class(res))
@@ -134,34 +135,34 @@ makeShading <- function(x, ylow, yhigh, col = grey(0.8), ...) {
 }
 
 addConfidenceShading <- 
-  function(x, y, ..., probs = c(0.025, 0.975), 
+  function(x, y, ..., probs = c(0.025, 0.975), exclude = 0, 
            what = "FFmsy", grey.intensity = 1.5, 
            addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2) {
-  if(is(y, "s6modelResults")) {
-    r <- attr(y, "Results")
-    w <- sapply(r, function(rr) {
-      if(is(rr, "try-error")) return(rep(NA, 2))
-      sdr <- attr(rr, "sdr")
-      id <- which(names(sdr$value) == ifelse(what == "FFmsy", "Fm", what))
-      c(sdr$value[id] + qnorm(probs) * sdr$sd[id])
-    })
-    if(what == "FFmsy") {
-      w <- sweep(w, 2, y$Fm / y$FFmsy, "/")
+    if(is(y, "s6modelResults")) {
+      r <- attr(y, "Results")
+      w <- sapply(r, function(rr) {
+        if(is(rr, "try-error")) return(rep(NA, 2))
+        sdr <- attr(rr, "sdr")
+        id <- which(names(sdr$value) == ifelse(what == "FFmsy", "Fm", what))
+        c(sdr$value[id] + qnorm(probs) * sdr$sd[id])
+      })
+      if(what == "FFmsy") {
+        w <- sweep(w, 2, y$Fm / y$FFmsy, "/")
+      }
+      makeShading(x, w[1,], w[2, ],  col = "lightgrey")
+    } else if (is(y, "data.frame")){
+      d <- nrow(y) - 1
+      for(i in seq(1 + exclude, d / 2)) {
+        makeShading(x, y[i, ], y[d - i, ],
+                    col=grey(1 - i / (d / grey.intensity )))
+      }
+      if(addMedian) {
+        lines(x, y[d/2 + 1, ], col = col.median, lty = lty.median, lwd=lwd.median)
+      }
+    } else {
+      stop("Only data.frame or s6modelResults are accepted as input by addConfidenceShading")
     }
-    makeShading(x, w[1,], w[2, ],  col = "lightgrey")
-  } else if (is(y, "data.frame")){
-    d <- nrow(y) - 1
-    for(i in seq(1, d / 2)) {
-      makeShading(x, y[i, ], y[d - i, ],
-                  col=grey(1 - i / (d / grey.intensity )))
-    }
-    if(addMedian) {
-      lines(x, y[d/2 + 1, ], col = col.median, lty = lty.median, lwd=lwd.median)
-    }
-  } else {
-    stop("Only data.frame or s6modelResults are accepted as input by addConfidenceShading")
   }
-}
 
 ##' @export
 ##' @rdname s6modelResults
@@ -171,16 +172,15 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
                                 addhline = 1, col.hline = 1, lty.hline = 2,
                                 addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2,
                                 cex.ver = 0.7, version = TRUE, xaxs = "i", yaxs = "i",
-                                ci = c("bootstrap", "estimated", "none"), grey.intensity = 1.5) {
+                                ci = c("bootstrap", "estimated", "none"), grey.intensity = 1.5,
+                                exclude = 0, mult = 1) {
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = expression(F~(y^-1)), 
                Winf = expression(W[infinity]~(g)), 
                Wfs = "50% retainment size (g)", 
                ssb = "SSB (t)",
                stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, or Wfs"))
-  g2ton <- if(what == "ssb") 1e6 else 1
   ylab <- if(is.null(ylab)) yl else ylab
   xlab <- if(is.null(xlab)) "Year" else xlab
-  
   xs <- seq(dim(x)[1])
   if(use.rownames) {
     xs <- as.numeric(regmatches(row.names(x), regexpr("[0-9]+", row.names(x))))
@@ -188,8 +188,8 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
   if(! is.null(years) & ! use.rownames) {
     xs <- years
   }
-  ys <- x[[what]] / g2ton
-  cidf <- attr(x, "CI")[[what]] / g2ton
+  ys <- x[[what]] / mult
+  cidf <- attr(x, "CI")[[what]] / mult
   ylim <- if(is.null(ylim)) range(ys, cidf, na.rm = TRUE) else ylim
   
   plot(xs, ys, type="n", ylim=ylim, xlab = "", ylab = "", xaxs = xaxs, yaxs = yaxs, ...)
@@ -198,7 +198,8 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
     if( ! is.null(cidf)) {
       addConfidenceShading(xs, cidf, grey.intensity = grey.intensity, 
                            addMedian = addMedian, col.median = col.median, 
-                           lty.median = lty.median, lwd.median = lwd.median)
+                           lty.median = lty.median, lwd.median = lwd.median,
+                           exclude = exclude)
     }
   } else if("estimated" %in% "ci") {
     addConfidenceShading(xs, x, what = what)  
@@ -214,14 +215,14 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
     abline(h=addhline, lwd=2, col=col.hline, lty=lty.hline)
   }
   if(version) {
-    addVersion(attr(x, "version"), cex = cex.ver)
+    addVersion(attr(x, "version"), cex = cex.ver, lengthSHA = 6)
   }
   box()
 }
 
 ##' @export 
 addIces<- function(stock, icesfile = "~/Work/mainCode/R/SecondPaper/ICES/ICES-cod.RData",
-                         col="darkgrey", lwd=2, lty = c(2,1,2), what = "ffmsy", ...) {
+                   col="darkgrey", lwd=2, lty = c(2,1,2), what = "ffmsy", ...) {
   load(icesfile)
   ices <- ices.cod[[stock]]
   if(what == "ffmsy")
