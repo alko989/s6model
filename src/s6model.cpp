@@ -25,6 +25,7 @@ Type objective_function<Type>::operator() ()
   Type sigma = exp(logSigma);
   Type u = 10.0;
   vector<Type> Nvec(nwc);
+  vector<Type> Weight(nwc);
   Type Fm = exp(logFm);
   Type Winf = exp(logWinf);
   Type Wfs = exp(logWfs);
@@ -37,7 +38,8 @@ Type objective_function<Type>::operator() ()
   ssb = 0.0;
   Type Y = 0.0;
   for(int j=0; j<nwc; j++) {
-    w = binsize * (j + 1);
+    w = binsize * (j + 0.5);
+    Weight(j) = w;
     psi_m = 1 / (1 + pow(w / (Winf * eta_m), -10));
     psi_F = 1 / (1 + pow(w / (Wfs), -u));
     psi_S = 1 / (1 + pow(w / (Winf * eta_S), -u));
@@ -91,6 +93,7 @@ Type objective_function<Type>::operator() ()
   ADREPORT(R);
   
   REPORT(Nvec);
+  REPORT(Weight);
   REPORT(freq);
   REPORT(residuals);
   REPORT(Rrel);
