@@ -58,19 +58,28 @@ getCI <- function (inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, p
     ## cat(paste0("Note: physiological mortality a ~ truncLogNorm(", 
     ##           r(log(a.mean)), ", ", r(a.sd), ", ubound = ", r(alim), ")\n"))
     as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
-    reps <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, winf.ubound = winf.ubound, 
+    results <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, winf.ubound = winf.ubound, 
                                                 totalYield = yield[i], ...))
-    reps[sapply(reps, function(x) is(x, "try-error"))] <- NULL
+    reps <- results
+    err <- sapply(results, function(x) is(x, "try-error"))
+    errmsg <- reps[err]
+    reps[err] <- NULL
+    nerr <- sum(err)
     notConv <- sapply(reps, function(x) attr(x, "opt")$convergence == 1)
     reps[notConv] <- NULL
-    reps <- do.call(rbind.data.frame, reps)
-    nrep <- nrow(reps)
-    structure(as.data.frame(apply(reps, 2, quantile, probs = probs, na.rm = TRUE)), 
-              alim=alim, nrep = nrep, notConv = if(length(notConv) > 0) sum(notConv) else 0)
+    repsdf <- do.call(rbind.data.frame, reps)
+    nrep <- nrow(repsdf)
+    structure(as.data.frame(apply(repsdf, 2, quantile, probs = probs, na.rm = TRUE)), results = results,
+              alim=alim, as = as, nrep = nrep, notConv = if(length(notConv) > 0) sum(notConv) else 0, nerr = nerr, err = err, errmsg = errmsg)
   })
   alims <- sapply(ci, function(x) attr(x, "alim"))
   reps <- sapply(ci, function(x) attr(x, "nrep"))
-  notConv <- sapply(ci, function(x) attr(x, "notConv")) 
+  nerr <- sapply(ci, function(x) attr(x, "nerr"))
+  err <- sapply(ci, function(x) attr(x, "err"))
+  errmsg <- sapply(ci, function(x) attr(x, "errmsg"))
+  notConv <- sapply(ci, function(x) attr(x, "notConv"))
+  allResults <- lapply(ci, function(x) attr(x, "results"))
+  as <-  lapply(ci, function(x) attr(x, "as"))
   nms <- names(ci[[1]])
   ci <- lapply(nms, function(nm) lapply(ci, function(d) d[[nm]]))
   ci <- lapply(ci, function(yy) {
@@ -80,7 +89,8 @@ getCI <- function (inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, p
     setNames(do.call(cbind.data.frame, yy), names(inputData))
   })
   ci <- setNames(ci, nms)
-  structure(ci, alims = alims, reps = reps, notConv = notConv)
+  structure(ci, alims = alims, as = as, reps = reps, notConv = notConv, nerr = nerr, 
+            err = err, errmsg = errmsg, allResults = allResults)
 }
 
 ##' @export
