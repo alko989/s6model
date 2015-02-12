@@ -184,11 +184,11 @@ estimateMultidata <-
 
 ##' @export
 estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, 
-                         eta_m=0.25, a=0.27, Winf = NULL, sigma=0.0001,
+                         eta_m=0.25, a=0.27, Winf = NULL, sigma=NULL,
                          sdloga = 0.89, winf.ubound = 2, DLL="s6model", 
                          verbose=FALSE, map=list(loga=factor(NA), x=factor(NA)), 
                          random=c(), isSurvey = FALSE, eta_S = 0.01, usePois = TRUE,
-                         totalYield = 0.000001) {
+                         totalYield = 0.000001, ...) {
   if(! require(TMB)) stop("TMB is not installed! Please install and try again.")
   tryer <- try({
     binsize <- attr(df,"binsize")
@@ -196,6 +196,11 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
       Winf <- max(df$Weight) + 2 * binsize
     } else {
       map$logWinf  <- factor(NA)
+    }
+    if(is.null(sigma) || is.na(sigma))  {
+      sigma <- if(usePois) sum(df$Freq) else 0.0001
+    } else {
+      map$logSigma  <- factor(NA)
     }
     if(! isSurvey) {
       map$logeta_S <- factor(NA)
@@ -209,7 +214,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     estnames <- names(pars[! names(pars) %in% c(names(map), random)])
     upper <- rep(Inf, length(estnames))
     upper[which(estnames == "logWinf")] <- log(Winf * winf.ubound)
-    obj <- MakeADFun(data = data, parameters = pars, DLL = DLL, map=map, random=random)
+    obj <- MakeADFun(data = data, parameters = pars, DLL = DLL, map=map, random=random, ...)
     obj$env$tracemgc <- verbose
     obj$env$inner.control$trace <- verbose
     obj$env$silent <- ! verbose
