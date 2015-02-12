@@ -165,7 +165,7 @@ addConfidenceShading <-
       d <- nrow(y) - 1
       for(i in seq(1 + exclude, d / 2)) {
         makeShading(x, y[i, ], y[d - i, ],
-                    col=grey(1 - i / (d / grey.intensity )))
+                    col=grey((1 - i / ((d - (2 * exclude))) / grey.intensity )))
       }
       if(addMedian) {
         lines(x, y[d/2 + 1, ], col = col.median, lty = lty.median, lwd=lwd.median)
