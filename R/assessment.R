@@ -233,13 +233,18 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
 
 ##' @export 
 addIces<- function(stock, icesfile = "~/Work/mainCode/R/SecondPaper/ICES/ICES-cod.RData",
-                   col="darkgrey", lwd=2, lty = c(2,1,2), what = "ffmsy", ...) {
+                   col="darkgrey", lwd=2, lty = c(2,1,2), what = "FFmsy", ...) {
   load(icesfile)
   ices <- ices.cod[[stock]]
-  if(what == "ffmsy")
+  nms <- tolower(names(ices))
+  if(what %in% c("FFmsy", "ffmsy"))
     matplot(ices$Year, ices[ , c("high_F", "F","low_F")] / fmsy(ices), 
             add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
-  else
-    matplot(ices$Year, ices[ , c(paste0("high_", what), what, paste0("low_", what) )], 
+  else {
+    n <- pmatch(what, nms)
+    h <- pmatch(paste0("high_", what), nms)
+    l <- pmatch(paste0("low_", what), nms)
+    matplot(ices$Year, ices[ , c(h, n, l)], 
             add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
+  }
 }
