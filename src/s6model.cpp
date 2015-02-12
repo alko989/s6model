@@ -49,9 +49,9 @@ Type objective_function<Type>::operator() ()
     N = exp(-cumsum) / g;
     alpha = epsilon_r * (1 - epsilon_a) * A * pow(Winf, n-1) / wr;
     ssb += psi_m  * N * w * binsize;
-    Nvec(j) = N * Fm * (isSurvey == 0 ? psi_F : psi_S);
+    Nvec(j) = N * (isSurvey == 0 ? psi_F : psi_S);
     Y +=  Fm * N * psi_F * w * binsize;
-    nc += Nvec(j) * binsize;
+    nc += Nvec(j); // * binsize;
   }
   Type Rrel = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb);
   N = N * Rrel;
@@ -59,21 +59,22 @@ Type objective_function<Type>::operator() ()
   rmax = totalYield / Y;
   ssb = ssb * Rrel * rmax;
   R = Rrel * rmax;
-  Type ff = freq.sum() * binsize;
+  Type ff = freq.sum() ; // * binsize;
   Type nll=0.0;
   for(int i=0; i<nwc; i++) {
     if(usePois) {
-      if(freq(i) > 0) 
-      {
-        //      Type mean = Nvec(i) / nc * ff;
-        //      Type prob = mean / pow(sigma, 2);
-        //      Type size = pow(mean, 2) / (pow(sigma, 2) - mean);
-        //      nll -= dnbinom(freq(i), size, prob, true);
-        nll -= dpois(freq(i), Nvec(i) / nc * ff, true);
-        nll += pow(sigma, 2);
+      if(freq(i) > 0) {
+        //        Type mean = Nvec(i) / nc * ff;
+        //        Type size = pow(mean, 2) / (pow(sigma, 2) - mean);
+        //        Type prob = size / (size + mean);
+        //        nll -= dnbinom(freq(i), size, prob, true);
+        nll -= dpois(freq(i), Nvec(i) / nc * sigma, true);
+        //nll += pow(sigma, 2);
       }
     } else {
-      nll -= dnorm(freq(i) / ff, Nvec(i) / nc, sigma, true);
+      if(freq(i) > 0) {
+        nll -= dnorm(log(freq(i) / ff), log(Nvec(i) / nc), sigma, true);
+      }
     }
   }
   nll -= dnorm(loga, meanloga, sdloga, true);
@@ -97,6 +98,7 @@ Type objective_function<Type>::operator() ()
   REPORT(freq);
   REPORT(residuals);
   REPORT(Rrel);
+  REPORT(rmax);
   return nll;
 }
 
