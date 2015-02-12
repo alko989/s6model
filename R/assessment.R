@@ -182,14 +182,14 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
                                 ylim = NULL, addDefault = FALSE, col.def = "white",
                                 addhline = 1, col.hline = 1, lty.hline = 2,
                                 addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2,
-                                cex.ver = 0.7, version = TRUE, xaxs = "i", yaxs = "i",
+                                cex.ver = 0.7, version = FALSE, xaxs = "i", yaxs = "i",
                                 ci = c("bootstrap", "estimated", "none"), grey.intensity = 1.5,
                                 exclude = 0, mult = 1) {
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = expression(F~(y^-1)), 
                Winf = expression(W[infinity]~(g)), 
                Wfs = "50% retainment size (g)", 
                ssb = "SSB (t)",
-               stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, or Wfs"))
+               stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, ssb, or Wfs"))
   ylab <- if(is.null(ylab)) yl else ylab
   xlab <- if(is.null(xlab)) "Year" else xlab
   xs <- seq(dim(x)[1])
@@ -212,7 +212,7 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
                            lty.median = lty.median, lwd.median = lwd.median,
                            exclude = exclude)
     }
-  } else if("estimated" %in% "ci") {
+  } else if("estimated" %in% ci) {
     addConfidenceShading(xs, x, what = what)  
   } else if("none" %in% ci) {
     col.def <- 1
