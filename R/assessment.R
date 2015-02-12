@@ -97,12 +97,13 @@ getCI <- function (inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, p
 makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100, 
                            probs = seq(0, 1, 0.01), winf.ubound = 2, 
                            dirout = "results", yield = NULL, seed = as.integer(rnorm(1, 1000, 100)),
-                           fnout = format.Date(Sys.time(), "results_%Y%m%d_%H%M.RData"), ...) {
+                           fnout = format.Date(Sys.time(), "results_%Y%m%d_%H%M.RData"), sigma = NULL, ...) {
   set.seed(seed)
   timeToCompletion <- system.time({
   if(is.null(yield)) yield <- rep(0.0001, length(inputData))
-  ests <- mapply(function(x, y) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound, totalYield = y, ...),
-                 inputData, yield, SIMPLIFY = FALSE)
+  sigma <- if(is.null(sigma) || is.na(sigma)) rep(NA, length(inputData)) else sapply(inputData, function(x) sum(x$Freq))
+  ests <- mapply(function(x, y, s) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound, totalYield = y, sigma = s, ...),
+                 inputData, yield, sigma, SIMPLIFY = FALSE)
   res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 15) else x[1:15] )
   res <- do.call(rbind.data.frame, res)
   row.names(res) <- names(inputData)
