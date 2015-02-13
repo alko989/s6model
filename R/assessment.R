@@ -101,7 +101,7 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
   set.seed(seed)
   timeToCompletion <- system.time({
   if(is.null(yield)) yield <- rep(0.0001, length(inputData))
-  sigma <- if(is.null(sigma) || is.na(sigma)) rep(NA, length(inputData)) else sapply(inputData, function(x) sum(x$Freq))
+  sigma <- if(is.null(sigma) || is.na(sigma)) rep(NA, length(inputData)) else sapply(inputData, function(x) mean(rle(x$Freq)$lengths) * sum(x$Freq))
   ests <- mapply(function(x, y, s) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound, totalYield = y, sigma = s, ...),
                  inputData, yield, sigma, SIMPLIFY = FALSE)
   res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 15) else x[1:15] )
