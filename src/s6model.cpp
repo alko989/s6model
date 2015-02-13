@@ -59,7 +59,7 @@ Type objective_function<Type>::operator() ()
   rmax = totalYield / Y;
   ssb = ssb * Rrel * rmax;
   R = Rrel * rmax;
-  Type ff = freq.sum() ; // * binsize;
+  Type ff = freq.sum();
   Type nll=0.0;
   for(int i=0; i<nwc; i++) {
     if(usePois) {
