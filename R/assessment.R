@@ -188,7 +188,7 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = expression(F~(y^-1)), 
                Winf = expression(W[infinity]~(g)), 
                Wfs = "50% retainment size (g)", 
-               ssb = "SSB (t)",
+               ssb = paste0("SSB (", ifelse(mult > 1, paste0(mult, " "), "") ,"t)"),
                stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, ssb, or Wfs"))
   ylab <- if(is.null(ylab)) yl else ylab
   xlab <- if(is.null(xlab)) "Year" else xlab
@@ -233,18 +233,18 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
 
 ##' @export 
 addIces<- function(stock, icesfile = "~/Work/mainCode/R/SecondPaper/ICES/ICES-cod.RData",
-                   col="darkgrey", lwd=2, lty = c(2,1,2), what = "FFmsy", ...) {
+                   col="darkgrey", lwd=2, lty = c(2,1,2), what = "FFmsy", mult = 1, ...) {
   load(icesfile)
   ices <- ices.cod[[stock]]
   nms <- tolower(names(ices))
   if(what %in% c("FFmsy", "ffmsy"))
-    matplot(ices$Year, ices[ , c("high_F", "F","low_F")] / fmsy(ices), 
+    matplot(ices$Year, ices[ , c("high_F", "F","low_F")] / fmsy(ices) / mult, 
             add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
   else {
     n <- pmatch(what, nms)
     h <- pmatch(paste0("high_", what), nms)
     l <- pmatch(paste0("low_", what), nms)
-    matplot(ices$Year, ices[ , c(h, n, l)], 
+    matplot(ices$Year, ices[ , c(h, n, l)] / mult, 
             add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
   }
 }
