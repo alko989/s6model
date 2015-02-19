@@ -164,9 +164,9 @@ addConfidenceShading <-
     } else if (is(y, "data.frame")){
       d <- nrow(y) - 1
       for(i in seq(1 + exclude, d / 2)) {
-        gr <- min(max(1, (1 - i / ((d - (2 * exclude))) / grey.intensity )), 0)
-        makeShading(x, y[i, ], y[d - i, ],
-                    col=grey(gr) )
+        gr <- max(min(1, (1 - i / ((d - (2 * exclude))) / grey.intensity )), 0)
+        cat(gr)
+        makeShading(x, y[i, ], y[d - i, ], col=grey(gr) )
       }
       if(addMedian) {
         lines(x, y[d/2 + 1, ], col = col.median, lty = lty.median, lwd=lwd.median)
