@@ -336,7 +336,7 @@ changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
   res <- rbind(res, data.frame(Weight = labs, Freq = 0))
   res <- aggregate(Freq ~ Weight, data = res, FUN = sum )
   res$Weight <- as.numeric(as.character(res$Weight))
-  res$Freq <- as.numeric(as.character(res$Freq))
+  res$Freq <- round(as.numeric(as.character(res$Freq)), digits = 0)
   if (! keepZeros) {
     res <- res[df$Freq > 0, ]
   }
