@@ -336,7 +336,7 @@ changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
   res <- rbind(res, data.frame(Weight = labs, Freq = 0))
   res <- aggregate(Freq ~ Weight, data = res, FUN = sum )
   res$Weight <- as.numeric(as.character(res$Weight))
-  res$Freq <- as.numeric(as.character(res$Freq))
+  res$Freq <- round(as.numeric(as.character(res$Freq)), digits = 0)
   if (! keepZeros) {
     res <- res[df$Freq > 0, ]
   }
@@ -350,7 +350,6 @@ changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
 ##' @description Given a folder and a pattern, rerurns the file that was modified latest.
 ##' @param path character, relative or absolute path
 ##' @param patterm an optional \code{\link{regex}}. Only file names which match the regular expression will be returned. Passed to \code{\link{dir}}
-
 ##' @seealso \code{dir}
 findLatest <- function(path = ".", pattern = "") {
   files <- dir(path, pattern, ignore.case = TRUE, full.names = TRUE)
@@ -360,6 +359,5 @@ findLatest <- function(path = ".", pattern = "") {
   })
   df <- do.call(rbind.data.frame, df)
   latest <- df[order(df$mtime, decreasing = TRUE), ][1,1]  
-  cat(latest)
   latest
 }

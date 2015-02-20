@@ -38,7 +38,7 @@ addVersion <- function(v = NULL, cex=0.5, col="#12345655", lengthSHA = 6, descri
       paste0(v, " (",d,")")
     }, fv, description), collapse = " - ")
   } else {
-    paste(v, collapse = " - ")
+    paste(fv, collapse = " - ")
   } 
   
   mtext(text, side=4, line= 0.1, padj = 0.1, adj=0.01, col = col, cex = cex)

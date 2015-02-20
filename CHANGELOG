@@ -561,3 +561,9 @@ Changes from version  0.10.11 to  0.10.12
  * findLatest file in directory and specific pattern
  * better makeAssessment and plot functions
  * bounded phys.mortality
+
+Changes from version  0.10.12 to  0.10.13 
+ * Poisson estimation has one parameter for the level
+ * Confidence interval results are saved
+ * Seed is saved
+ * Small plotting changes
