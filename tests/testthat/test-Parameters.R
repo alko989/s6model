@@ -50,10 +50,10 @@ test_that("Initialization of Parmaters object using base object", {
 test_that("Winf getter and setter", {
     p <- parameters(c("Winf", "eta_F"), c(1000, parameters()@scaleeta_F), FALSE)
     expect_equal(p@logWfs, log(1000 * p@scaleeta_F / p@scaleWfs))
-    expect_equal(Winf(p), 1000)
+    expect_equal(getWinf(p), 1000)
     expect_equal(p@logeta_F, p@logeta_F)
     Winf(p) <- 1234
-    expect_equal(Winf(p), 1234)
+    expect_equal(getWinf(p), 1234)
 })
 
 test_that("Initialization only using Winf sets Wfs/eta_F correctly", {
