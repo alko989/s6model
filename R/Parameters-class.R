@@ -134,15 +134,15 @@ setGeneric("Winf<-",function(object,value){standardGeneric("Winf<-")})
 ##' @aliases Winf<--methods, Winf<-,Parameters-method
 ##' @name Winfsetter
 setReplaceMethod(
-    f="Winf",
-    signature="Parameters",
-    definition=function(object,value){
-        object@logWinf <- log(value/object@scaleWinf)
-        eF <- exp(object@logeta_F) * object@scaleeta_F
-        winf <- exp(object@logWinf)* object@scaleWinf
-        object@logWfs <- log(eF*winf/object@scaleWfs)
-        return (object)
-    })
+  f="Winf",
+  signature="Parameters",
+  definition=function(object,value){
+    object@logWinf <- log(value/object@scaleWinf)
+    eF <- exp(object@logeta_F) * object@scaleeta_F
+    winf <- exp(object@logWinf)* object@scaleWinf
+    object@logWfs <- log(eF*winf/object@scaleWfs)
+    return (object)
+  })
 
 ##' @param object \code{Parameters} object 
 ##' @export
@@ -153,10 +153,10 @@ setGeneric("getWinf", function(object) standardGeneric("getWinf"))
 ##' @rdname Winf-methods
 ##' @aliases Winf,Parameters-method
 setMethod("getWinf", 
-	signature(object = "Parameters"), 
-	function(object) {
-		exp(object@logWinf) * object@scaleWinf
-	}
+          signature(object = "Parameters"), 
+          function(object) {
+            exp(object@logWinf) * object@scaleWinf
+          }
 )
 
 formatEntry <- function(..., width=20) {
@@ -238,7 +238,7 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
   res <- data.frame(base=numeric(), comp=numeric(),difference=numeric(),percent.difference=numeric(), stringsAsFactors=FALSE)
   r <- sapply(slotNames("Parameters"), function(n) {
     if(eval(parse(text=paste("base@" , n, sep=""))) !=
-       eval(parse(text=paste("comp@" , n, sep="")))) {
+         eval(parse(text=paste("comp@" , n, sep="")))) {
       val1 <- exp(eval(parse(text=paste("base@" , n, sep="")))) * eval(parse(text=paste("base@scale" , substr(n, 4, nchar(n)), sep="")))
       val2 <- exp(eval(parse(text=paste("comp@" , n, sep="")))) * eval(parse(text=paste("comp@scale" , substr(n, 4, nchar(n)), sep="")))
       res[substr(n, 4, nchar(n)), ] <<- c(val1,val2, val1 - val2,abs((val1-val2)/(mean(val1,val2)))*100)
@@ -266,8 +266,7 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
 ##' @docType methods
 ##' @export 
 ##' @author alko
-setGeneric("plotFit", function(object, data, add, ...)
-           {standardGeneric ("plotFit")} )
+setGeneric("plotFit", function(object, data, add, ...){ standardGeneric ("plotFit") })
 
 ##'  @rdname plotFit-methods
 ##' @aliases plotFit,Parameters,numeric,missing-method
@@ -285,12 +284,12 @@ setMethod("plotFit", c("Parameters", "numeric", "logical"),
           function(object, data, add,...) {
             p <- getParams(object)
             if(add == FALSE) {
-                plot(p$w, p$pdfN.approx(p$w), type="l", col="blue",
-                     main="Fitted pdf and histogram of the simulated data",
-                     xlab="Weight (g)",
-                     ylab="Probability")
+              plot(p$w, p$pdfN.approx(p$w), type="l", col="blue",
+                   main="Fitted pdf and histogram of the simulated data",
+                   xlab="Weight (g)",
+                   ylab="Probability")
             } else {
-                lines(p$w, p$pdfN.approx(p$w), col="blue", ...)
+              lines(p$w, p$pdfN.approx(p$w), col="blue", ...)
             }
             hist(data, freq=FALSE, add=TRUE, breaks="FD")
             invisible(NULL)
@@ -300,23 +299,23 @@ setMethod("plotFit", c("Parameters", "numeric", "logical"),
 ##' @aliases plotFit,Parameters,data.frame,logical-method
 setMethod("plotFit", c("Parameters", "data.frame", "logical"),
           function(object, data, add, ...) {
-              p <- getParams(object)
-              if(add == FALSE) {
-                  plot(p$w, p$pdfN.approx(p$w), type="l",
-                       main="Fitted pdf and histogram of the simulated data",
-                       xlab="Weight (g)",
-                       ylab="Probability")
-              } else {
-                  lines(p$w, p$pdfN.approx(p$w), col="blue", ...)
-              }
-              points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
-                     pch=".", cex=3)
-              lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
-              ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
-              lines(p$w, p$pdfN.approx(p$w), col="blue", lwd = 2, ...)
-              legend("topright", , c("fitted PDF", "Data kernel density"), col=c("blue","red"),
-                     lty=1, lwd=2, seg.len=5)
-              invisible(NULL)
+            p <- getParams(object)
+            if(add == FALSE) {
+              plot(p$w, p$pdfN.approx(p$w), type="l",
+                   main="Fitted pdf and histogram of the simulated data",
+                   xlab="Weight (g)",
+                   ylab="Probability")
+            } else {
+              lines(p$w, p$pdfN.approx(p$w), col="blue", ...)
+            }
+            points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
+                   pch=".", cex=3)
+            lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
+            ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
+            lines(p$w, p$pdfN.approx(p$w), col="blue", lwd = 2, ...)
+            legend("topright", , c("fitted PDF", "Data kernel density"), col=c("blue","red"),
+                   lty=1, lwd=2, seg.len=5)
+            invisible(NULL)
           })
 
 ##' Plots growth function
@@ -440,62 +439,62 @@ setMethod("getCor", c("Parameters"), function(object) {
 #' @rdname Parameters
 #' @export parameters
 parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Parameters"))
-  {
-    res <- base
-    mats <- wfs <- etaf <- 0
-    if(length(names) == 1)  {
-        if(names=="Winf") {
-            if(transformed) {
-                res@logWinf <- vals
-            } else {
-                res@logWinf <- log(vals / getscaleWinf(res))
-            }
-            res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F * exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
-            return(res)
-        }
-    }
-    for(i in seq(along=names))
-      if(names[i] %in% c("M")) {
-        eval(parse(text=paste("res@", names[i]," <- ", vals[i], sep="" )))
-      } else if (names[i] == "matSize") {
-        mats <- i
-      } else if (names[i] == "Wfs") {
-        wfs <- i
-      } else if (names[i] == "eta_F") {
-        etaf <- i
-      } else {
-        if(transformed) {
-          eval(parse(text=paste("res@log", names[i]," <- ", vals[i] , sep="" )))
-        } else {
-          scale <- do.call(paste0("getscale", names[i]), list(res))
-          eval(parse(text=paste0("res@log", names[i], " <- " , log(vals[i] / scale))))
-        }
-      }
-    if(mats > 0) {
-      res@logeta_m <- log(vals[mats] / (exp(res@logWinf)*res@scaleWinf) / res@scaleeta_m)
-    }
-    if(wfs > 0) {
+{
+  res <- base
+  mats <- wfs <- etaf <- 0
+  if(length(names) == 1)  {
+    if(names=="Winf") {
       if(transformed) {
-        res@logWfs <- vals[wfs]
+        res@logWinf <- vals
       } else {
-        res@logWfs <- log(vals[wfs] /getscaleWfs(res))
+        res@logWinf <- log(vals / getscaleWinf(res))
       }
-      res@logeta_F <- log((exp(res@logWfs) * res@scaleWfs) / (exp(res@logWinf) * res@scaleWinf) / res@scaleeta_F)
-      if(etaf > 0)
-          warning("Do not use Wfs and eta_F at the same time. Only Wfs was used")
+      res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F * exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
+      return(res)
     }
-    if(etaf>0 & wfs==0) {
-      if(transformed) {
-        res@logeta_F <-  vals[etaf]
-      } else {
-        res@logeta_F <- log(vals[etaf] / getscaleeta_F(res))
-      }
-      res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F* exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
-    }
-    if(etaf == 0 & wfs ==0) {
-        res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F * exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
-    }
-    if(exp(res@logWinf)*res@scaleWinf <= exp(res@logWfs)*res@scaleWfs)
-        warning("The start of fishing occurs at a weight equal or greater than the asymptotic weight")
-    res    
   }
+  for(i in seq(along=names))
+    if(names[i] %in% c("M")) {
+      eval(parse(text=paste("res@", names[i]," <- ", vals[i], sep="" )))
+    } else if (names[i] == "matSize") {
+      mats <- i
+    } else if (names[i] == "Wfs") {
+      wfs <- i
+    } else if (names[i] == "eta_F") {
+      etaf <- i
+    } else {
+      if(transformed) {
+        eval(parse(text=paste("res@log", names[i]," <- ", vals[i] , sep="" )))
+      } else {
+        scale <- do.call(paste0("getscale", names[i]), list(res))
+        eval(parse(text=paste0("res@log", names[i], " <- " , log(vals[i] / scale))))
+      }
+    }
+  if(mats > 0) {
+    res@logeta_m <- log(vals[mats] / (exp(res@logWinf)*res@scaleWinf) / res@scaleeta_m)
+  }
+  if(wfs > 0) {
+    if(transformed) {
+      res@logWfs <- vals[wfs]
+    } else {
+      res@logWfs <- log(vals[wfs] /getscaleWfs(res))
+    }
+    res@logeta_F <- log((exp(res@logWfs) * res@scaleWfs) / (exp(res@logWinf) * res@scaleWinf) / res@scaleeta_F)
+    if(etaf > 0)
+      warning("Do not use Wfs and eta_F at the same time. Only Wfs was used")
+  }
+  if(etaf>0 & wfs==0) {
+    if(transformed) {
+      res@logeta_F <-  vals[etaf]
+    } else {
+      res@logeta_F <- log(vals[etaf] / getscaleeta_F(res))
+    }
+    res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F* exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
+  }
+  if(etaf == 0 & wfs ==0) {
+    res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F * exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
+  }
+  if(exp(res@logWinf)*res@scaleWinf <= exp(res@logWfs)*res@scaleWfs)
+    warning("The start of fishing occurs at a weight equal or greater than the asymptotic weight")
+  res    
+}
