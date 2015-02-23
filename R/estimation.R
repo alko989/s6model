@@ -121,11 +121,11 @@ estimateParam <-
     
     res <- estim$par
     h <- hessian(minimizeme, estim$par, data=data,
-                           names=names, fixed.names=fixed.names,
-                           fixed.vals=fixed.vals,isSurvey=isSurvey)
+                 names=names, fixed.names=fixed.names,
+                 fixed.vals=fixed.vals,isSurvey=isSurvey)
     s <- jacobian(minimizeme, estim$par, data=data,
-                            names=names, fixed.names=fixed.names,
-                            fixed.vals=fixed.vals,isSurvey=isSurvey)
+                  names=names, fixed.names=fixed.names,
+                  fixed.vals=fixed.vals,isSurvey=isSurvey)
     vcm <- try(solve(h))
     
     ci <- matrix(rep(NA, length(names)*3),ncol=3, dimnames = list(names, c("Estimate","Lower", "Upper")))
@@ -142,17 +142,17 @@ estimateParam <-
     return(structure(p, par=res, hessian=h, jacobian=s, st.er=st.er, ci=ci, 
                      objective=estim$objective, convergence=estim$convergence, 
                      nlminbMessage=estim$message, call=match.call(), version=getVersion()))
-}
+  }
 
 ##' @param surdata Same as data. Survey data.
 ##' @param comdata Same as data. Commercial data.
 ##' @rdname minimizeme
 minimizemeMultidata <- function(theta, surdata, comdata, names, fixed.names=c(), fixed.vals=c())
-  {
-    params <- parameters(c(names, fixed.names), c(theta, fixed.vals))
-    return(with(getParams(params,isSurvey=TRUE), sum(-log(pdfN.approx(surdata)))) +
+{
+  params <- parameters(c(names, fixed.names), c(theta, fixed.vals))
+  return(with(getParams(params,isSurvey=TRUE), sum(-log(pdfN.approx(surdata)))) +
            with(getParams(params,isSurvey=FALSE), sum(-log(pdfN.approx(comdata)))))
-  }
+}
 ##' @param surdata Same as data. Survey data.
 ##' @param comdata Same as data. Commercial data.
 ##' @rdname estimateParam
@@ -185,36 +185,69 @@ estimateMultidata <-
 ##' @export
 estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, 
                          eta_m=0.25, a=0.27, Winf = NULL, sigma=NULL,
-                         sdloga = 0.89, winf.ubound = 2, DLL="s6model", 
+                         sdloga = 0.89, winf.ubound = 2,
                          verbose=FALSE, map=list(loga=factor(NA), x=factor(NA)), 
                          random=c(), isSurvey = FALSE, eta_S = 0.01, usePois = TRUE,
                          totalYield = 0.000001, ...) {
   if(! require(TMB)) stop("TMB is not installed! Please install and try again.")
-  tryer <- try({
+  isTS <- is(df, "list")
+  if(isTS) {
+    length(totalYield) == length(df) || stop("Please provide the yield for all years")
+    yrs <- names(df)
+    df <- df2matrix(df)
+    nyrs <- ncol(df)
+    DLL <- "s6modelts"
+  } else {
+    yrs <- 1
+    nyrs <- 1
+    DLL <- "s6model"
+  }
+  tryer <- try({})#{
     binsize <- attr(df,"binsize")
     if(is.null(Winf))  {
-      Winf <- max(df$Weight) + 2 * binsize
+      if(isTS) {
+        Winf <- binsize * (nrow(df) + 2)
+      } else {
+        Winf <- max(df$Weight) + 2 * binsize
+      }
     } else {
       map$logWinf  <- factor(NA)
     }
     if(is.null(sigma) || is.na(sigma))  {
-      sigma <- if(usePois) sum(df$Freq) else 0.0001
+      if(isTS) {
+        sigma <- if(usePois) colSums(df) else rep(0.0001, nyrs)
+      } else {
+        sigma <- if(usePois) sum(df$Freq) else 0.0001
+      }
     } else {
-      map$logSigma  <- factor(NA)
+      map$logSigma  <- rep(factor(NA), nyrs)
     }
     if(! isSurvey) {
-      map$logeta_S <- factor(NA)
+      map$logeta_S <- rep(factor(NA), nyrs)
     }
-    data <- list(binsize=binsize, nwc=dim(df)[1], freq=df$Freq, n=n, epsilon_a=epsilon_a,
+    if(isTS) {
+      freq <- df
+      nwc <- attr(df, "nwc")
+      logFm <- rep(log(0.5), nyrs)
+      logWfs <- log(apply(df, 2, function(x) which(x > 0)[1]) * binsize)
+      logeta_S <- rep(log(eta_S), nyrs)
+    } else {
+      freq <- df$Freq
+      nwc <- dim(df)[1]
+      logFm <- log(0.5)
+      logWfs <- rep(log(min(df$Weight[df$Freq > 0])), nyrs)
+      logeta_S <- log(eta_S)
+    }
+    logSigma <- log(sigma)
+    data <- list(binsize=binsize, nwc=nwc, freq=freq, n=n, epsilon_a=epsilon_a,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
                  sdloga = sdloga, isSurvey = as.integer(isSurvey), usePois = as.integer(usePois),
                  totalYield = totalYield)
-    pars <- list(loga=log(a), x=0, logFm = log(0.5), logWinf = log(Winf),
-                 logWfs = log(min(df$Weight[df$Freq > 0])), logSigma=log(sigma), logeta_S = log(eta_S))
-    estnames <- names(pars[! names(pars) %in% c(names(map), random)])
-    upper <- rep(Inf, length(estnames))
-    upper[which(estnames == "logWinf")] <- log(Winf * winf.ubound)
-    obj <- MakeADFun(data = data, parameters = pars, DLL = DLL, map=map, random=random, ...)
+    pars <- list(loga=log(a), x=0, logFm = logFm, logWinf = log(Winf),
+                 logWfs = logWfs, logSigma=logSigma, logeta_S = logeta_S)
+    obj <- MakeADFun(data = data, parameters = pars,  map=map, random=random, DLL = DLL)
+    upper <- rep(Inf, length(obj$par))
+    upper[which(names(obj$par) == "logWinf")] <- log(Winf * winf.ubound)
     obj$env$tracemgc <- verbose
     obj$env$inner.control$trace <- verbose
     obj$env$silent <- ! verbose
@@ -224,21 +257,34 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     }
     opt <- nlminb(obj$par, obj$fn, obj$gr, upper = upper)
     sdr <- sdreport(obj)
-    nms <- c("Fm","Winf","Wfs", "a", "eta_S")
+    parnms <- c("Fm","Winf","Wfs", "a", "eta_S")
     vals <- sdr$value
-    sds <- setNames(sdr$sd, names(vals))
-    estpars <- parameters(c(nms, "n", "epsilon_a", "epsilon_r", "A", "eta_m"),
-                          as.numeric(c(vals[nms], n, epsilon_a, epsilon_r, A, eta_m)),
-                          transformed=FALSE)
-    Fmsy <- calcFmsy(estpars)
+    nms <- names(vals)
+    sds <- setNames(sdr$sd, nms)
+    estpars <- sapply(seq(nyrs), function(i) {
+      vls <- sapply(parnms, function(x) {
+        match <- vals[grepl(paste0("^", x, "$"), nms)]
+        if(length(match) == 1) match else match[i]
+      })
+      parameters(c(parnms, "n", "epsilon_a", "epsilon_r", "A", "eta_m"),
+                 as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m)),
+                 transformed=FALSE)
+    })
+  Fmsy <- sapply(estpars, calcFmsy)
+  if(nyrs == 1) {
+    estpars <- estpars[[1]]
+    Fmsy <- Fmsy[[1]]
+  }
     opt$convergence
-  }, silent = !verbose)
+  #}, silent = !verbose)
   if(class(tryer) == "try-error") {
     return(tryer)
   }
-  structure(data.frame(Fm=vals["Fm"], Fm_sd = sds["Fm"], Winf=vals["Winf"], Winf_sd=sds["Winf"],
+  structure(data.frame(Fm=vals[grepl("^Fm", nms)], Fm_sd = sds[grepl("^Fm", nms)],
+                       Winf=rep(vals[grepl("Winf", nms)], nyrs),
+                       Winf_sd=rep(sds[grepl("Winf", nms)], nyrs),
                        Fmsy = Fmsy, Wfs = vals["Wfs"], Wfs_sd = sds["Wfs"], FFmsy = vals["Fm"]/Fmsy, 
                        a = vals["a"], eta_S = vals["eta_S"], sigma = vals["sigma"], R = vals["R"], 
-                       Y = vals["Y"], ssb = vals["ssb"], ssb_sd = sds["ssb"], row.names=NULL),
+                       Y = vals["Y"], ssb = vals["ssb"], ssb_sd = sds["ssb"], row.names=yrs),
             obj=obj, opt=opt, sdr = sdr, estpars=estpars)
 }
