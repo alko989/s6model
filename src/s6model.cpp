@@ -59,7 +59,6 @@ Type objective_function<Type>::operator() ()
   rmax = totalYield / Y;
   ssb = ssb * Rrel * rmax;
   R = Rrel * rmax;
-  Type ff = freq.sum();
   Type nll=0.0;
   for(int i=0; i<nwc; i++) {
     if(usePois) {
@@ -73,14 +72,14 @@ Type objective_function<Type>::operator() ()
       }
     } else {
       if(freq(i) > 0) {
-        nll -= dnorm(log(freq(i) / ff), log(Nvec(i) / nc), sigma, true);
+        nll -= dnorm(log(freq(i) / freq.sum()), log(Nvec(i) / nc), sigma, true);
       }
     }
   }
   nll -= dnorm(loga, meanloga, sdloga, true);
   nll += pow(x, 2);
   vector<Type> residuals(nwc);
-  residuals = Nvec / nc * ff - freq;
+  residuals = Nvec / nc * sigma - freq;
   
   
   ADREPORT(Fm);
