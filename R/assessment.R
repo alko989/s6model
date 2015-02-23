@@ -49,36 +49,38 @@ getalim <- function (p) {
 }
 
 
-getCI <- function (inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, probs, ...) {
+getCI <- function (inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, probs, Winf, ...) {
   aplfun <- if(require(parallel)) mclapply else lapply
   maplfun <- if(require(parallel)) mcmapply else mapply
   r <- function(x) round(x, 2)
   ci <- lapply(seq(along.with = inputData), function(i) {
     alim <- getalim(ests[[i]])
-    ## cat(paste0("Note: physiological mortality a ~ truncLogNorm(", 
-    ##           r(log(a.mean)), ", ", r(a.sd), ", ubound = ", r(alim), ")\n"))
     as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
-    results <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, winf.ubound = winf.ubound, 
-                                                totalYield = yield[i], ...))
+    results <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, Winf = getWinf(ests[[i]]),
+                                                   totalYield = yield[i], ...))
     reps <- results
     err <- sapply(results, function(x) is(x, "try-error"))
     errmsg <- reps[err]
     reps[err] <- NULL
-    nerr <- sum(err)
     notConv <- sapply(reps, function(x) attr(x, "opt")$convergence == 1)
     reps[notConv] <- NULL
+    verySmall <- sapply(reps, function(x) x$Fm < 1e-5)
+    reps[verySmall] <- NULL
     repsdf <- do.call(rbind.data.frame, reps)
     nrep <- nrow(repsdf)
-    structure(as.data.frame(apply(repsdf, 2, quantile, probs = probs, na.rm = TRUE)), results = results,
-              alim=alim, as = as, nrep = nrep, notConv = if(length(notConv) > 0) sum(notConv) else 0, nerr = nerr, err = err, errmsg = errmsg)
+    n <- function(x) if(length(x) > 0) sum(x) else 0
+    structure(as.data.frame(apply(repsdf, 2, quantile, probs = probs, na.rm = TRUE)), results = data.frame(results),
+              alim=alim, as = as, nrep = nrep, notConv = n(notConv) , nVerySmall = n(verySmall),
+              nerr = n(err), err = err, errmsg = errmsg)
   })
   alims <- sapply(ci, function(x) attr(x, "alim"))
   reps <- sapply(ci, function(x) attr(x, "nrep"))
   nerr <- sapply(ci, function(x) attr(x, "nerr"))
+  nVerySmall <- sapply(ci, function(x) attr(x, "nVerySmall"))
   err <- sapply(ci, function(x) attr(x, "err"))
   errmsg <- sapply(ci, function(x) attr(x, "errmsg"))
   notConv <- sapply(ci, function(x) attr(x, "notConv"))
-  ## allResults <- lapply(ci, function(x) attr(x, "results"))
+  allResults <- lapply(ci, function(x) attr(x, "results"))
   as <-  lapply(ci, function(x) attr(x, "as"))
   nms <- names(ci[[1]])
   ci <- lapply(nms, function(nm) lapply(ci, function(d) d[[nm]]))
@@ -89,8 +91,9 @@ getCI <- function (inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, p
     setNames(do.call(cbind.data.frame, yy), names(inputData))
   })
   ci <- setNames(ci, nms)
-  structure(ci, alims = alims, as = as, reps = reps, notConv = notConv, nerr = nerr, 
-            err = err, errmsg = errmsg) ##, allResults = allResults)
+  structure(ci, alims = alims, as = as, reps = reps, nVerySmall = nVerySmall, notConv = notConv, nerr = nerr, 
+            err = err, errmsg = errmsg, allResults = allResults)
+}
 }
 
 ##' @export
@@ -107,9 +110,9 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
   res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 15) else x[1:15] )
   res <- do.call(rbind.data.frame, res)
   row.names(res) <- names(inputData)
-  if(a.sd > 0 & nsample > 1) {
-    attr(res, "CI") <- getCI(inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, probs, ...)
-  } 
+    if(a.sd > 0 & nsample > 1) {
+      attr(res, "CI") <- getCI(inputData, estpars, a.mean, a.sd, nsample, winf.ubound, yield, probs, ...)
+    } 
   })
   opts <- list(...)
   res <- structure(res, Results = ests, version = getVersion(), timeToCompletion = timeToCompletion, seed = seed,
