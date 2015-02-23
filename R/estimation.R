@@ -280,11 +280,12 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
   if(class(tryer) == "try-error") {
     return(tryer)
   }
-  structure(data.frame(Fm=vals[grepl("^Fm", nms)], Fm_sd = sds[grepl("^Fm", nms)],
-                       Winf=rep(vals[grepl("Winf", nms)], nyrs),
-                       Winf_sd=rep(sds[grepl("Winf", nms)], nyrs),
-                       Fmsy = Fmsy, Wfs = vals["Wfs"], Wfs_sd = sds["Wfs"], FFmsy = vals["Fm"]/Fmsy, 
-                       a = vals["a"], eta_S = vals["eta_S"], sigma = vals["sigma"], R = vals["R"], 
-                       Y = vals["Y"], ssb = vals["ssb"], ssb_sd = sds["ssb"], row.names=yrs),
+  nw <- function(x) grepl(paste0("^", x, "$"), nms)
+  structure(data.frame(Fm=vals[nw("Fm")], Fm_sd = sds[nw("Fm")],
+                       Winf=rep(vals[nw("Winf")], nyrs),
+                       Winf_sd=rep(sds[nw("Winf")], nyrs),
+                       Fmsy = Fmsy, Wfs = vals[nw("Wfs")], Wfs_sd = sds[nw("Wfs")], FFmsy = vals[nw("Fm")]/Fmsy, 
+                       a = vals[nw("a")], eta_S = vals[nw("eta_S$")], sigma = vals[nw("sigma")], R = vals[nw("R")], 
+                       Y = vals[nw("Y")], ssb = vals[nw("ssb")], ssb_sd = sds[nw("ssb")], row.names=yrs),
             obj=obj, opt=opt, sdr = sdr, estpars=estpars)
 }
