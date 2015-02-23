@@ -34,7 +34,7 @@ Type objective_function<Type>::operator() ()
   Type a = exp(loga);
 //  Type sdFm = exp(logsdFm);
 //  Type sdWfs = exp(logsdWfs);
-  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha;
+  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha, Y, Rrel;
   vector<Type> ssb(nyrs);
   vector<Type> rmax(nyrs);
   vector<Type> R(nyrs);
@@ -45,12 +45,11 @@ Type objective_function<Type>::operator() ()
      cumsum=0.0;
      nc = 0.0;
      ssb(yr) = 0.0;
-     Type Y = 0.0;
+     Y = 0.0;
      vector<Type> Nvec(nwc);
-     Type Rrel = 0.0;
-     Type ff = 0.0;
+     Rrel = 0.0;
     for(int j=0; j<nwc; j++) {
-      w = binsize * (j + 1);
+      w = binsize * (j + 0.5);
       psi_m = 1 / (1 + pow(w / (Winf * eta_m), -10));
       psi_F = 1 / (1 + pow(w / (Wfs(yr)), -u));
       psi_S = 1 / (1 + pow(w / (Winf * eta_S(yr)), -u));
@@ -60,9 +59,9 @@ Type objective_function<Type>::operator() ()
       N = exp(-cumsum) / g;
       alpha = epsilon_r * (1 - epsilon_a) * A * pow(Winf, n-1) / wr;
       ssb(yr) += psi_m  * N * w * binsize;
-      Nvec(j) = N * Fm(yr) * (isSurvey ? psi_S : psi_F);
+      Nvec(j) = N * (isSurvey ? psi_S : psi_F);
       Y +=  Fm(yr) * N * psi_F * w * binsize;
-      nc += Nvec(j) * binsize;
+      nc += Nvec(j);
     }
     
     Rrel = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb(yr));
@@ -71,16 +70,14 @@ Type objective_function<Type>::operator() ()
     rmax(yr) = totalYield(yr) / Y;
     ssb(yr) *=  Rrel * rmax(yr);
     R(yr) = Rrel * rmax(yr);
-    ff = freq.col(yr).sum() * binsize;
     for(int i=0; i<nwc; i++) {
       if(usePois) {
         if(freq(i, yr) > 0) 
         {
-          nll -= dpois(freq(i, yr), Nvec(i) / nc * ff, true);
-          nll += pow(sigma(yr), 2);
+          nll -= dpois(freq(i, yr), Nvec(i) / nc * sigma(yr), true);  
         }
       } else {
-        nll -= dnorm(freq(i, yr) / ff, Nvec(i) / nc, sigma(yr), true);
+        nll -= dnorm(freq(i, yr) / freq.sum(), Nvec(i) / nc, sigma(yr), true);
       }
     }
   }
@@ -97,11 +94,14 @@ Type objective_function<Type>::operator() ()
   ADREPORT(eta_S);
   ADREPORT(a);
   ADREPORT(sigma);
+  ADREPORT(Y);
   ADREPORT(ssb);
   ADREPORT(R);
   // ADREPORT(sdFm);
   // ADREPORT(sdWfs);
   
+  REPORT(Rrel);
+  REPORT(rmax);
   return nll;
 }
 
