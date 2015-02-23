@@ -94,30 +94,45 @@ getCI <- function (inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, p
   structure(ci, alims = alims, as = as, reps = reps, nVerySmall = nVerySmall, notConv = notConv, nerr = nerr, 
             err = err, errmsg = errmsg, allResults = allResults)
 }
+
+
+df2matrix <- function(df){
+  maxrow <- max(sapply(df, nrow))
+  structure(sapply(df, function(x) c(x$Freq, rep(0, maxrow - nrow(x))) ),
+            nwc = maxrow, binsize = attr(df[[1]], "binsize"))  
 }
 
 ##' @export
 makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100, 
-                           probs = seq(0, 1, 0.01), winf.ubound = 2, 
+                           probs = seq(0, 1, 0.01), winf.ubound = 2, equalWinf = TRUE,
                            dirout = "results", yield = NULL, seed = as.integer(rnorm(1, 1000, 100)),
                            fnout = format.Date(Sys.time(), "results_%Y%m%d_%H%M.RData"), sigma = NULL, ...) {
   set.seed(seed)
-  timeToCompletion <- system.time({
   if(is.null(yield)) yield <- rep(0.0001, length(inputData))
   sigma <- if(is.null(sigma) || is.na(sigma)) rep(NA, length(inputData)) else sapply(inputData, function(x) mean(rle(x$Freq)$lengths) * sum(x$Freq))
-  ests <- mapply(function(x, y, s) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound, totalYield = y, sigma = s, ...),
-                 inputData, yield, sigma, SIMPLIFY = FALSE)
-  res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 15) else x[1:15] )
-  res <- do.call(rbind.data.frame, res)
-  row.names(res) <- names(inputData)
+  timeToCompletion <- system.time({
+    if(equalWinf) {
+      ests <- estimate_TMB(inputData, DLL = "s6modelts", totalYield = yield, 
+                           sigma = sigma, a=a.mean, winf.ubound = winf.ubound, ...)
+      estpars <- attr(ests, "estpars")
+      res <- ests
+    } else {
+      ests <- mapply(function(x, y, s) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound,
+                                                    totalYield = y, sigma = s, DLL = "s6model", ...),
+                     inputData, yield, sigma, SIMPLIFY = FALSE)
+      res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 15) else x[1:15] )
+      res <- do.call(rbind.data.frame, res)
+      row.names(res) <- names(inputData)
+      estpars <- lapply(ests, function(x) attr(x, "estpars"))
+    }
     if(a.sd > 0 & nsample > 1) {
       attr(res, "CI") <- getCI(inputData, estpars, a.mean, a.sd, nsample, winf.ubound, yield, probs, ...)
     } 
   })
   opts <- list(...)
-  res <- structure(res, Results = ests, version = getVersion(), timeToCompletion = timeToCompletion, seed = seed,
-                   opts = list(tmbopts = c(opts, a.mean = a.mean, a.sd = a.sd, 
-                                           winf.ubound = winf.ubound, yield = yield), probs = probs))
+  res <- structure(res, Results = ests, version = getVersion(), timeToCompletion = timeToCompletion,
+                   seed = seed, opts = list(tmbopts = c(opts, a.mean = a.mean, a.sd = a.sd, 
+                   winf.ubound = winf.ubound, yield = yield), probs = probs))
   class(res) <- c("s6modelResults", class(res))
   if(!is.null(fnout)) {
     dir.create(dirout, showWarnings = FALSE)
@@ -178,6 +193,10 @@ addConfidenceShading <-
     }
   }
 
+getYears <- function(x) {
+  as.numeric(regmatches(x, regexpr("[0-9]+", x)))
+}
+
 ##' @export
 ##' @rdname s6modelResults
 plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE, 
@@ -197,7 +216,7 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
   xlab <- if(is.null(xlab)) "Year" else xlab
   xs <- seq(dim(x)[1])
   if(use.rownames) {
-    xs <- as.numeric(regmatches(row.names(x), regexpr("[0-9]+", row.names(x))))
+    xs <- getYears(rownames(x))
   }
   if(! is.null(years) & ! use.rownames) {
     xs <- years
