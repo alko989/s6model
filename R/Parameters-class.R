@@ -148,11 +148,11 @@ setReplaceMethod(
 ##' @export
 ##' @docType methods
 ##' @rdname Winf-methods
-setGeneric("Winf", function(object) standardGeneric("Winf"))
+setGeneric("getWinf", function(object) standardGeneric("getWinf"))
 
 ##' @rdname Winf-methods
 ##' @aliases Winf,Parameters-method
-setMethod("Winf", 
+setMethod("getWinf", 
 	signature(object = "Parameters"), 
 	function(object) {
 		exp(object@logWinf) * object@scaleWinf
