@@ -498,3 +498,11 @@ parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Param
     warning("The start of fishing occurs at a weight equal or greater than the asymptotic weight")
   res    
 }
+
+##' @export
+##' @rdname Parameters
+meanParameters <- function(x) {
+  p <- as.list(parameters())
+  do.call(parameters, 
+          list(names = names(p), 
+               vals = sapply(seq(p), function(i) mean(sapply(x, function(xx) c(as.list(xx)[[i]])))), transformed = FALSE))}

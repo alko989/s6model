@@ -5,6 +5,7 @@
 \alias{Parameters-class}
 \alias{as.list.Parameters}
 \alias{lines.Parameters}
+\alias{meanParameters}
 \alias{parameters}
 \alias{plot.Parameters}
 \title{The Parameters class and constructor}
@@ -17,6 +18,8 @@
 
 parameters(names = c(), vals = c(), transformed = TRUE,
   base = new("Parameters"))
+
+meanParameters(x)
 }
 \arguments{
 \item{names}{String vector. Contains the names of the parameters that will
