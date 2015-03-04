@@ -36,15 +36,15 @@
 #' @export minimizeme
 #' @rdname minimizeme
 minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSurvey=FALSE) {
-    params <- parameters(c(names, fixed.names), c(theta, fixed.vals))  
-    if(is(data, "data.frame")) {
-        return(with(getParams(params,isSurvey),
-                    sum( - data$Freq * log(pdfN.approx(data$Weight)) )))
-    } else if(is(data, "numeric")) {
-        return(with(getParams(params,isSurvey), sum(-log(pdfN.approx(data)))))
-    } else {
-        stop("data appears not to be numeric vector or data.frame")
-    }
+  params <- parameters(c(names, fixed.names), c(theta, fixed.vals))  
+  if(is(data, "data.frame")) {
+    return(with(getParams(params,isSurvey),
+                sum( - data$Freq * log(pdfN.approx(data$Weight)) )))
+  } else if(is(data, "numeric")) {
+    return(with(getParams(params,isSurvey), sum(-log(pdfN.approx(data)))))
+  } else {
+    stop("data appears not to be numeric vector or data.frame")
+  }
 }
 
 
@@ -93,11 +93,11 @@ estimateParam <-
     p <- parameters()
 
     if(is(data, "list")) {
-        if("df" %in% names(data)) {
-            data <- data$df
-        } else if ("sample" %in% names(data)) {
-            data <- data$sample
-        } else stop("`data` is a list not containing an element named sample or df.")
+      if("df" %in% names(data)) {
+        data <- data$df
+      } else if ("sample" %in% names(data)) {
+        data <- data$sample
+      } else stop("`data` is a list not containing an element named sample or df.")
     }
 
     start[which(names == "Winf")] <- 
@@ -106,8 +106,8 @@ estimateParam <-
     scales <- sapply(names, function(n) get(paste0("getscale", n))(p))
 
     if( ! fixed.transformed) {
-        fixed.scales <- sapply(fixed.names, function(n) get(paste0("getscale", n))(p))
-        fixed.vals <- log(fixed.vals / fixed.scales)
+      fixed.scales <- sapply(fixed.names, function(n) get(paste0("getscale", n))(p))
+      fixed.vals <- log(fixed.vals / fixed.scales)
     }
     
     useapply <- if(require(parallel)) mclapply else lapply
@@ -202,7 +202,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     nyrs <- 1
     DLL <- "s6model"
   }
-  tryer <- try({})#{
+  tryer <- try({
     binsize <- attr(df,"binsize")
     if(is.null(Winf))  {
       if(isTS) {
@@ -270,22 +270,29 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                  as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m)),
                  transformed=FALSE)
     })
-  Fmsy <- sapply(estpars, calcFmsy)
-  if(nyrs == 1) {
-    estpars <- estpars[[1]]
-    Fmsy <- Fmsy[[1]]
-  }
+    Fmsy <- sapply(estpars, calcFmsy)
+    if(nyrs == 1) {
+      estpars <- estpars[[1]]
+      Fmsy <- Fmsy[[1]]
+    }
     opt$convergence
-  #}, silent = !verbose)
+  }, silent = !verbose)
   if(class(tryer) == "try-error") {
     return(tryer)
   }
   nw <- function(x) grepl(paste0("^", x, "$"), nms)
   structure(data.frame(Fm=vals[nw("Fm")], Fm_sd = sds[nw("Fm")],
-                       Winf=rep(vals[nw("Winf")], nyrs),
-                       Winf_sd=rep(sds[nw("Winf")], nyrs),
-                       Fmsy = Fmsy, Wfs = vals[nw("Wfs")], Wfs_sd = sds[nw("Wfs")], FFmsy = vals[nw("Fm")]/Fmsy, 
-                       a = vals[nw("a")], eta_S = vals[nw("eta_S$")], sigma = vals[nw("sigma")], R = vals[nw("R")], 
-                       Y = vals[nw("Y")], ssb = vals[nw("ssb")], ssb_sd = sds[nw("ssb")], row.names=yrs),
+                       Winf=rep(vals[nw("Winf")], nyrs), Winf_sd=rep(sds[nw("Winf")], nyrs),
+                       Fmsy = Fmsy, FFmsy = vals[nw("Fm")]/Fmsy, 
+                       Wfs = vals[nw("Wfs")], Wfs_sd = sds[nw("Wfs")],
+                       a = rep(vals[nw("a")], nyrs), eta_S = vals[nw("eta_S")],
+                       sigma = vals[nw("sigma")], sigma_sd = sds[nw("sigma")],
+                       R = vals[nw("R")], R_sd = sds[nw("R")],
+                       Rrel = vals[nw("Rrel")], Rrel_sd = sds[nw("Rrel")],
+                       rmax = vals[nw("rmax")], rmax_sd = sds[nw("rmax")],
+                       Y = vals[nw("Y")], Y_sd = sds[nw("Y")],
+                       ssb = vals[nw("ssb")], ssb_sd = sds[nw("ssb")],
+                       row.names=yrs),
             obj=obj, opt=opt, sdr = sdr, estpars=estpars)
 }
+

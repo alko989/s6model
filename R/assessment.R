@@ -266,7 +266,8 @@ addIces<- function(stock, icesfile = "~/Work/mainCode/R/SecondPaper/ICES/ICES-co
   load(icesfile)
   ices <- ices.cod[[stock]]
   nms <- tolower(names(ices))
-  if(what %in% c("FFmsy", "ffmsy"))
+  what <- tolower(what)
+  if(what == "ffmsy")
     matplot(ices$Year, ices[ , c("high_F", "F","low_F")] / fmsy(ices) / mult, 
             add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
   else {
