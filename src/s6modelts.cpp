@@ -34,10 +34,12 @@ Type objective_function<Type>::operator() ()
   Type a = exp(loga);
 //  Type sdFm = exp(logsdFm);
 //  Type sdWfs = exp(logsdWfs);
-  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha, Y, Rrel;
+  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha;
   vector<Type> ssb(nyrs);
   vector<Type> rmax(nyrs);
   vector<Type> R(nyrs);
+  vector<Type> Rrel(nyrs);
+  vector<Type> Y(nyrs);
   wr = 0.001;
   Type nll = 0.0;
   
@@ -45,9 +47,9 @@ Type objective_function<Type>::operator() ()
      cumsum=0.0;
      nc = 0.0;
      ssb(yr) = 0.0;
-     Y = 0.0;
+     Y(yr) = 0.0;
      vector<Type> Nvec(nwc);
-     Rrel = 0.0;
+     Rrel(yr) = 0.0;
     for(int j=0; j<nwc; j++) {
       w = binsize * (j + 0.5);
       psi_m = 1 / (1 + pow(w / (Winf * eta_m), -10));
@@ -60,16 +62,16 @@ Type objective_function<Type>::operator() ()
       alpha = epsilon_r * (1 - epsilon_a) * A * pow(Winf, n-1) / wr;
       ssb(yr) += psi_m  * N * w * binsize;
       Nvec(j) = N * (isSurvey ? psi_S : psi_F);
-      Y +=  Fm(yr) * N * psi_F * w * binsize;
+      Y(yr) +=  Fm(yr) * N * psi_F * w * binsize;
       nc += Nvec(j);
     }
     
-    Rrel = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb(yr));
-    N = N * Rrel;
-    Y = Y * Rrel;
-    rmax(yr) = totalYield(yr) / Y;
-    ssb(yr) *=  Rrel * rmax(yr);
-    R(yr) = Rrel * rmax(yr);
+    Rrel(yr) = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb(yr));
+    N = N * Rrel(yr);
+    Y(yr) = Y(yr) * Rrel(yr);
+    rmax(yr) = totalYield(yr) / Y(yr);
+    ssb(yr) *=  Rrel(yr) * rmax(yr);
+    R(yr) = Rrel(yr) * rmax(yr);
     for(int i=0; i<nwc; i++) {
       if(usePois) {
         if(freq(i, yr) > 0) 
@@ -100,8 +102,8 @@ Type objective_function<Type>::operator() ()
   // ADREPORT(sdFm);
   // ADREPORT(sdWfs);
   
-  REPORT(Rrel);
-  REPORT(rmax);
+  ADREPORT(Rrel);
+  ADREPORT(rmax);
   return nll;
 }
 

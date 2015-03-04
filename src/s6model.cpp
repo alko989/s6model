@@ -91,13 +91,14 @@ Type objective_function<Type>::operator() ()
   ADREPORT(Y);
   ADREPORT(ssb);
   ADREPORT(R);
+  ADREPORT(Rrel);
+  ADREPORT(rmax);
   
   REPORT(Nvec);
   REPORT(Weight);
   REPORT(freq);
   REPORT(residuals);
-  REPORT(Rrel);
-  REPORT(rmax);
+  
   return nll;
 }
 
