@@ -49,13 +49,19 @@ getalim <- function (p) {
 }
 
 
-getCI <- function (inputData, ests, a.mean, a.sd, nsample, winf.ubound, yield, probs, Winf, ...) {
+getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.ubound, yield, probs, Winf, ...) {
   aplfun <- if(require(parallel)) mclapply else lapply
   maplfun <- if(require(parallel)) mcmapply else mapply
   r <- function(x) round(x, 2)
-  ci <- lapply(seq(along.with = inputData), function(i) {
-    alim <- getalim(ests[[i]])
+  if(same.as) {
+    alim <- getalim(meanParameters(ests))
     as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
+  }
+  ci <- lapply(seq(along.with = inputData), function(i) {
+    if(!same.as) {
+      alim <- getalim(ests[[i]])
+      as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
+    }
     results <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, Winf = getWinf(ests[[i]]),
                                                    totalYield = yield[i], ...))
     reps <- results
@@ -126,7 +132,8 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
       estpars <- lapply(ests, function(x) attr(x, "estpars"))
     }
     if(a.sd > 0 & nsample > 1) {
-      attr(res, "CI") <- getCI(inputData, estpars, a.mean, a.sd, nsample, winf.ubound, yield, probs, ...)
+      attr(res, "CI") <- getCI(inputData = inputData, ests = estpars, a.mean = a.mean, a.sd = a.sd,
+                               same.as = TRUE, nsample = nsample, winf.ubound = winf.ubound, yield = yield, probs = probs, ...)
     } 
   })
   opts <- list(...)
