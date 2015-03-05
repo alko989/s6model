@@ -70,11 +70,11 @@ subsetDatras <- function(dat, species="Gadus morhua", gear=NULL,
 ##' @return list of \code{data.frame}s, one for each year
 ##' @author alko
 ##' @export
-getDfYears <- function(dat, years = as.numeric(levels(dat[[2]]$Year)), ...) {
-  lapply(years, function(yr) {
+getDfYears <- function(dat, years = as.numeric(levels(dat[[2]]$Year)), binsize = 100, ...) {
+  setNames(lapply(years, function(yr) {
     d <- subset(dat, Year %in% yr)
-    datrasraw2weightfreq(d, ...)
-  })
+    changeBinsize2(datrasraw2weightfreq(d, ...), binsize = binsize)
+  }), years)
 }
 
 ##' Convert a DATRASraw object to weight frequency data.frame
