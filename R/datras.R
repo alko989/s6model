@@ -11,8 +11,8 @@
 ##' @return if \code{out} is NULL, a DATRASraw object (invisible). If \code{out} is character, the filename of the saved RDS file. If the file specified in \code{out} exist, the function does not rewrite the file and returns the filename.
 ##' @author alko
 ##' @export
-subsetDatras <- function(dat, species="Gadus morhua", gear="GOV",
-                          years=c(1991, 2013), haulDur=c(25, 35), out=NULL) {
+subsetDatras <- function(dat, species="Gadus morhua", gear=NULL,
+                          years=c(1991, 2014), haulDur=NULL, icesAreas = NULL, out=NULL) {
   pnh <- function(o) cat("Number of hauls: ", nrow(o[[2]]), "\n")
   if(! is.null(out)) {
     if(file.exists(out)) return(out)
@@ -44,6 +44,11 @@ subsetDatras <- function(dat, species="Gadus morhua", gear="GOV",
   if( ! is.null(haulDur)) {
     cat("\n *** Selecting only hauls with duration: ", paste(haulDur, collapse=" - "), "***\n\n")
     res <- subset(res, haulDur[1]<HaulDur & HaulDur<haulDur[2])
+    pnh(res)
+  }
+  if( ! is.null(icesAreas)) {
+    cat("\n *** Selecting only hauls in areas: ", paste(icesAreas, collapse=" - "), "***\n\n")
+    res <- subset(res, ICES_area %in% icesAreas)
     pnh(res)
   }
   cat("\n *** Adding spectrum ***\n\n")
