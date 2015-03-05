@@ -90,11 +90,12 @@ getDfYears <- function(dat, years = as.numeric(levels(dat[[2]]$Year)), binsize =
 ##' @author alko
 ##' @export
 datrasraw2weightfreq <- function(datr, a=0.01, b=3, estWL=FALSE, verbose=TRUE) {
-  
   df <- aggregate(Count  ~ LngtCm, data=datr[["HL"]], sum, na.action=na.omit)
   names(df) <- c("Length", "Freq")
   if(estWL) {
-    fit <- lm(log(IndWgt) ~ log(LngtCm), data = datr[[1]])
+    ca <- datr[["CA"]][, c("LngtCm", "IndWgt")]
+    ca <- ca[which(ca$IndWgt != 0), ]
+    fit <- lm(log(IndWgt) ~ log(LngtCm), data = na.omit(ca))
     coef <- coefficients(fit)
     if(verbose) cat(coef, "\n")
     a <- exp(coef[1])
@@ -103,7 +104,7 @@ datrasraw2weightfreq <- function(datr, a=0.01, b=3, estWL=FALSE, verbose=TRUE) {
   }
   df$Weight <- a * df$Length ^ b
   if(verbose) showDf(df)
-  attr(df, "createdBy") <- getVersion()
+  attr(df, "createdBy") <- s6model:::getVersion()
   invisible(df)
 }
 
