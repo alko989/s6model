@@ -330,6 +330,11 @@ changeBinsize <- function(df, binsize = 10, keepZeros = TRUE) {
 
 ##' @export
 changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq", verbose = options()$verbose) {
+  if(is(df, "list")) { 
+    return(lapply (df, changeBinsize2, binsize = binsize, keepZeros = keepZeros, 
+                   weight.col = weight.col, freq.col = freq.col, verbose = verbose)) 
+  }
+  if(dim(df)[1] == 0 ) return( structure(data.frame(Weight = numeric(0), Freq = integer(0)), binsize = binsize))
   cuts <- seq(0, max(df[weight.col], na.rm = TRUE) + binsize, binsize)
   labs <- head(cuts + binsize/2, -1)
   res <- data.frame(Weight = cut(df[[weight.col]], breaks = cuts, labels = labs), Freq = df[[freq.col]])
