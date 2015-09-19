@@ -75,7 +75,8 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
       alim <- getalim(ests[[i]])
       as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
     }
-    results <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, Winf = getWinf(ests[[i]]),
+    Winf <- if(is.null(ests[[i]])) NULL else getWinf(ests[[i]])
+    results <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, Winf = Winf,
                                                    totalYield = yield[i], ...))
     reps <- results
     err <- sapply(results, function(x) is(x, "try-error"))
@@ -88,7 +89,7 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
     repsdf <- do.call(rbind.data.frame, reps)
     nrep <- nrow(repsdf)
     n <- function(x) if(length(x) > 0) sum(x) else 0
-    structure(as.data.frame(apply(repsdf, 2, quantile, probs = probs, na.rm = TRUE)), results = data.frame(results),
+    structure(as.data.frame(apply(repsdf, 2, quantile, probs = probs, na.rm = TRUE)), results = results,
               alim=alim, as = as, nrep = nrep, notConv = n(notConv) , nVerySmall = n(verySmall),
               nerr = n(err), err = err, errmsg = errmsg)
   })
