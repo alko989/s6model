@@ -502,7 +502,14 @@ parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Param
 ##' @export
 ##' @rdname Parameters
 meanParameters <- function(x) {
+  if(is.null(x)) {
+    warning("Argument x in `meanParameters` is NULL")
+    return(NULL)
+  }
   p <- as.list(parameters())
   do.call(parameters, 
           list(names = names(p), 
-               vals = sapply(seq(p), function(i) mean(sapply(x, function(xx) c(as.list(xx)[[i]])))), transformed = FALSE))}
+               vals = sapply(seq(p), function(i) mean(sapply(x, function(xx) {
+                 if(is.null(xx)) return(NA)
+                 c(as.list(xx)[[i]])  
+               }), na.rm = TRUE)), transformed = FALSE))}
