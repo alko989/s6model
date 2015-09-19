@@ -303,8 +303,12 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
 ##' @export 
 addIces<- function(stock, icesfile = "~/Work/mainCode/R/SecondPaper/ICES/ICES-cod.RData",
                    col="darkgrey", lwd=2, lty = c(2,1,2), what = "FFmsy", mult = 1, ...) {
-  load(icesfile)
-  ices <- ices.cod[[stock]]
+  n <- load(icesfile)
+  firstList <- n[sapply(mget(n, inherits = TRUE), class) == "list"][1]
+  if(is.na(fistList)) stop("No list object found in ", icesfile)
+  stocks <- get(firstList)
+  ices <- stocks[[stock]]
+  if(is.null(ices)) stop("Stock ", stock, " was not in the list ", firstList)
   nms <- tolower(names(ices))
   what <- tolower(what)
   if(what == "ffmsy")
