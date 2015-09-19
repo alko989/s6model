@@ -217,6 +217,20 @@ getYears <- function(x) {
   as.numeric(regmatches(x, regexpr("[0-9]+", x)))
 }
 
+constrFilename <- function(stock = "generic-stock", a, sdloga, winfub, estimateWinf, Winf, 
+                           # sigma = NULL, usePois = TRUE, aggryrs = 1, ## Not implemented yet
+                           estimateU, nsample, includeUncertainty = nsample > 1, equalWinf, ...) {
+  paste0(stock, "_a=", a, 
+         "_sdloga=", sdloga, 
+         if(estimateWinf) 
+           paste0("_estWinf_winfUbound=", winfub) else paste0("_fixWinf=",Winf),  
+         "_estSigma", "_usePoison", "_aggryrs=1",  
+         if(estimateU) "_estu" else "_fixu=10",
+         "_nsample=", if(includeUncertainty) nsample else 1, 
+         if(equalWinf) "_equalWinf" else "_difWinf",
+         ".RData")
+}
+
 ##' @export
 ##' @rdname s6modelResults
 plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE, 
