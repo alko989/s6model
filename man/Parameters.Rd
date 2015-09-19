@@ -22,8 +22,6 @@ parameters(names = c(), vals = c(), transformed = TRUE,
 meanParameters(x)
 }
 \arguments{
-\item{x}{Parameters object}
-
 \item{names}{String vector. Contains the names of the parameters that will
 have non default values.}
 

@@ -3,7 +3,8 @@
 \alias{getDfYears}
 \title{Get yearly weight frequencies}
 \usage{
-getDfYears(dat, years = as.numeric(levels(dat[[2]]$Year)), ...)
+getDfYears(dat, years = as.numeric(levels(dat[[2]]$Year)), binsize = 100,
+  ...)
 }
 \arguments{
 \item{dat}{DATRASraw object}
