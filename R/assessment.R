@@ -195,7 +195,7 @@ makeShading <- function(x, ylow, yhigh, col = grey(0.8), ...) {
 
 addConfidenceShading <- 
   function(x, y, ..., probs = c(0.025, 0.975), exclude = 0, 
-           what = "FFmsy", grey.intensity = 1.5, 
+           what = "FFmsy", grey.intensity = 1.5, col.ci = 1,
            addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2) {
     if(is(y, "s6modelResults")) {
       r <- attr(y, "Results")
@@ -208,7 +208,7 @@ addConfidenceShading <-
       if(what == "FFmsy") {
         w <- sweep(w, 2, y$Fm / y$FFmsy, "/")
       }
-      makeShading(x, w[1,], w[2, ],  col = "lightgrey")
+      makeShading(x, w[1,], w[2, ],  col = col.ci)
     } else if (is(y, "data.frame")){
       d <- nrow(y) - 1
       for(i in seq(1 + exclude, d / 2)) {
@@ -219,7 +219,7 @@ addConfidenceShading <-
         lines(x, y[d/2 + 1, ], col = col.median, lty = lty.median, lwd=lwd.median)
       }
     } else {
-      stop("Only data.frame or s6modelResults are accepted as input by addConfidenceShading")
+      stop("Only data.frame or s6modelResults are accepted as input to addConfidenceShading")
     }
   }
 
@@ -266,7 +266,9 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
     xs <- years
   }
   ys <- x[[what]] / mult
-  cidf <- attr(x, "CI")[[what]] / mult
+  CI <- attr(x, "CI")
+  if(is.null(CI)) ci <- "none"
+  cidf <- CI[[what]] / mult
   ylim <- if(is.null(ylim)) range(ys, cidf, na.rm = TRUE) else ylim
   
   plot(xs, ys, type="n", ylim=ylim, xlab = "", ylab = "", xaxs = xaxs, yaxs = yaxs, ...)
