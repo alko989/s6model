@@ -22,15 +22,16 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logWfs);
   PARAMETER(logSigma);
   PARAMETER(logeta_S);
+  PARAMETER(logu);
+  Type u = exp(logu);
   Type sigma = exp(logSigma);
-  Type u = 10.0;
-  vector<Type> Nvec(nwc);
-  vector<Type> Weight(nwc);
   Type Fm = exp(logFm);
   Type Winf = exp(logWinf);
   Type Wfs = exp(logWfs);
   Type a = exp(loga);
   Type eta_S = exp(logeta_S);
+  vector<Type> Nvec(nwc);
+  vector<Type> Weight(nwc);
   Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha, ssb, rmax, R;
   wr = 0.001;
   cumsum=0.0;
@@ -93,6 +94,7 @@ Type objective_function<Type>::operator() ()
   ADREPORT(R);
   ADREPORT(Rrel);
   ADREPORT(rmax);
+  ADREPORT(u);
   
   REPORT(Nvec);
   REPORT(Weight);

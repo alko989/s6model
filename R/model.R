@@ -294,7 +294,7 @@ calcFmsy <- function(params=NULL) {
   }
   if( ! is(params,"list"))
     stop("params is of class ", class(params))
-  def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.35, M=1000)
+  def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.27, M=1000, u = 10)
   def <- replace(def, names(params), unlist(params))
   obj <- MakeADFun(def, list(logF = log(0.2)), DLL="calcFmsy")
   obj$env$tracemgc <- FALSE
