@@ -129,31 +129,41 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
   set.seed(seed)
   if(is.null(yield)) yield <- rep(0.0001, length(inputData))
   sigma <- if(is.null(sigma) || is.na(sigma)) rep(NA, length(inputData)) else sapply(inputData, function(x) mean(rle(x$Freq)$lengths) * sum(x$Freq))
-  timeToCompletion <- system.time({
-    if(equalWinf) {
-      ests <- estimate_TMB(inputData, DLL = "s6modelts", totalYield = yield, 
-                           sigma = sigma, a=a.mean, winf.ubound = winf.ubound, ...)
-      estpars <- attr(ests, "estpars")
-      res <- ests
-    } else {
-      ests <- mapply(function(x, y, s) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound,
-                                                    totalYield = y, sigma = s, DLL = "s6model", ...),
-                     inputData, yield, sigma, SIMPLIFY = FALSE)
-      res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 15) else x[1:15] )
-      res <- do.call(rbind.data.frame, res)
-      row.names(res) <- names(inputData)
-      estpars <- lapply(ests, function(x) attr(x, "estpars"))
-    }
-    if(a.sd > 0 & nsample > 1) {
-      attr(res, "CI") <- getCI(inputData = inputData, ests = estpars, a.mean = a.mean, a.sd = a.sd,
-                               same.as = TRUE, nsample = nsample, winf.ubound = winf.ubound, yield = yield, probs = probs, ...)
-    } 
-  })
+  starting <- Sys.time()
+  inputData <- changeBinsize2(inputData)
+  if(equalWinf) {
+    ests <- try(estimate_TMB(inputData, DLL = "s6modelts", totalYield = yield, 
+                             sigma = sigma, a=a.mean, winf.ubound = winf.ubound, ...))
+    #     while(is(ests, "try-error")) {
+    #       ests <- try(estimate_TMB(inputData, DLL = "s6modelts", totalYield = yield, 
+    #                                sigma = sigma, a=a.mean, winf.ubound = winf.ubound, ...))
+    #     }
+    estpars <- attr(ests, "estpars")
+    res <- ests
+  } else {
+    ests <- mapply(function(x, y, s) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound,
+                                                  totalYield = y, sigma = s, DLL = "s6model", ...),
+                   inputData, yield, sigma, SIMPLIFY = FALSE)
+    res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 15) else x[1:15] )
+    res <- do.call(rbind.data.frame, res)
+    row.names(res) <- names(inputData)
+    estpars <- lapply(ests, function(x) attr(x, "estpars"))
+  }
+  if(is(res, "try-error")) {
+    cat("There was an error whith the estimation")
+    return(res)
+  }  
+  if(a.sd > 0 & nsample > 1) {
+    attr(res, "CI") <- getCI(inputData = inputData, ests = estpars, a.mean = a.mean, a.sd = a.sd,
+                             same.as = same.as, nsample = nsample, winf.ubound = winf.ubound, yield = yield, probs = probs, ...)
+  } 
   opts <- list(...)
-  res <- structure(res, Results = ests, version = getVersion(), timeToCompletion = timeToCompletion,
+  res <- structure(res, Results = ests, version = getVersion(), timeToCompletion = Sys.time() - starting,
                    seed = seed, opts = list(tmbopts = c(opts, a.mean = a.mean, a.sd = a.sd, 
-                   winf.ubound = winf.ubound, yield = yield), probs = probs))
-  class(res) <- c("s6modelResults", class(res))
+                                                        winf.ubound = winf.ubound, yield = yield), probs = probs))
+  if( ! is(res,"try-error")) { 
+    class(res) <- c("s6modelResults", class(res))
+  }
   if(!is.null(fnout)) {
     dir.create(dirout, showWarnings = FALSE)
     out <- file.path(dirout, fnout)
