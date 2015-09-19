@@ -72,8 +72,9 @@ subsetDatras <- function(dat, species="Gadus morhua", gear=NULL,
 ##' @export
 getDfYears <- function(dat, years = as.numeric(levels(dat[[2]]$Year)), binsize = 100, ...) {
   setNames(lapply(years, function(yr) {
-    d <- subset(dat, Year %in% yr)
-    changeBinsize2(datrasraw2weightfreq(d, ...), binsize = binsize)
+    cat("Making the data.frame for year", yr, "\n")
+    dyr <- subset(dat, Year %in% yr)
+    changeBinsize2(datrasraw2weightfreq(dyr, ...), binsize = binsize)
   }), years)
 }
 
@@ -90,17 +91,24 @@ getDfYears <- function(dat, years = as.numeric(levels(dat[[2]]$Year)), binsize =
 ##' @author alko
 ##' @export
 datrasraw2weightfreq <- function(datr, a=0.01, b=3, estWL=FALSE, verbose=TRUE) {
-  df <- aggregate(Count  ~ LngtCm, data=datr[["HL"]], sum, na.action=na.omit)
+  emptyDF <- data.frame(Weight = numeric(0), Freq = integer(0))
+  if(dim(datr[["HL"]])[1] == 0) return(emptyDF)
+  tr <- try(df <- aggregate(Count  ~ LngtCm, data=datr[["HL"]], sum, na.action=na.omit), silent = TRUE)
+  if(is(tr, "try-error")) return(emptyDF)
   names(df) <- c("Length", "Freq")
   if(estWL) {
     ca <- datr[["CA"]][, c("LngtCm", "IndWgt")]
     ca <- ca[which(ca$IndWgt != 0), ]
+    if(dim(ca)[1] < 15) {
+      cat("No weight and length information are available. Default values for a and b are used: a = ", a, ", b = ", b, "\n" )
+    } else {
     fit <- lm(log(IndWgt) ~ log(LngtCm), data = na.omit(ca))
     coef <- coefficients(fit)
     if(verbose) cat(coef, "\n")
     a <- exp(coef[1])
     b <- coef[2]
     if(verbose) print(summary(fit))
+    }
   }
   df$Weight <- a * df$Length ^ b
   if(verbose) showDf(df)
