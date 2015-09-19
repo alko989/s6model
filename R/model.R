@@ -350,6 +350,28 @@ changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
   res
 }
 
+#' @export
+changeBinsize3 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq", verbose = options()$verbose) {
+  if(is(df, "list")) { 
+    return(lapply (df, changeBinsize2, binsize = binsize, keepZeros = keepZeros, 
+                   weight.col = weight.col, freq.col = freq.col, verbose = verbose)) 
+  }
+  if(dim(df)[1] == 0 ) return( structure(data.frame(Weight = numeric(0), Freq = integer(0)), binsize = binsize))
+  res <- df %>% 
+    group_by_(WeightClass = ~cut(weight.col, breaks = seq(0, max(weight.col) + binsize, by = binsize) )) %>% 
+    summarise_(Freq = ~sum(freq.col)) %>% 
+    mutate_(Weight = ~WeightClass %>% 
+             sapply( . %>% as.character %>% getmid)) %>% 
+    select(Weight, Freq, WeightClass) %>% 
+    `attr<-`("binsize", binsize)
+  if (! keepZeros) {
+    res <- res[df$Freq > 0, ]
+  }
+  if(verbose) cat("Done")
+  res
+}
+
+
 ##' @export
 ##' @title Find newest file in folder matching pattern
 ##' @description Given a folder and a pattern, rerurns the file that was modified latest.
@@ -358,7 +380,8 @@ changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
 ##' @seealso \code{dir}
 findLatest <- function(path = ".", pattern = "") {
   files <- dir(path, pattern, ignore.case = TRUE, full.names = TRUE)
-  
+  if(length(files) == 0) return(NULL)
+  if(length(files) == 1) return(files)
   df <- lapply(files, function(f){
     data.frame(fn = f, mtime = file.info(f)$mtime, stringsAsFactors = FALSE)
   })
