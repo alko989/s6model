@@ -63,11 +63,16 @@ getalim <- function (p) {
 
 
 getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.ubound, yield, probs, Winf, ...) {
+  if(is(ests, "Parameters")) {
+    ests <- list(ests)
+    inputData
+  }
+  
   aplfun <- if(require(parallel)) mclapply else lapply
   maplfun <- if(require(parallel)) mcmapply else mapply
   r <- function(x) round(x, 2)
   if(same.as) {
-    alim <- getalim(meanParameters(ests))
+    alim <- getalim(meanParameters(ests))  
     as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
   }
   ci <- lapply(seq(along.with = inputData), function(i) {
@@ -188,16 +193,18 @@ print.s6modelResults <- function(x, ...) {
   invisible(x)
 }
 
-makeShading <- function(x, ylow, yhigh, col = grey(0.8), ...) {
+makeShading <- function(x, ylow, yhigh, col = grey(0.8), alpha = 1, ...) {
   xs <- c(x, rev(x))
   ys <- c(ylow, rev(yhigh))
   notna <- ! is.na(ys)
+  col <- col2rgb(col) / 255
+  col <- rgb(col[1], col[2], col[3], alpha)
   polygon(xs[notna], ys[notna], col = col, border = NA)
 }
 
 addConfidenceShading <- 
   function(x, y, ..., probs = c(0.025, 0.975), exclude = 0, 
-           what = "FFmsy", grey.intensity = 1.5, col.ci = 1,
+           what = "FFmsy", grey.intensity = 1.5, col.ci = 1, alpha = 1,
            addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2) {
     if(is(y, "s6modelResults")) {
       r <- attr(y, "Results")
@@ -210,12 +217,12 @@ addConfidenceShading <-
       if(what == "FFmsy") {
         w <- sweep(w, 2, y$Fm / y$FFmsy, "/")
       }
-      makeShading(x, w[1,], w[2, ],  col = col.ci)
+      makeShading(x, w[1,], w[2, ],  col = col.ci, alpha = alpha)
     } else if (is(y, "data.frame")){
       d <- nrow(y) - 1
       for(i in seq(1 + exclude, d / 2)) {
         gr <- max(min(1, (1 - i / ((d - (2 * exclude))) / grey.intensity )), 0)
-        makeShading(x, y[i, ], y[d - i, ], col=grey(gr) )
+        makeShading(x, y[i, ], y[d - i, ], col=grey(gr), alpha = alpha)
       }
       if(addMedian) {
         lines(x, y[d/2 + 1, ], col = col.median, lty = lty.median, lwd=lwd.median)

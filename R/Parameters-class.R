@@ -512,4 +512,5 @@ meanParameters <- function(x) {
                vals = sapply(seq(p), function(i) mean(sapply(x, function(xx) {
                  if(is.null(xx)) return(NA)
                  c(as.list(xx)[[i]])  
-               }), na.rm = TRUE)), transformed = FALSE))}
+               }), na.rm = TRUE)), transformed = FALSE))
+  }
