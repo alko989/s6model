@@ -514,3 +514,16 @@ meanParameters <- function(x) {
                  c(as.list(xx)[[i]])  
                }), na.rm = TRUE)), transformed = FALSE))
   }
+
+##' @export
+simulate.Parameters <- function(object, nsim = 1000, seed = NULL, binsize = 5, keepZeros = TRUE) {
+  if(!is.null(seed)) set.seed(seed)
+  p <- getParams(object)
+  s <- rmultinom(1, nsim, p$pdfN.approx(1:p$Winf))
+  df <- structure(data.frame(Weight = 1:p$Winf, Freq = s[,1]), binsize = 1)
+  df <- changeBinsize2(df, binsize = binsize, keepZeros = keepZeros)
+  rl <- rle(df$Freq)
+  df <- head(df, nrow(df) - if(tail(rl$values, 1) == 0) tail(rl$lengths, 1) else 0)
+  class(df) <-c("WeightFreq", "data.frame")
+  df
+}
