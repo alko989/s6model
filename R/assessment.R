@@ -62,7 +62,7 @@ getalim <- function (p) {
 }
 
 
-getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.ubound, yield, probs, Winf, ...) {
+getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.ubound, yield, probs, Winf, u, ...) {
   if(is(ests, "Parameters")) {
     ests <- list(ests)
     inputData
@@ -81,7 +81,7 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
       as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
     }
     Winf <- if(is.null(ests[[i]])) NULL else getWinf(ests[[i]])
-    results <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, Winf = Winf,
+    results <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, Winf = Winf, u = u,
                                                    totalYield = yield[i], ...))
     reps <- results
     err <- sapply(results, function(x) is(x, "try-error"))
@@ -132,7 +132,7 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
                            probs = seq(0, 1, 0.01), winf.ubound = 2, equalWinf = TRUE,
                            dirout = "results", yield = NULL, seed = as.integer(rnorm(1, 1000, 100)),
                            fnout = format.Date(Sys.time(), "results_%Y%m%d_%H%M.RData"), sigma = NULL,
-                           same.as = TRUE, ...) {
+                           same.as = TRUE, u = 10, ...) {
   set.seed(seed)
   if(is.null(yield)) yield <- rep(0.0001, length(inputData))
   sigma <- if(is.null(sigma) || is.na(sigma)) rep(NA, length(inputData)) else sapply(inputData, function(x) mean(rle(x$Freq)$lengths) * sum(x$Freq))
@@ -140,7 +140,7 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
   inputData <- changeBinsize2(inputData)
   if(equalWinf) {
     ests <- try(estimate_TMB(inputData, DLL = "s6modelts", totalYield = yield, 
-                             sigma = sigma, a=a.mean, winf.ubound = winf.ubound, ...))
+                             sigma = sigma, a=a.mean, winf.ubound = winf.ubound, u = u, ...))
     #     while(is(ests, "try-error")) {
     #       ests <- try(estimate_TMB(inputData, DLL = "s6modelts", totalYield = yield, 
     #                                sigma = sigma, a=a.mean, winf.ubound = winf.ubound, ...))
@@ -149,7 +149,7 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
     res <- ests
   } else {
     ests <- mapply(function(x, y, s) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound,
-                                                  totalYield = y, sigma = s, DLL = "s6model", ...),
+                                                  totalYield = y, sigma = s, u = u, DLL = "s6model", ...),
                    inputData, yield, sigma, SIMPLIFY = FALSE)
     res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 15) else x[1:15] )
     res <- do.call(rbind.data.frame, res)
@@ -161,13 +161,13 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
     return(res)
   }  
   if(a.sd > 0 & nsample > 1) {
-    attr(res, "CI") <- getCI(inputData = inputData, ests = estpars, a.mean = a.mean, a.sd = a.sd,
+    attr(res, "CI") <- getCI(inputData = inputData, ests = estpars, a.mean = a.mean, a.sd = a.sd, u = u,
                              same.as = same.as, nsample = nsample, winf.ubound = winf.ubound, yield = yield, probs = probs, ...)
   } 
   opts <- list(...)
   res <- structure(res, Results = ests, version = getVersion(), timeToCompletion = Sys.time() - starting,
                    seed = seed, opts = list(tmbopts = c(opts, a.mean = a.mean, a.sd = a.sd, 
-                                                        winf.ubound = winf.ubound, yield = yield), probs = probs))
+                                                        winf.ubound = winf.ubound, yield = yield, u = u), probs = probs))
   if( ! is(res,"try-error")) { 
     class(res) <- c("s6modelResults", class(res))
   }
@@ -236,16 +236,16 @@ getYears <- function(x) {
   as.numeric(regmatches(x, regexpr("[0-9]+", x)))
 }
 
-constrFilename <- function(stock, a, sdloga, winf.ubound, Winf,
+constrFilename <- function(stock, a, sdloga, winf.ubound, Winf, sigma, usePois, u,
                            # aggryrs = 1, ## Not implemented yet
-                           estimateU, nsample, includeUncertainty = nsample > 1, equalWinf, ...) {
+                           nsample, includeUncertainty = nsample > 1, equalWinf, ...) {
   estimateWinf <- is.null(Winf)
   paste0(stock, "_a=", a, 
          "_sdloga=", sdloga, 
          if(estimateWinf) paste0("_estWinf_winfUbound=", winf.ubound) else paste0("_fixWinf=", Winf), 
          if(is.null(sigma)) "_estSigma" else paste0("_sigma=", sigma), 
          if(usePois) "_usePoison" else "_useGauss", "_aggryrs=1",  
-         if(estimateU) "_estu" else "_fixu=10",
+         if(is.null) "_estu" else "_fixu=10",
          "_nsample=", if(includeUncertainty) nsample else 1, 
          if(equalWinf) "_equalWinf" else "_difWinf",
          ".RData")
