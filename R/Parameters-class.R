@@ -313,7 +313,7 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
             lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
             ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
             lines(p$w, p$pdfN.approx(p$w), col="blue", lwd = 2, ...)
-            legend("topright", , c("fitted PDF", "Data kernel density"), col=c("blue","red"),
+            legend("topright", NULL, c("fitted PDF", "Data kernel density"), col=c("blue","red"),
                    lty=1, lwd=2, seg.len=5)
             invisible(NULL)
           })
