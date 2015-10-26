@@ -175,7 +175,7 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
     dir.create(dirout, showWarnings = FALSE)
     out <- file.path(dirout, fnout)
     save(res, file = out)
-    cat("Results are saved in:", out)
+    cat("Results are saved in:", out, "\n")
   }
   res
 }
