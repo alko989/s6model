@@ -245,7 +245,7 @@ constrFilename <- function(stock, a, sdloga, winf.ubound, Winf, sigma, usePois, 
          if(estimateWinf) paste0("_estWinf_winfUbound=", winf.ubound) else paste0("_fixWinf=", Winf), 
          if(is.null(sigma)) "_estSigma" else paste0("_sigma=", sigma), 
          if(usePois) "_usePoison" else "_useGauss", "_aggryrs=1",  
-         if(is.null) "_estu" else "_fixu=10",
+         if(is.null(u)) "_estu" else "_fixu=10",
          "_nsample=", if(includeUncertainty) nsample else 1, 
          if(equalWinf) "_equalWinf" else "_difWinf",
          ".RData")
