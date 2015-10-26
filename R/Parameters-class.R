@@ -527,3 +527,13 @@ simulate.Parameters <- function(object, nsim = 1000, seed = NULL, binsize = 5, k
   class(df) <-c("WeightFreq", "data.frame")
   df
 }
+
+##' @export
+plot.WeightFreq <- function(x, ...) {
+  plot(x, ...)
+}
+
+##' @export
+hist.WeightFreq <- function(x, ..., main = "", xlab = "Weight") {
+  hist(rep(x$Weight, x$Freq), xlab = xlab,  main = main, ...)
+}
