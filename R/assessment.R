@@ -236,12 +236,12 @@ getYears <- function(x) {
   as.numeric(regmatches(x, regexpr("[0-9]+", x)))
 }
 
-constrFilename <- function(stock, a, sdloga, winf.ubound, Winf, sigma, usePois, u,
+constrFilename <- function(stock, a, a.sd, winf.ubound, Winf, sigma, usePois, u,
                            # aggryrs = 1, ## Not implemented yet
                            nsample, includeUncertainty = nsample > 1, equalWinf, ...) {
   estimateWinf <- is.null(Winf)
   paste0(stock, "_a=", a, 
-         "_sdloga=", sdloga, 
+         "_asd=", a.sd, 
          if(estimateWinf) paste0("_estWinf_winfUbound=", winf.ubound) else paste0("_fixWinf=", Winf), 
          if(is.null(sigma)) "_estSigma" else paste0("_sigma=", sigma), 
          if(usePois) "_usePoison" else "_useGauss", "_aggryrs=1",  
