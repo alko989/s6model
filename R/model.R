@@ -298,7 +298,7 @@ calcFmsy <- function(params=NULL) {
   def <- replace(def, names(params), unlist(params))
   obj <- MakeADFun(def, list(logF = log(0.2)), DLL="calcFmsy")
   obj$env$tracemgc <- FALSE
-  obj$env$silent <- TRUE; newtonOption(trace=0); config(trace.optimize = 0,DLL="calcFmsy")
+  obj$env$silent <- TRUE; newtonOption(obj=obj,trace=0); config(trace.optimize = 0,DLL="calcFmsy")
   opt <- try(do.call("optim", obj))
   res <- try(sdreport(obj)$val)
   if(is(res, "try-error"))

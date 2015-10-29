@@ -281,7 +281,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     obj$env$inner.control$trace <- verbose
     obj$env$silent <- ! verbose
     if(! verbose) {
-      newtonOption(trace=0)
+      newtonOption(obj=obj, trace=0)
       config(trace.optimize = 0, DLL=DLL)
     }
     opt <- nlminb(obj$par, obj$fn, obj$gr, upper = upper)
