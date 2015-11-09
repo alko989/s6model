@@ -105,7 +105,7 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
   err <- sapply(ci, function(x) attr(x, "err"))
   errmsg <- sapply(ci, function(x) attr(x, "errmsg"))
   notConv <- sapply(ci, function(x) attr(x, "notConv"))
-  allResults <- lapply(ci, function(x) attr(x, "results"))
+  ## allResults <- lapply(ci, function(x) attr(x, "results"))
   as <-  lapply(ci, function(x) attr(x, "as"))
   nms <- names(ci[[1]])
   ci <- lapply(nms, function(nm) lapply(ci, function(d) d[[nm]]))
@@ -117,7 +117,8 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
   })
   ci <- setNames(ci, nms)
   structure(ci, alims = alims, as = as, reps = reps, nVerySmall = nVerySmall, notConv = notConv, nerr = nerr, 
-            err = err, errmsg = errmsg, allResults = allResults)
+            err = err, errmsg = errmsg #, allResults = allResults
+            )
 }
 
 
