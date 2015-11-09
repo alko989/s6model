@@ -128,7 +128,7 @@ df2matrix <- function(df){
 }
 
 ##' @export
-makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100, binsize = 100,
+makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100, binsize = NULL,
                            probs = seq(0, 1, 0.01), winf.ubound = 2, equalWinf = TRUE,
                            dirout = "results", yield = NULL, seed = as.integer(rnorm(1, 1000, 100)),
                            fnout = format.Date(Sys.time(), "results_%Y%m%d_%H%M.RData"), sigma = NULL,
@@ -137,7 +137,7 @@ makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100,
   if(is.null(yield)) yield <- rep(0.0001, length(inputData))
   sigma <- if(is.null(sigma) || is.na(sigma)) rep(NA, length(inputData)) else sapply(inputData, function(x) mean(rle(x$Freq)$lengths) * sum(x$Freq))
   starting <- Sys.time()
-  inputData <- changeBinsize2(inputData)
+  if(! is.null(binsize)) inputData <- changeBinsize2(inputData, binsize = binsize)
   if(equalWinf) {
     ests <- try(estimate_TMB(inputData, DLL = "s6modelts", totalYield = yield, 
                              sigma = sigma, a=a.mean, winf.ubound = winf.ubound, u = u, ...))
