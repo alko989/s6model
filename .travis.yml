@@ -6,6 +6,7 @@ notifications:
     on_success: change
     on_failure: change
 
+
 deploy:
   provider: s3
   access_key_id: AKIAJNMXV5HVGHBZCKNQ
@@ -15,3 +16,11 @@ deploy:
   on:
     repo: alko989/s6model
     branch: poormansts
+
+r_github_packages:
+  - jimhester/covr
+
+after_success:
+  - Rscript -e 'library(covr);codecov()'
+
+
