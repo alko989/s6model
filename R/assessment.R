@@ -6,6 +6,28 @@
 #' @export
 setClass("s6modelResults")
 
+#' Fit weight-length relationship
+#'
+#' @param df \code{data.frame} or \code{DATRASraw} object containing length and weight data
+#' @param colname.weight chr, the name of the column containing weight data. Only used if df is \code{data.frame}
+#' @param colname.length chr, the name of the column containing length data. Only used if df is \code{data.frame}
+#' @param plotFit logical, if TRUE plot the fitted line along with the input data
+#'
+#' @return A list with a and b parameters and data points used (n)
+#' @export
+#'
+#' @examples
+#' ## Simulated data
+#' a <- 0.00058
+#' b <- 3.123
+#' df <- data.frame(lengths = 50:100,  weights =  a * c(50:100) ^ b + rnorm(51))
+#' 
+#' ## Fit weight-length relationship and compare with simulated values of a and b
+#' s6model:::fitWL(df, colname.weight = "we", colname.length = "le")
+#' ## a: 0.00057 (sim: 0.00058)
+#' ## b: 3.128   (sim: 3.123)
+#' 
+#' @note \code{fitWL} return an error if data from more than one species are contained in the DATRASraw object.
 fitWL <- function(df, colname.weight = "Weight", colname.length = "Length", plotFit = FALSE) {
   if(is(df, "data.frame")) {
     nms <- names(df)
