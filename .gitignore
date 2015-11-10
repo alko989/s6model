@@ -20,3 +20,4 @@ packrat
 *.so
 
 *.bak
+tests/testthat/*.pdf

@@ -12,6 +12,7 @@ setClass("s6modelResults")
 #' @param colname.weight chr, the name of the column containing weight data. Only used if df is \code{data.frame}
 #' @param colname.length chr, the name of the column containing length data. Only used if df is \code{data.frame}
 #' @param plotFit logical, if TRUE plot the fitted line along with the input data
+#' @param mindata integer, the minumum data points. If less data are available, default paramter values are returned with a warning.
 #'
 #' @return A list with a and b parameters and data points used (n)
 #' @export
@@ -28,19 +29,22 @@ setClass("s6modelResults")
 #' ## b: 3.128   (sim: 3.123)
 #' 
 #' @note \code{fitWL} return an error if data from more than one species are contained in the DATRASraw object.
-fitWL <- function(df, colname.weight = "Weight", colname.length = "Length", plotFit = FALSE) {
+#' @note If mindata is 4 or lower the minimum acceptable amount of data points is set to 4.
+fitWL <- function(df, colname.weight = "Weight", colname.length = "Length", plotFit = FALSE, mindata = 0) {
   if(is(df, "data.frame")) {
+    mindata <- max(4,mindata)
     nms <- names(df)
     wlcols <- c(pmatch(colname.weight, nms), pmatch(colname.length, nms))
     df <- setNames(df[wlcols], c("Weight", "Length"))
     w <- which(df$Weight > 0 & df$Length > 0, ! is.na(df$Weight) & ! is.na(df$Length))
     df <- df[w, ]
-    if(nrow(df) < 50) {
+    if(mindata > 0 & nrow(df) < mindata) {
       if(plotFit) {
         plot(1, axes = FALSE, type = "n", xlab = "", ylab = "")
         text(1,1, adj = 0.5, "No weight-length data")
       }
-      return(list(a = 0.01, b = 3, n = NA))
+      warning("Not enough data. Default parameter values are returned")
+      return(list(a = 0.01, b = 3, n = nrow(df)))
     }
     fit <- lm(log(Weight) ~ log(Length), data = df) 
     a <- as.numeric(exp(fit$coefficients[1]))
