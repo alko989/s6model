@@ -268,7 +268,7 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
 ##' @author alko
 setGeneric("plotFit", function(object, data, add, ...){ standardGeneric ("plotFit") })
 
-##'  @rdname plotFit-methods
+##' @rdname plotFit-methods
 ##' @aliases plotFit,Parameters,numeric,missing-method
 setMethod("plotFit", c("Parameters", "numeric", "missing"),
           function(object, data,...) {plotFit(object, data, FALSE,...)})
@@ -326,7 +326,7 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
 ##' @author alko
 ##' @docType methods
 ##' @rdname plotGrowthMortality
-##'  @export
+##' @export
 setGeneric("plotGrowth", function(object, ...) {standardGeneric("plotGrowth")})
 ##' @aliases plotGrowth,Parameters-methods
 setMethod("plotGrowth", c("Parameters"),

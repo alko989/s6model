@@ -19,3 +19,4 @@ Suggests:
     parallel,
     testthat,
     TMB
+RoxygenNote: 5.0.0.9000
