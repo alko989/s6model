@@ -286,6 +286,7 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
                                 cex.ver = 0.7, version = FALSE, xaxs = "i", yaxs = "i",
                                 ci = c("bootstrap", "estimated", "none"), grey.intensity = 1.5,
                                 exclude = 0, mult = 1) {
+  ci <- match.arg(ci)
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = expression(F~(y^-1)), 
                Winf = expression(W[infinity]~(g)), 
                Wfs = "50% retainment size (g)", 
@@ -302,7 +303,6 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
   }
   ys <- x[[what]] / mult
   CI <- attr(x, "CI")
-  if(is.null(CI)) ci <- "none"
   cidf <- CI[[what]] / mult
   ylim <- if(is.null(ylim)) range(ys, cidf, na.rm = TRUE) else ylim
   
