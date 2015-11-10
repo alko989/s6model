@@ -8,7 +8,9 @@ setClass("s6modelResults")
 
 fitWL <- function(df, colname.weight = "Weight", colname.length = "Length", plotFit = FALSE) {
   if(is(df, "data.frame")) {
-    df <- setNames(df[c(colname.weight, colname.length)], c("Weight", "Length"))
+    nms <- names(df)
+    wlcols <- c(pmatch(colname.weight, nms), pmatch(colname.length, nms))
+    df <- setNames(df[wlcols], c("Weight", "Length"))
     w <- which(df$Weight > 0 & df$Length > 0, ! is.na(df$Weight) & ! is.na(df$Length))
     df <- df[w, ]
     if(nrow(df) < 50) {
