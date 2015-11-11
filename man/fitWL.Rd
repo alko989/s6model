@@ -5,7 +5,7 @@
 \title{Fit weight-length relationship}
 \usage{
 fitWL(df, colname.weight = "Weight", colname.length = "Length",
-  plotFit = FALSE)
+  plotFit = FALSE, mindata = 0, ...)
 }
 \arguments{
 \item{df}{\code{data.frame} or \code{DATRASraw} object containing length and weight data}
@@ -15,6 +15,10 @@ fitWL(df, colname.weight = "Weight", colname.length = "Length",
 \item{colname.length}{chr, the name of the column containing length data. Only used if df is \code{data.frame}}
 
 \item{plotFit}{logical, if TRUE plot the fitted line along with the input data}
+
+\item{mindata}{integer, the minumum data points. If less data are available, default paramter values are returned with a warning.}
+
+\item{...}{additional arguments passed to plot}
 }
 \value{
 A list with a and b parameters and data points used (n)
@@ -24,6 +28,8 @@ Fit weight-length relationship
 }
 \note{
 \code{fitWL} return an error if data from more than one species are contained in the DATRASraw object.
+
+If mindata is 4 or lower the minimum acceptable amount of data points is set to 4.
 }
 \examples{
 ## Simulated data

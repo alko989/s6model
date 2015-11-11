@@ -13,6 +13,7 @@ setClass("s6modelResults")
 #' @param colname.length chr, the name of the column containing length data. Only used if df is \code{data.frame}
 #' @param plotFit logical, if TRUE plot the fitted line along with the input data
 #' @param mindata integer, the minumum data points. If less data are available, default paramter values are returned with a warning.
+#' @param ... additional arguments passed to plot
 #'
 #' @return A list with a and b parameters and data points used (n)
 #' @export
@@ -30,7 +31,7 @@ setClass("s6modelResults")
 #' 
 #' @note \code{fitWL} return an error if data from more than one species are contained in the DATRASraw object.
 #' @note If mindata is 4 or lower the minimum acceptable amount of data points is set to 4.
-fitWL <- function(df, colname.weight = "Weight", colname.length = "Length", plotFit = FALSE, mindata = 0) {
+fitWL <- function(df, colname.weight = "Weight", colname.length = "Length", plotFit = FALSE, mindata = 0, ...) {
   if(is(df, "data.frame")) {
     mindata <- max(4,mindata)
     nms <- names(df)
@@ -40,7 +41,7 @@ fitWL <- function(df, colname.weight = "Weight", colname.length = "Length", plot
     df <- df[w, ]
     if(mindata > 0 & nrow(df) < mindata) {
       if(plotFit) {
-        plot(1, axes = FALSE, type = "n", xlab = "", ylab = "")
+        plot(1, axes = FALSE, type = "n", xlab = "", ylab = "", ...)
         text(1,1, adj = 0.5, "No weight-length data")
       }
       warning("Not enough data. Default parameter values are returned")
@@ -60,7 +61,7 @@ fitWL <- function(df, colname.weight = "Weight", colname.length = "Length", plot
     return(fitWL(df[[1]], colname.weight = "IndWgt", colname.length = "LngtCm"))
   }
   if(plotFit) {
-    plot(Weight ~ Length, data = df, pch = 20, cex = 0.7)
+    plot(Weight ~ Length, data = df, pch = 20, cex = 0.7, ...)
     newdat <- data.frame(Length = seq(0, max(df$Length), length.out = 100))
     lines(newdat$Length, exp(predict(fit, newdata = newdat)), col =2)
   }
