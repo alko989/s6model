@@ -9,18 +9,22 @@
 \alias{meanParameters}
 \alias{parameters}
 \alias{plot.Parameters}
+\alias{simulate.Parameters}
 \title{The Parameters class and constructor}
 \usage{
-\method{plot}{Parameters}(x, xlim = c(0.001, 1), ...)
-
-\method{lines}{Parameters}(x, ...)
-
-\method{as.list}{Parameters}(x)
-
 parameters(names = c(), vals = c(), transformed = TRUE,
   base = new("Parameters"))
 
 meanParameters(x)
+
+\method{plot}{Parameters}(x, xlim = c(0.001, 1), ...)
+
+\method{lines}{Parameters}(x, ...)
+
+\method{as.list}{Parameters}(x, ...)
+
+\method{simulate}{Parameters}(object, nsim = 1000, seed = NULL,
+  binsize = 5, keepZeros = TRUE, ...)
 }
 \arguments{
 \item{names}{String vector. Contains the names of the parameters that will
@@ -31,12 +35,31 @@ have non default values.}
 \item{transformed}{Boolean. If TRUE vals should contain the transformed parameter values.}
 
 \item{base}{\code{Parameters} object. The parameter values will be used instead of the default values.}
+
+\item{x}{a Parameters object}
+
+\item{xlim}{the x limits (x1, x2) of the plot.}
+
+\item{...}{Arguments passed to other methods.}
+
+\item{object}{a \code{\link{Parameters}} object}
+
+\item{nsim}{number of individuals in the simulated sample}
+
+\item{seed}{the seed that is passed to \code{\link{set.seed}}.}
+
+\item{binsize}{numeric, the width of the weight classes in grams}
+
+\item{keepZeros}{logical, if TRUE keep bins with zero frequency. Note that the zeros after the last non-zero bin are always droped.}
 }
 \value{
 Returns an object of the Parameters class
 }
 \description{
 A class that contains all model parameters
+}
+\note{
+Additional arguments are passed to \code{\link{plot.default}} (from plot) and to \code{\link{lines}} (from lines). From all other functions the extra arguments are ignored.
 }
 \section{Slots}{
 

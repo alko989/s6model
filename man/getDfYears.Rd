@@ -12,6 +12,8 @@ getDfYears(dat, years = as.numeric(levels(dat[[2]]$Year)), binsize = 100,
 
 \item{years}{numeric vector, containing the years to return}
 
+\item{binsize}{numeric, the width of the weight classes in grams}
+
 \item{...}{additional arguments to \code{\link{datrasraw2weightfreq}}}
 }
 \value{

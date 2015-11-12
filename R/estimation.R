@@ -56,21 +56,22 @@ minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSu
 #' \code{estimateMultidata} uses both sources
 #' 
 #' 
-#' @param names String vector. The parameters to be estimated.
-#' @param data Numeric vector, or \code{data.frame} with columns Weight and Freq, or \code{list} with a numeric vector named `sample` or a \code{data.frame} named `df`.
+#' @param names string vector, the parameters to be estimated.
+#' @param data numeric vector, or \code{data.frame} with columns Weight and Freq, or \code{list} with a numeric vector named `sample` or a \code{data.frame} named `df`.
 #' Weight of individual fish (vector) or frequencies per weight class \code{data.frame}.
-#' @param start Numeric vector. Initial values of the parameters.
+#' @param start numeric vector, initial values of the parameters.
 #' @param lower The lower bound for the parameter estimation.
 #' @param upper The upper bound for the parameter estimation.
 #' @param fixed.names String vector. Names of constants.
 #' @param fixed.vals Numeric vector. Transformed values of constants.
 #' @param fixed.transformed Logical. If FALSE the constants are not transformed.
-#' @param plotFit Boolean. If TRUE a plot is produced with the fited pdf and the
+#' @param plotFit logical, if TRUE a plot is produced with the fited pdf and the
 #' kernel density estimate of the data.
-#' @param isSurvey Boolean. If TRUE the data are assumed to be from a survey.
-#' @param verbose Boolean. If TRUE the estimated confidence intervals are printed.
+#' @param isSurvey logical, if TRUE the data are assumed to be from a survey.
+#' @param verbose logical, if TRUE the estimated confidence intervals are printed.
+#' @param useTMB logical, if TRUE TMB is used for parameter estimation
 #' @param ... Additional named arguments passed to plotFit
-#' @return A Parameters object, containing the estimated parameters.
+#' @return \code{link{Parameters}} object, containing the estimated parameters.
 #' @note If data is a list containing both sample and df, the \code{data.frame} df will be used.
 #' @author alko
 #' @keywords optimize

@@ -2,12 +2,15 @@
 ##'
 ##' Selects species, gear, years, haul duration from DATRAS object and returns it
 ##' or save it in an RDS file
+##'
 ##' @param dat DATRAS object, or character containing the filename of an RDS file holding a DATRASraw object
 ##' @param species character vector, species to keep (latin name). If \code{NULL} all species are kept
 ##' @param gear character vector, gears to keep. If \code{NULL} all gears are kept
 ##' @param years numeric vector, if length is 2 it is the first and last year to keep, if length is 1 only the data of this year are kept. If \code{NULL} all years are kept
 ##' @param haulDur numeric vector of length 2 with the minimum and maxumum haul duration. If \code{NULL} all haul durations are kept
+##' @param icesAreas character vector, the ICES area codes to keep. If \code{NULL} all areas are kept
 ##' @param out string, filename of the output RDS file
+##'
 ##' @return if \code{out} is NULL, a DATRASraw object (invisible). If \code{out} is character, the filename of the saved RDS file. If the file specified in \code{out} exist, the function does not rewrite the file and returns the filename.
 ##' @author alko
 ##' @export
@@ -64,9 +67,12 @@ subsetDatras <- function(dat, species="Gadus morhua", gear=NULL,
 ##' Get yearly weight frequencies
 ##'
 ##' For selected years get yearly weight frequencies from DATRAS object
+##'
 ##' @param dat DATRASraw object
 ##' @param years numeric vector, containing the years to return
+##' @param binsize numeric, the width of the weight classes in grams
 ##' @param ... additional arguments to \code{\link{datrasraw2weightfreq}}
+##'
 ##' @return list of \code{data.frame}s, one for each year
 ##' @author alko
 ##' @export

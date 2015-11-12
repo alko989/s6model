@@ -10,6 +10,11 @@ difference(base, comp)
 
 \S4method{difference}{Parameters,Parameters}(base, comp)
 }
+\arguments{
+\item{base}{\code{Parameters} object. First object}
+
+\item{comp}{\code{Parameters} object. Second object}
+}
 \value{
 TRUE if they are the same. If there are differences, a data.frame is returned
 with the untransformed parameter values of the two objects, the relative difference (base - comp)

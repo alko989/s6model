@@ -14,7 +14,8 @@ Depends:
 Imports:
     numDeriv,
     methods,
-    truncdist
+    truncdist, 
+    stats
 Suggests:
     parallel,
     testthat,

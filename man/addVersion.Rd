@@ -14,6 +14,8 @@ addVersion(v = NULL, cex = 0.5, col = "#12345655", lengthSHA = 6,
 
 \item{col}{A color code or name}
 
+\item{lengthSHA}{integer, amount of characters to be printed}
+
 \item{description}{character vector, same length as \code{x}, description of each version}
 }
 \value{

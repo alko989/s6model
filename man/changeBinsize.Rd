@@ -16,6 +16,9 @@ changeBinsize(df, binsize = 10, keepZeros = TRUE)
 \value{
 data.frame with weight frequencies binned with bin size \code{binsize}
 }
+\description{
+Change the bin size of a weight frequency data.frame
+}
 \examples{
 ## Simulate a data set with bin size equal to 100 gr
 dat <- simulateData3(binsize=100)

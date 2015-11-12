@@ -8,4 +8,7 @@
 #' @importFrom numDeriv jacobian hessian
 #' @import methods
 #' @importFrom truncdist rtrunc
+#' @importFrom stats simulate
+#' @importFrom utils packageDescription
+#' @importFrom utils packageName
 NULL

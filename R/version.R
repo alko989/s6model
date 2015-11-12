@@ -15,6 +15,7 @@ getVersion <- function(pkg=packageName()) {
 #' @param v character vector, version(s) to add to plot
 #' @param cex numeric, controls the font size
 #' @param col A color code or name
+#' @param lengthSHA integer, amount of characters to be printed
 #' @param description character vector, same length as \code{x}, description of each version
 #' @return Invisible NULL
 #' @details All versions in the \code{v} vector are added to the current plot,

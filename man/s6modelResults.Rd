@@ -18,4 +18,7 @@
   xaxs = "i", yaxs = "i", ci = c("bootstrap", "estimated", "none"),
   grey.intensity = 1.5, exclude = 0, mult = 1)
 }
+\description{
+Class s6modelResults
+}
 

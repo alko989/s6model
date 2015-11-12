@@ -9,12 +9,12 @@ findLatest(path = ".", pattern = "")
 \arguments{
 \item{path}{character, relative or absolute path}
 
-\item{patterm}{an optional \code{\link{regex}}. Only file names which match the regular expression will be returned. Passed to \code{\link{dir}}}
+\item{pattern}{the pattern to search for, used by \code{link{dir}}}
 }
 \description{
 Given a folder and a pattern, rerurns the file that was modified latest.
 }
 \seealso{
-\code{dir}
+\code{\link{dir}}
 }
 

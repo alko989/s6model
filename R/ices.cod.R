@@ -49,8 +49,6 @@
 #' @export
 #'
 #' @note If no active plot exists produces an error
-#'
-#' @examples
 addIces <- function(stock, col="darkgrey", lwd=2, lty = c(2,1,2), what = "FFmsy", mult = 1) {
   ices <- ices.cod[[stock]]
   if(is.null(ices)) stop("Stock ", stock, " was not in the ices.cod dataset")

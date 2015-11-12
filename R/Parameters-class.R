@@ -118,6 +118,112 @@ setMethod("getscaleWfs","Parameters", function(object){ return(object@scaleWfs) 
 setGeneric("getscaleu",function(object){standardGeneric ("getscaleu")})
 setMethod("getscaleu","Parameters", function(object){ return(object@scaleu) })
 
+#' @param names String vector. Contains the names of the parameters that will
+#' have non default values.
+#' @param vals Numeric vector. The corresponding values, transformed if \code{transformed} is TRUE.
+#' @param transformed Boolean. If TRUE vals should contain the transformed parameter values.
+#' @param base \code{Parameters} object. The parameter values will be used instead of the default values.
+#' @return Returns an object of the Parameters class
+#' @author alko
+#' @keywords constructor
+#' @examples
+#' 
+#' ## Without any arguments gives a Parameters object with default values
+#' parameters()
+#' 
+#' ## Changing some parameters gives the corresponding object
+#' par1 <- parameters(c("Winf", "Fm", "Wfs"), c(log(1000 / 10000), log(0.4 / 0.25), log(100 / 1000)))
+#' par2 <- parameters(c("Winf", "Fm", "Wfs"), c(1000 , 0.4, 100), transformed=FALSE)
+#'
+#' ## Check if the two objects are equal
+#' all.equal(par1, par2)
+#'
+#' ## Take a Parameters object and change one parameter
+#' par <- parameters(c("Winf", "a", "Fm", "Wfs"), c(1000, 0.4, 0.2, 100), transformed = FALSE)
+#' changeMatsize <- parameters("eta_m", 0.3, transformed =FALSE, base=par)
+#'
+#' difference(par, changeMatsize)
+#' ##       base comp difference percent.difference
+#' ## eta_m 0.25  0.3      -0.05                 20
+#' @rdname Parameters
+#' @export 
+parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Parameters"))
+{
+  res <- base
+  mats <- wfs <- etaf <- 0
+  if(length(names) == 1)  {
+    if(names=="Winf") {
+      if(transformed) {
+        res@logWinf <- vals
+      } else {
+        res@logWinf <- log(vals / getscaleWinf(res))
+      }
+      res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F * exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
+      return(res)
+    }
+  }
+  for(i in seq(along=names))
+    if(names[i] %in% c("M")) {
+      eval(parse(text=paste("res@", names[i]," <- ", vals[i], sep="" )))
+    } else if (names[i] == "matSize") {
+      mats <- i
+    } else if (names[i] == "Wfs") {
+      wfs <- i
+    } else if (names[i] == "eta_F") {
+      etaf <- i
+    } else {
+      if(transformed) {
+        eval(parse(text=paste("res@log", names[i]," <- ", vals[i] , sep="" )))
+      } else {
+        scale <- do.call(paste0("getscale", names[i]), list(res))
+        eval(parse(text=paste0("res@log", names[i], " <- " , log(vals[i] / scale))))
+      }
+    }
+  if(mats > 0) {
+    res@logeta_m <- log(vals[mats] / (exp(res@logWinf)*res@scaleWinf) / res@scaleeta_m)
+  }
+  if(wfs > 0) {
+    if(transformed) {
+      res@logWfs <- vals[wfs]
+    } else {
+      res@logWfs <- log(vals[wfs] /getscaleWfs(res))
+    }
+    res@logeta_F <- log((exp(res@logWfs) * res@scaleWfs) / (exp(res@logWinf) * res@scaleWinf) / res@scaleeta_F)
+    if(etaf > 0)
+      warning("Do not use Wfs and eta_F at the same time. Only Wfs was used")
+  }
+  if(etaf>0 & wfs==0) {
+    if(transformed) {
+      res@logeta_F <-  vals[etaf]
+    } else {
+      res@logeta_F <- log(vals[etaf] / getscaleeta_F(res))
+    }
+    res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F* exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
+  }
+  if(etaf == 0 & wfs ==0) {
+    res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F * exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
+  }
+  if(exp(res@logWinf)*res@scaleWinf <= exp(res@logWfs)*res@scaleWfs)
+    warning("The start of fishing occurs at a weight equal or greater than the asymptotic weight")
+  res    
+}
+
+##' @export
+##' @rdname Parameters
+meanParameters <- function(x) {
+  if(is.null(x)) {
+    warning("Argument x in `meanParameters` is NULL")
+    return(NULL)
+  }
+  p <- as.list(parameters())
+  do.call(parameters, 
+          list(names = names(p), 
+               vals = sapply(seq(p), function(i) mean(sapply(x, function(xx) {
+                 if(is.null(xx)) return(NA)
+                 c(as.list(xx)[[i]])  
+               }), na.rm = TRUE)), transformed = FALSE))
+}
+
 ##' Takes a Parameters object and changes its asymptotic weight
 ##'
 ##' The asymptotic weight is changed, along with the relative and absolute sizes of 50\% retention 
@@ -193,6 +299,12 @@ setMethod("show", "Parameters",
             cat("\n")
           })
 
+
+#' @param x a Parameters object
+#' @param xlim the x limits (x1, x2) of the plot.
+#' @param ... Arguments passed to other methods.
+#' @note Additional arguments are passed to \code{\link{plot.default}} (from plot) and to \code{\link{lines}} (from lines). From all other functions the extra arguments are ignored.
+#'
 #' @export
 #' @rdname Parameters
 plot.Parameters <- function(x, xlim=c(0.001, 1), ...) {
@@ -208,19 +320,19 @@ plot.Parameters <- function(x, xlim=c(0.001, 1), ...) {
 #' @rdname Parameters
 lines.Parameters <- function(x, ...){
   p <- getParams(x)
-  lines(xy.coords(p$w / p$Winf, p$N*(p$w^2)))
+  lines(xy.coords(p$w / p$Winf, p$N*(p$w^2)), ...)
 }
 
 ##' @export
 ##' @rdname Parameters
-as.list.Parameters <- function(x) {
+as.list.Parameters <- function(x, ...) {
   with(getParams(x), list(Winf=Winf, Fm=Fm, Wfs=Wfs, eta_m=eta_m, epsilon_r=epsilon_r, epsilon_a=epsilon_a, A=A, a=a, n=n, u=u))
 }
 
 ##' Difference between two \code{Parameters} objects
 ##' 
-## ##' @param base \code{Parameters} object. First object
-## ##' @param comp \code{Parameters} object. Second object
+##' @param base \code{Parameters} object. First object
+##' @param comp \code{Parameters} object. Second object
 ##' @return TRUE if they are the same. If there are differences, a data.frame is returned
 ##' with the untransformed parameter values of the two objects, the relative difference (base - comp)
 ##' and the percent difference 
@@ -265,7 +377,6 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
 ##' @rdname plotFit-methods
 ##' @docType methods
 ##' @export 
-##' @author alko
 setGeneric("plotFit", function(object, data, add, ...){ standardGeneric ("plotFit") })
 
 ##' @rdname plotFit-methods
@@ -408,115 +519,16 @@ setMethod("getCor", c("Parameters"), function(object) {
 })
 
 
-
-#' @param names String vector. Contains the names of the parameters that will
-#' have non default values.
-#' @param vals Numeric vector. The corresponding values, transformed if \code{transformed} is TRUE.
-#' @param transformed Boolean. If TRUE vals should contain the transformed parameter values.
-#' @param base \code{Parameters} object. The parameter values will be used instead of the default values.
-#' @return Returns an object of the Parameters class
-#' @author alko
-#' @keywords constructor
-#' @examples
-#' 
-#' ## Without any arguments gives a Parameters object with default values
-#' parameters()
-#' 
-#' ## Changing some parameters gives the corresponding object
-#' par1 <- parameters(c("Winf", "Fm", "Wfs"), c(log(1000 / 10000), log(0.4 / 0.25), log(100 / 1000)))
-#' par2 <- parameters(c("Winf", "Fm", "Wfs"), c(1000 , 0.4, 100), transformed=FALSE)
-#'
-#' ## Check if the two objects are equal
-#' all.equal(par1, par2)
-#'
-#' ## Take a Parameters object and change one parameter
-#' par <- parameters(c("Winf", "a", "Fm", "Wfs"), c(1000, 0.4, 0.2, 100), transformed = FALSE)
-#' changeMatsize <- parameters("eta_m", 0.3, transformed =FALSE, base=par)
-#'
-#' difference(par, changeMatsize)
-#' ##       base comp difference percent.difference
-#' ## eta_m 0.25  0.3      -0.05                 20
-#' @rdname Parameters
-#' @export parameters
-parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Parameters"))
-{
-  res <- base
-  mats <- wfs <- etaf <- 0
-  if(length(names) == 1)  {
-    if(names=="Winf") {
-      if(transformed) {
-        res@logWinf <- vals
-      } else {
-        res@logWinf <- log(vals / getscaleWinf(res))
-      }
-      res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F * exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
-      return(res)
-    }
-  }
-  for(i in seq(along=names))
-    if(names[i] %in% c("M")) {
-      eval(parse(text=paste("res@", names[i]," <- ", vals[i], sep="" )))
-    } else if (names[i] == "matSize") {
-      mats <- i
-    } else if (names[i] == "Wfs") {
-      wfs <- i
-    } else if (names[i] == "eta_F") {
-      etaf <- i
-    } else {
-      if(transformed) {
-        eval(parse(text=paste("res@log", names[i]," <- ", vals[i] , sep="" )))
-      } else {
-        scale <- do.call(paste0("getscale", names[i]), list(res))
-        eval(parse(text=paste0("res@log", names[i], " <- " , log(vals[i] / scale))))
-      }
-    }
-  if(mats > 0) {
-    res@logeta_m <- log(vals[mats] / (exp(res@logWinf)*res@scaleWinf) / res@scaleeta_m)
-  }
-  if(wfs > 0) {
-    if(transformed) {
-      res@logWfs <- vals[wfs]
-    } else {
-      res@logWfs <- log(vals[wfs] /getscaleWfs(res))
-    }
-    res@logeta_F <- log((exp(res@logWfs) * res@scaleWfs) / (exp(res@logWinf) * res@scaleWinf) / res@scaleeta_F)
-    if(etaf > 0)
-      warning("Do not use Wfs and eta_F at the same time. Only Wfs was used")
-  }
-  if(etaf>0 & wfs==0) {
-    if(transformed) {
-      res@logeta_F <-  vals[etaf]
-    } else {
-      res@logeta_F <- log(vals[etaf] / getscaleeta_F(res))
-    }
-    res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F* exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
-  }
-  if(etaf == 0 & wfs ==0) {
-    res@logWfs <- log(exp(res@logeta_F) * res@scaleeta_F * exp(res@logWinf) * res@scaleWinf/res@scaleWfs)
-  }
-  if(exp(res@logWinf)*res@scaleWinf <= exp(res@logWfs)*res@scaleWfs)
-    warning("The start of fishing occurs at a weight equal or greater than the asymptotic weight")
-  res    
-}
-
+##' @param object a \code{\link{Parameters}} object
+##'
+##' @param nsim number of individuals in the simulated sample
+##' @param seed the seed that is passed to \code{\link{set.seed}}.
+##' @param binsize numeric, the width of the weight classes in grams
+##' @param keepZeros logical, if TRUE keep bins with zero frequency. Note that the zeros after the last non-zero bin are always droped.
+##'
 ##' @export
 ##' @rdname Parameters
-meanParameters <- function(x) {
-  if(is.null(x)) {
-    warning("Argument x in `meanParameters` is NULL")
-    return(NULL)
-  }
-  p <- as.list(parameters())
-  do.call(parameters, 
-          list(names = names(p), 
-               vals = sapply(seq(p), function(i) mean(sapply(x, function(xx) {
-                 if(is.null(xx)) return(NA)
-                 c(as.list(xx)[[i]])  
-               }), na.rm = TRUE)), transformed = FALSE))
-  }
-
-##' @export
-simulate.Parameters <- function(object, nsim = 1000, seed = NULL, binsize = 5, keepZeros = TRUE) {
+simulate.Parameters <- function(object, nsim = 1000, seed = NULL, binsize = 5, keepZeros = TRUE, ...) {
   if(!is.null(seed)) set.seed(seed)
   p <- getParams(object)
   s <- rmultinom(1, nsim, p$pdfN.approx(1:p$Winf))

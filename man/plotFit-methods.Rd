@@ -35,7 +35,4 @@ invisible \code{NULL}
 \description{
 Visualizing fit of s6model
 }
-\author{
-alko
-}
 

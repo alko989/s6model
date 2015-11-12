@@ -1,3 +1,5 @@
+##' Class s6modelResults
+##'
 ##' @title s6modelResults class
 ##' @exportClass s6modelResults
 ##'@name s6modelResults
@@ -157,12 +159,46 @@ df2matrix <- function(df){
             nwc = maxrow, binsize = attr(df[[1]], "binsize"))  
 }
 
-##' @export
-makeAssessment <- function(inputData, a.mean = 0.27, a.sd = 0.89, nsample = 100, binsize = NULL,
-                           probs = seq(0, 1, 0.01), winf.ubound = 2, equalWinf = TRUE,
-                           dirout = "results", yield = NULL, seed = as.integer(rnorm(1, 1000, 100)),
-                           fnout = format.Date(Sys.time(), "results_%Y%m%d_%H%M.RData"), sigma = NULL,
-                           same.as = TRUE, u = 10, ...) {
+#' Makes assessment of a fish stock given weight frequency data for several years
+#'
+#' @param inputData list of data.frames, each data.frame has columns \code{Weight} and  \code{Freq} and attribute \code{binsize}
+#' @param yield numeric, the total yearly catch or landings in kg. Use NULL if not known.
+#' @param a.mean numeric, physiological mortality.
+#' @param a.sd numeric, the standard deviation (log domain) of the log-normal distribution of physiological mortality.
+#' @param nsample integer, number of repetitions for uncertainty etimation. If zero no uncertainty is estimated.
+#' @param same.as logical, if TRUE use the same random values of physiological mortality for each year.
+#' @param seed numeric, the random number generator seed.
+#' @param u numeric, the selectivity steepness parameter.
+#' @param sigma numeric, if NULL the parameter is estimated, otherwise a constant is used, see Details.
+#' @param binsize numeric, span of weight classes in grams.
+#' @param winf.ubound numeric, the upper bound of asymptotic weight. It is a multiplier of the maximum observed weight.
+#' @param equalWinf logical, if TRUE estimate one asymptotic weight for all years, if FALSE estimate one for each year.
+#' @param probs numeric vector of probabilites with values in [0,1] for the uncertainty sample quantiles.
+#' @param dirout Output directory
+#' @param fnout Output file name
+#' @param ... Arguments passed to \code{estimate_TMB} that does the estimation
+#'
+#' @return object of class s6modelResults which is a data.frame with parameter estimates with attributes \describe{
+#' \item{CI}{confidence levels as sample quantiles}
+#' \item{obj}{the TMB object of the default value estimation}
+#' \item{opt}{the optimization output from \code{nlminb}}
+#' \item{opts}{the input options used in the run}
+#' \item{Results}{all results using default parameters}
+#' \item{seed}{the random number gernerator used}
+#' \item{timeToCompletion}{difftime object with the time needed for the estimation}
+#' \item{version}{the \code{s6model}version that produced the results}
+#' }  
+#' 
+#' @details \itemize{
+#' \item{sigma paramter} for more information see the cited paper.
+#' }
+#' 
+#' @export
+makeAssessment <- function(inputData, yield = NULL, 
+                           a.mean = 0.27, a.sd = 0.89, nsample = 100, same.as = TRUE, seed = as.integer(rnorm(1, 1000, 100)), 
+                           u = 10, sigma = NULL, binsize = NULL, winf.ubound = 2, equalWinf = TRUE,
+                           probs = seq(0, 1, 0.01), 
+                           dirout = "results", fnout = format.Date(Sys.time(), "results_%Y%m%d_%H%M.RData"), ...) {
   set.seed(seed)
   if(is.null(yield)) yield <- rep(0.0001, length(inputData))
   sigma <- if(is.null(sigma) || is.na(sigma)) rep(NA, length(inputData)) else sapply(inputData, function(x) mean(rle(x$Freq)$lengths) * sum(x$Freq))

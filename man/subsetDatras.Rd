@@ -18,6 +18,8 @@ subsetDatras(dat, species = "Gadus morhua", gear = NULL, years = c(1991,
 
 \item{haulDur}{numeric vector of length 2 with the minimum and maxumum haul duration. If \code{NULL} all haul durations are kept}
 
+\item{icesAreas}{character vector, the ICES area codes to keep. If \code{NULL} all areas are kept}
+
 \item{out}{string, filename of the output RDS file}
 }
 \value{

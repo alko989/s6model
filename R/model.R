@@ -229,56 +229,56 @@ getRandomParameters <-
 getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
   parameter.names <- c("A", "n" ,"eta_m","eta_F", "a" ,"Fm","Winf","epsilon_a", "epsilon_r")
   parameter.value <- c(4.5,0.75 , 0.25  ,  0.05 , 0.35,0.25,  winf ,    0.8    ,     0.1    )
-  getRandomParameters(parameter.names, parameter.value,, Rrel.gt=Rrel.gt, Fmsy.gt=Fmsy.gt)
+  getRandomParameters(parameter.names, parameter.value, Rrel.gt=Rrel.gt, Fmsy.gt=Fmsy.gt)
 }
 
-##' Multicore lapply function with progress bar
-##'
-##' Wrapper around parallel::mclapply function with text progress bar
-##' @param X  a vector (atomic or list) or an expressions vector.  Other
-##' objects (including classed objects) will be coerced by `as.list`.
-##' @param FUN the function to be applied to (`mclapply`) each element of `X` or (`mcmapply`) in parallel to `...`.
-##' @param ... Optional arguments to FUN
-##' @param progressbar Logical. If TRUE a text progress bar is shown.
-##' @return Result from mclapply
-##' @note If mclapply is not available, lapply is used instead.
-##' @author alko
-##' @export
-tmclapply <- function(X, FUN, ..., progressbar=TRUE){
-  aplfun <- if(require(parallel)) mclapply else lapply
-  start <- Sys.time()
-  if(progressbar)
-    pb <- txtProgressBar(min = 0, max = 100, style=3)
-  results <- local({
-    f <- fifo(tempfile(), open="w+b", blocking=TRUE)
-    if (inherits(parallel:::mcfork(), "masterProcess")) {
-      progress <- 0.0
-      while(progress < 1 && !isIncomplete(f)) {
-        msg <- readBin(f, "double")
-        progress <- progress + as.numeric(msg)
-        if(progressbar)
-          setTxtProgressBar(pb, progress * 100)
-        tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
-        cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
-        if( ! progressbar) cat("\r")
-      } 
-      parallel:::mcexit()
-    }
-    res <- aplfun(X, function(x) {
-      rr <- FUN(x)
-      writeBin(1/length(X), f)
-      rr
-    })
-    close(f)
-    if(progressbar) {
-      setTxtProgressBar(pb,100)
-      close(pb)
-    }
-    res
-  })
-  cat(difftime(Sys.time(), start, units="mins"), "mins\n")
-  results
-} 
+# ##' Multicore lapply function with progress bar
+# ##'
+# ##' Wrapper around parallel::mclapply function with text progress bar
+# ##' @param X  a vector (atomic or list) or an expressions vector.  Other
+# ##' objects (including classed objects) will be coerced by `as.list`.
+# ##' @param FUN the function to be applied to (`mclapply`) each element of `X` or (`mcmapply`) in parallel to `...`.
+# ##' @param ... Optional arguments to FUN
+# ##' @param progressbar Logical. If TRUE a text progress bar is shown.
+# ##' @return Result from mclapply
+# ##' @note If mclapply is not available, lapply is used instead.
+# ##' @author alko
+# ##' @export
+# tmclapply <- function(X, FUN, ..., progressbar=TRUE){
+#   aplfun <- if(require(parallel)) mclapply else lapply
+#   start <- Sys.time()
+#   if(progressbar)
+#     pb <- txtProgressBar(min = 0, max = 100, style=3)
+#   results <- local({
+#     f <- fifo(tempfile(), open="w+b", blocking=TRUE)
+#     if (inherits(parallel:::mcfork(), "masterProcess")) {
+#       progress <- 0.0
+#       while(progress < 1 && !isIncomplete(f)) {
+#         msg <- readBin(f, "double")
+#         progress <- progress + as.numeric(msg)
+#         if(progressbar)
+#           setTxtProgressBar(pb, progress * 100)
+#         tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
+#         cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
+#         if( ! progressbar) cat("\r")
+#       } 
+#       parallel:::mcexit()
+#     }
+#     res <- aplfun(X, function(x) {
+#       rr <- FUN(x)
+#       writeBin(1/length(X), f)
+#       rr
+#     })
+#     close(f)
+#     if(progressbar) {
+#       setTxtProgressBar(pb,100)
+#       close(pb)
+#     }
+#     res
+#   })
+#   cat(difftime(Sys.time(), start, units="mins"), "mins\n")
+#   results
+# } 
 
 ##' Calculates the Fmsy reference point
 ##'
@@ -306,11 +306,9 @@ calcFmsy <- function(params=NULL) {
   names(res) <- NULL
   res
 }
-## simplify2dataframe <- function(dd) {
-##   data.frame(t(simplify2array(dd)))
-## }
 
-##' @title Change the bin size of a weight frequency data.frame
+##' Change the bin size of a weight frequency data.frame
+##' 
 ##' 
 ##' @param df data.frame with colums 'Weight' and 'Freq'
 ##' @param binsize numeric, the bin size in grams
@@ -375,9 +373,11 @@ changeBinsize3 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
 ##' @export
 ##' @title Find newest file in folder matching pattern
 ##' @description Given a folder and a pattern, rerurns the file that was modified latest.
+##'
 ##' @param path character, relative or absolute path
-##' @param patterm an optional \code{\link{regex}}. Only file names which match the regular expression will be returned. Passed to \code{\link{dir}}
-##' @seealso \code{dir}
+##' @param pattern the pattern to search for, used by \code{link{dir}}
+##'
+##' @seealso \code{\link{dir}}
 findLatest <- function(path = ".", pattern = "") {
   files <- dir(path, pattern, ignore.case = TRUE, full.names = TRUE)
   if(length(files) == 0) return(NULL)
