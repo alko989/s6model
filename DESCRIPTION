@@ -3,7 +3,7 @@ Type: Package
 Title: Data-poor stock assessment using a single-sepcies steady-state
     size-based (s6) model
 Version: 0.10.13
-Date: 2015-02-12
+Date: 2015-11-12
 Author: Alexandros Kokkalis
 Maintainer: Alexandros Kokkalis <alko@aqua.dtu.dk>
 Description: Contains functions to estimate parameters of the model and the
@@ -19,4 +19,5 @@ Suggests:
     parallel,
     testthat,
     TMB
+LazyData: true
 RoxygenNote: 5.0.0.9000

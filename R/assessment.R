@@ -338,26 +338,3 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
   }
   box()
 }
-
-##' @export 
-addIces<- function(stock, icesfile = "~/Work/mainCode/R/SecondPaper/ICES/ICES-cod.RData",
-                   col="darkgrey", lwd=2, lty = c(2,1,2), what = "FFmsy", mult = 1, ...) {
-  n <- load(icesfile)
-  firstList <- n[sapply(mget(n, inherits = TRUE), class) == "list"][1]
-  if(is.na(firstList)) stop("No list object found in ", icesfile)
-  stocks <- get(firstList)
-  ices <- stocks[[stock]]
-  if(is.null(ices)) stop("Stock ", stock, " was not in the list ", firstList)
-  nms <- tolower(names(ices))
-  what <- tolower(what)
-    if(what == "ffmsy")
-    matplot(ices$Year, ices[ , c("high_F", "F","low_F")] / fmsy(ices) / mult, 
-            add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
-  else {
-    n <- pmatch(what, nms)
-    h <- pmatch(paste0("high_", what), nms)
-    l <- pmatch(paste0("low_", what), nms)
-    matplot(ices$Year, ices[ , c(h, n, l)] / mult, 
-            add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
-  }
-}

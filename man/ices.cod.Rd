@@ -22,23 +22,29 @@ ICES Stock Assessment Database, 2015/11. ICES, Copenhagen \url{http://http://sta
 data(ices.cod)
 }
 \description{
-A dataset containing the assessment output for all cod stocks in the ICES areas (except cod-2224)#'
+A dataset containing the assessment output for all cod stocks in the ICES areas (except cod-2224)
 }
 \details{
 For some of the cod stocks uncertainty bounds of quantity x are given as High_x and Low_x
 }
 \examples{
+## load the dataset
+data(ices.cod)
+
 ## Select the North Sea cod (cod-347d) assessment data.frame
 nscod <- ices.cod[["cod-347d"]]
 ## Get the Fmsy from the meta-data
 fmsy <- as.numeric(attr(nscod, "FMSY"))
 ## Plot the F/Fmsy of North Sea cod
-plot(nscod$Year, nscod$F / fmsy, type = "l",)
+plot(nscod$Year, nscod$F / fmsy, type = "l", xlab = "Year", ylab = "F/Fmsy")
 lines(nscod$Year, nscod$High_F / fmsy, lty = 2)
 lines(nscod$Year, nscod$Low_F / fmsy, lty = 2)
 
 ## To see all available meta-data
 attributes(nscod)
+}
+\seealso{
+\code{\link{addIces}} for adding ICES assessment results to plots
 }
 \keyword{datasets}
 
