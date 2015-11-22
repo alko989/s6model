@@ -44,6 +44,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> R(nyrs);
   vector<Type> Rrel(nyrs);
   vector<Type> Y(nyrs);
+  vector<Type> Rp(nyrs);
   wr = 0.001;
   Type nll = 0.0;
   
@@ -62,19 +63,19 @@ Type objective_function<Type>::operator() ()
       m = a * A * pow(w, n-1);
       cumsum += (m + Fm(yr) *  psi_F) / g * binsize; 
       N = exp(-cumsum) / g;
-      alpha = epsilon_r * (1 - epsilon_a) * A * pow(Winf, n-1) / wr;
       ssb(yr) += psi_m  * N * w * binsize;
       Nvec(j, yr) = N * (isSurvey ? psi_S : psi_F);
       Y(yr) +=  Fm(yr) * N * psi_F * w * binsize;
       nc += Nvec(j, yr);
     }
-    
     Rrel(yr) = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb(yr));
     N = N * Rrel(yr);
     Y(yr) = Y(yr) * Rrel(yr);
     rmax(yr) = totalYield(yr) / Y(yr);
     ssb(yr) *=  Rrel(yr) * rmax(yr);
     R(yr) = Rrel(yr) * rmax(yr);
+    alpha = epsilon_r * (1 - epsilon_a) * A * pow(Winf, n-1) / wr;
+    Rp(yr)  = alpha * ssb(yr);
     for(int i=0; i<nwc; i++) {
       if(usePois) {
         if(freq(i, yr) > 0) 
@@ -109,6 +110,7 @@ Type objective_function<Type>::operator() ()
   // ADREPORT(sdWfs);
   
   ADREPORT(Rrel);
+  ADREPORT(Rp);
   ADREPORT(rmax);
   REPORT(residuals);
   REPORT(Weight);

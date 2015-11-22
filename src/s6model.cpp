@@ -32,7 +32,7 @@ Type objective_function<Type>::operator() ()
   Type eta_S = exp(logeta_S);
   vector<Type> Nvec(nwc);
   vector<Type> Weight(nwc);
-  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha, ssb, rmax, R;
+  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha, ssb, rmax, R, Rp;
   wr = 0.001;
   cumsum=0.0;
   nc = 0.0;
@@ -48,7 +48,6 @@ Type objective_function<Type>::operator() ()
     m = a * A * pow(w, n-1);
     cumsum += (m + Fm *  psi_F) / g * binsize; 
     N = exp(-cumsum) / g;
-    alpha = epsilon_r * (1 - epsilon_a) * A * pow(Winf, n-1) / wr;
     ssb += psi_m  * N * w * binsize;
     Nvec(j) = N * (isSurvey == 0 ? psi_F : psi_S);
     Y +=  Fm * N * psi_F * w * binsize;
@@ -60,6 +59,8 @@ Type objective_function<Type>::operator() ()
   rmax = totalYield / Y;
   ssb = ssb * Rrel * rmax;
   R = Rrel * rmax;
+  alpha = epsilon_r * (1 - epsilon_a) * A * pow(Winf, n-1) / wr;
+  Rp = alpha * ssb;
   Type nll=0.0;
   for(int i=0; i<nwc; i++) {
     if(usePois) {
@@ -93,6 +94,7 @@ Type objective_function<Type>::operator() ()
   ADREPORT(ssb);
   ADREPORT(R);
   ADREPORT(Rrel);
+  ADREPORT(Rp);
   ADREPORT(rmax);
   ADREPORT(u);
   
