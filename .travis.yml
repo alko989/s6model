@@ -7,15 +7,15 @@ notifications:
     on_failure: change
 
 
-deploy:
-  provider: s3
-  access_key_id: AKIAJNMXV5HVGHBZCKNQ
-  secret_access_key:
-    secure: hwwvv7gsaxUDI3gEJk6w/bi28cZzA8Uyni/CymRJ3RErCFTKuHRx4PBcy5ApEqh924pqX9/BuF11SK4bwhKsGpKLtweucOpKkC3SM0ZWEQSruDdEpKMGXpzIK7jwrsKmgCK4gEIVG354ytaRoS0rV4JsrIDJr+HZd0QeF6Bykp4=
-  bucket: s6model
-  on:
-    repo: alko989/s6model
-    branch: poormansts
+# deploy:
+#  provider: s3
+#  access_key_id: AKIAJNMXV5HVGHBZCKNQ
+#  secret_access_key:
+#    secure: hwwvv7gsaxUDI3gEJk6w/bi28cZzA8Uyni/CymRJ3RErCFTKuHRx4PBcy5ApEqh924pqX9/BuF11SK4bwhKsGpKLtweucOpKkC3SM0ZWEQSruDdEpKMGXpzIK7jwrsKmgCK4gEIVG354ytaRoS0rV4JsrIDJr+HZd0QeF6Bykp4=
+#  bucket: s6model
+#  on:
+#    repo: alko989/s6model
+#    branch: poormansts
 
 r_github_packages:
   - jimhester/covr
