@@ -49,19 +49,28 @@
 #' @export
 #'
 #' @note If no active plot exists produces an error
-addIces <- function(stock, col="darkgrey", lwd=2, lty = c(2,1,2), what = "FFmsy", mult = 1) {
+addIces <- function(stock, col="darkgrey", lwd=2, lty = c(2,1,2), what = "FFmsy", mult = 1, includeuncertainty = FALSE) {
   ices <- ices.cod[[stock]]
   if(is.null(ices)) stop("Stock ", stock, " was not in the ices.cod dataset")
   nms <- tolower(names(ices))
   what <- tolower(what)
   if(what == "ffmsy") {
-    matplot(ices$Year, ices[ , na.omit(pmatch(c("high_f", "f","low_f"), nms, NULL))] / fmsy(ices) * mult, 
+    cols <- if(includeuncertainty) {
+      na.omit(pmatch(c("high_f", "f","low_f"), nms, NA))
+    } else { 
+      na.omit(pmatch(c("f"), nms, NA))
+    }
+    matplot(ices$Year, ices[ , cols] / fmsy(ices) * mult, 
             add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
   } else {
     n <- pmatch(what, nms)
-    h <- pmatch(paste0("high_", what), nms)
-    l <- pmatch(paste0("low_", what), nms)
-    matplot(ices$Year, ices[ , c(h, n, l)] * mult, add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
+    cols <- na.omit(n)
+    if(includeuncertainty){
+      h <- pmatch(paste0("high_", what), nms)
+      l <- pmatch(paste0("low_", what), nms)
+      cols <- na.omit(h,n,l)
+    }
+    matplot(ices$Year, ices[ , cols] * mult, add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
   }
   return(invisible(NULL))
 }

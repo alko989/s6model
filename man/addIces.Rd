@@ -5,7 +5,7 @@
 \title{Adds ICES assessment results to existing plots}
 \usage{
 addIces(stock, col = "darkgrey", lwd = 2, lty = c(2, 1, 2),
-  what = "FFmsy", mult = 1)
+  what = "FFmsy", mult = 1, includeuncertainty = FALSE)
 }
 \arguments{
 \item{stock}{The stock code}
