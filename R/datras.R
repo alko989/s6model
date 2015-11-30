@@ -116,7 +116,7 @@ datrasraw2weightfreq <- function(datr, a=0.01, b=3, estWL=FALSE, verbose=TRUE) {
     if(verbose) print(summary(fit))
     }
   }
-  df$Weight <- a * df$Length ^ b
+  df <- addWeight(df, a = a, b = b)
   if(verbose) showDf(df)
   attr(df, "createdBy") <- getVersion()
   invisible(df)
