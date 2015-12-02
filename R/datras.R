@@ -71,16 +71,19 @@ subsetDatras <- function(dat, species="Gadus morhua", gear=NULL,
 ##' @param dat DATRASraw object
 ##' @param years numeric vector, containing the years to return
 ##' @param binsize numeric, the width of the weight classes in grams
+##' @param a The a parameter of the weight-length relationship
+##' @param b The b parameter of the weight-length relationship
+##' @param estWL logical, if TRUE the weight length relationship is estimated from the data in the DATRASraw object
 ##' @param ... additional arguments to \code{\link{datrasraw2weightfreq}}
 ##'
 ##' @return list of \code{data.frame}s, one for each year
 ##' @author alko
 ##' @export
-getDfYears <- function(dat, years = as.numeric(levels(dat[[2]]$Year)), binsize = 100, ...) {
+getDfYears <- function(dat, years = as.numeric(levels(dat[[2]]$Year)), binsize = 100, a=0.01, b=3, estWL=FALSE, ...) {
   setNames(lapply(years, function(yr) {
     cat("Making the data.frame for year", yr, "\n")
     dyr <- subset(dat, Year %in% yr)
-    changeBinsize2(datrasraw2weightfreq(dyr, ...), binsize = binsize)
+    changeBinsize2(datrasraw2weightfreq(dyr, a=a, b=b, estWL=estWL, ...), binsize = binsize)
   }), years)
 }
 

@@ -5,7 +5,7 @@
 \title{Get yearly weight frequencies}
 \usage{
 getDfYears(dat, years = as.numeric(levels(dat[[2]]$Year)), binsize = 100,
-  ...)
+  a = 0.01, b = 3, estWL = FALSE, ...)
 }
 \arguments{
 \item{dat}{DATRASraw object}
@@ -13,6 +13,12 @@ getDfYears(dat, years = as.numeric(levels(dat[[2]]$Year)), binsize = 100,
 \item{years}{numeric vector, containing the years to return}
 
 \item{binsize}{numeric, the width of the weight classes in grams}
+
+\item{a}{The a parameter of the weight-length relationship}
+
+\item{b}{The b parameter of the weight-length relationship}
+
+\item{estWL}{logical, if TRUE the weight length relationship is estimated from the data in the DATRASraw object}
 
 \item{...}{additional arguments to \code{\link{datrasraw2weightfreq}}}
 }
