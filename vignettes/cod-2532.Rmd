@@ -57,7 +57,7 @@ Now the data are in the correct format the assessment can be done using the `mak
 
 Since it is an assessment using only survey data, we are using `isSurvey = TRUE` and we make the assumption that all sizes are selected by the gear by setting the relative selectivity parameter ($\eta_S$, argument `eta_S`) of the gear very small.
 ```{r, echo = TRUE, eval = FALSE}
-res <- makeAssessment(ebcoddat, fnout = NULL, isSurvey = TRUE, nsample = 10, eta_S = 1e-10, a.mean = 0.5, a.sd = 0.2)
+res <- makeAssessment(ebcodat, fnout = NULL, isSurvey = TRUE, nsample = 10, eta_S = 1e-10, a.mean = 0.5, a.sd = 0.2)
 plot(res, addMedian = TRUE, ylim = c(1/40,40), log = "y")
 addIces("cod-2532")
 ```
