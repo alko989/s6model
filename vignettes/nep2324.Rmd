@@ -28,7 +28,17 @@ The first collumn (`Lmm`) is the lenght in mm, the rest are one for each year. T
 knitr::kable(head(nepdat[, 1:15]))
 ```
 
-
+<!-- Use `DATRAS` package to download and read exchange data from the EVHOE survey. -->
+<!-- ```{r, echo = TRUE} -->
+<!-- library(DATRAS) -->
+<!-- ## Download all years of EVHOE survey -->
+<!-- downloadExchange("EVHOE") -->
+<!-- ## Read in all data -->
+<!-- evhoe <- readExchangeDir() -->
+<!-- nepevhoe <- subset(evhoe, Species == "Nephrops norvegicus") -->
+<!-- nepevhoe <- addSpectrum(nepevhoe) -->
+<!-- fitWL(nepevhoe) -->
+<!-- ``` -->
 
 
 ## Assessment of nep-2324

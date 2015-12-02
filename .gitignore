@@ -15,9 +15,8 @@
 packrat/lib*/
 packrat/src/
 packrat
-
 *.o
 *.so
-
 *.bak
 tests/testthat/*.pdf
+inst/doc

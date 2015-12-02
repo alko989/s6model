@@ -1,0 +1,65 @@
+---
+title: "Using s6model to assess the status of Eastern Baltic cod (cod-2532)"
+author: "Alexandros Kokkalis"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    fig_caption: yes
+# bibliography: bib.bibtex
+vignette: >
+  %\VignetteIndexEntry{Using s6model to assess the status of Eastern Baltic cod (cod-2532)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Introduction
+
+The Eastern Baltic cod (_Gadus morhua_) is assessed in this example using only survey data from the BITS survey. The data can be downloaded from the [DATRAS](http://datras.ices.dk) database. 
+
+## Downloading and pre-processing of the data
+
+The data are downloaded using the `DATRAS` package which can be installed using:
+```{r, eval=FALSE, echo = TRUE}
+install.packages('DATRAS',repos='http://www.rforge.net/',type='source')
+```
+
+The package contains functions to download, read and subset survey data. Shape files for ICES regions can be downloaded from [ICES spatial facility](http://geo.ices.dk/).
+
+```{r, echo = TRUE, eval = FALSE}
+library(DATRAS)
+## Download the survey data for the years 1991 to 2014
+downloadExchange("BITS", 1991:2014)
+## Read in all data
+bits <- readExchangeDir()
+## Select only cod
+ebcod <- subset(bits, Species == "Gadus morhua")
+```
+
+Select only the relevant areas for the Eastern Baltic cod
+```{r, echo=TRUE, eval = FALSE}
+## Add area information
+ebcod <- addSpatialData(ebcod, shape = "ices_areas.shp")
+ebcod <- subset(ebcod, ICES_area %in% c("25", "26", "27", "28-1", 
+                                        "28-2", "29", "30", "31", "32"))
+```
+
+Then using the `s6model` package we can extract the yearly weight frequencies using the function `getDFYears`. This function extracts the length distributions from an object of class `DATRASraw`, fits the weight length relationship, transforms the length to weight and returns a `list` of `data.frames`, one for each year. The bin size is set to 100 g (`binsize` argument) and the weight-length relationship is fitted using weight and length data in the survey for each year (`estWL` argument).
+```{r, echo = TRUE, eval = FALSE}
+library(s6model)
+ebcoddat <- getDfYears(ebcod, binsize = 100, estWL = TRUE)
+```
+
+Now the data are in a format that can be used to assess the stock status. The data are provided with the package (saved as `ebcoddat`).
+
+## Assessment of the stock
+
+Now the data are in the correct format the assessment can be done using the `makeAssessment` function. It has many arguments and only a subset of them are presented here. There are default values for most of them, so that a preliminary assessment can be done using `makeAssessment(dat)`, where `dat` has the data in the correct format. The results are saved after a successful run of the function so that they can accessed at a later point to make plots and reports.
+
+Since it is an assessment using only survey data, we are using `isSurvey = TRUE` and we make the assumption that all sizes are selected by the gear by setting the relative selectivity parameter ($\eta_S$) of the gear very small.
+```{r, echo = TRUE, eval = FALSE}
+res <- makeAssessment(ebcoddat, fnout = NULL, isSurvey = TRUE, nsample = 10, eta_S = 0.000000001, a.mean = 0.22, a.sd = 0.7)
+plot(res, addMedian = TRUE, ylim = c(1/40,40), log = "y")
+addIces("cod-2532")
+```
+
+
