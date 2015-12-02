@@ -55,9 +55,9 @@ Now the data are in a format that can be used to assess the stock status. The da
 
 Now the data are in the correct format the assessment can be done using the `makeAssessment` function. It has many arguments and only a subset of them are presented here. There are default values for most of them, so that a preliminary assessment can be done using `makeAssessment(dat)`, where `dat` has the data in the correct format. The results are saved after a successful run of the function so that they can accessed at a later point to make plots and reports.
 
-Since it is an assessment using only survey data, we are using `isSurvey = TRUE` and we make the assumption that all sizes are selected by the gear by setting the relative selectivity parameter ($\eta_S$) of the gear very small.
+Since it is an assessment using only survey data, we are using `isSurvey = TRUE` and we make the assumption that all sizes are selected by the gear by setting the relative selectivity parameter ($\eta_S$, argument `eta_S`) of the gear very small.
 ```{r, echo = TRUE, eval = FALSE}
-res <- makeAssessment(ebcoddat, fnout = NULL, isSurvey = TRUE, nsample = 10, eta_S = 0.000000001, a.mean = 0.22, a.sd = 0.7)
+res <- makeAssessment(ebcoddat, fnout = NULL, isSurvey = TRUE, nsample = 10, eta_S = 1e-10, a.mean = 0.5, a.sd = 0.2)
 plot(res, addMedian = TRUE, ylim = c(1/40,40), log = "y")
 addIces("cod-2532")
 ```
