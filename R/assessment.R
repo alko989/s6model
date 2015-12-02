@@ -323,10 +323,10 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
                                 years = NULL, xlab = NULL, ylab = NULL, 
                                 ylim = NULL, addDefault = FALSE, col.def = "white",
                                 addhline = 1, col.hline = 1, lty.hline = 2,
-                                addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2,
+                                addMedian = TRUE, col.median = "white", lty.median = 2, lwd.median = 2,
                                 cex.ver = 0.7, version = FALSE, xaxs = "i", yaxs = "i",
                                 ci = c("bootstrap", "estimated", "none"), grey.intensity = 1.5,
-                                exclude = 0, mult = 1) {
+                                exclude = 0, mult = 1, add = FALSE, alpha = 1) {
   ci <- match.arg(ci)
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = expression(F~(y^-1)), 
                Winf = expression(W[infinity]~(g)), 
@@ -346,15 +346,17 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
   CI <- attr(x, "CI")
   cidf <- CI[[what]] / mult
   ylim <- if(is.null(ylim)) range(ys, cidf, na.rm = TRUE) else ylim
+  if(! add) {
+    plot(xs, ys, type="n", ylim=ylim, xlab = "", ylab = "", xaxs = xaxs, yaxs = yaxs, ...)  
+  }
   
-  plot(xs, ys, type="n", ylim=ylim, xlab = "", ylab = "", xaxs = xaxs, yaxs = yaxs, ...)
   title(xlab = xlab, ylab=ylab, line=2)
   if("bootstrap" %in% ci) {
     if( ! is.null(cidf)) {
       addConfidenceShading(xs, cidf, grey.intensity = grey.intensity, 
                            addMedian = addMedian, col.median = col.median, 
                            lty.median = lty.median, lwd.median = lwd.median,
-                           exclude = exclude)
+                           exclude = exclude, alpha = alpha)
     }
   } else if("estimated" %in% ci) {
     addConfidenceShading(xs, x, what = what)  
