@@ -9,16 +9,19 @@ Maintainer: Alexandros Kokkalis <alko@aqua.dtu.dk>
 Description: Contains functions to estimate parameters of the model and the
     Fmsy reference point. Functions for simulating data are also available.
 License: GPL
-Depends:
+Depends: 
     R (>= 2.14)
-Imports:
+Imports: 
     numDeriv,
     methods,
     truncdist, 
     stats
-Suggests:
+Suggests: 
     parallel,
     testthat,
-    TMB
+    TMB,
+    knitr,
+    rmarkdown
 LazyData: true
 RoxygenNote: 5.0.0.9000
+VignetteBuilder: knitr

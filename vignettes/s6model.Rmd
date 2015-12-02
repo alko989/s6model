@@ -1,0 +1,38 @@
+---
+title: "Using s6model to assess the status of Nephrops (FU 23-24, nep-2324)"
+author: "Alexandros Kokkalis"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    fig_caption: yes
+# bibliography: bib.bibtex
+vignette: >
+  %\VignetteIndexEntry{Using s6model to assess the status of Nephrops (FU 23-24, nep-2324)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This vignette will show a complete example of a complete workflow using _s6model_, going from catch-at-length data, pre-processing them, doing the actual assessment and report the results. The case study is about Nephrops (_Nephrops norvegicus_) in functional units 23-24 Bay of Biscay (VIIIa,b, nep-2324). Available data of landings length distributions from the years 1987--2014 from the ICES WGBIE report (@ICES2015) are included in the package and can be accessed using.
+
+## Pre-processing of the data
+
+The first step is to read in the data from the two csv files included in the `s6model` package in the folder *nep-2324*.
+
+```{r, echo = TRUE}
+fn <- system.file("nep-2324","nep2324_catch1987_2014.csv", package = "s6model")
+nepdat <- read.table(fn, sep = ",", header = TRUE)
+```
+
+The first collumn (`Lmm`) is the lenght in mm, the rest are one for each year. The numbers are in thousends. The first 6 rows and 12 columns are presented in the following table.
+```{r, echo=FALSE}
+knitr::kable(head(nepdat[, 1:15]))
+```
+
+
+
+
+## Assessment of nep-2324
+
+## Presenting the results
+
+## References
