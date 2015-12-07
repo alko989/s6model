@@ -76,7 +76,7 @@ Type objective_function<Type>::operator() ()
     } else {
       if(freq(i) > 0) {
         nll -= dnorm(log(freq(i) / freq.sum()), log(Nvec(i) / nc), sigma, true);
-        resuduals(i) = freq(i) / freq.sum() - Nvec(i) / nc;
+        residuals(i) = freq(i) / freq.sum() - Nvec(i) / nc;
       }
     }
   }
