@@ -81,7 +81,7 @@ Type objective_function<Type>::operator() ()
         if(freq(i, yr) > 0) 
         {
           nll -= dpois(freq(i, yr), Nvec(i) / nc * sigma(yr), true);
-          residuals(i, yr) = freq(i, yr) - Nvec(i) / nc * sigma(yr);
+          residuals(i, yr) = ppois(freq(i, yr), Nvec(i) / nc * sigma(yr)); // freq(i, yr) - Nvec(i) / nc * sigma(yr);
         }
       } else {
         nll -= dnorm(freq(i, yr) / freq.sum(), Nvec(i) / nc, sigma(yr), true);
@@ -90,7 +90,6 @@ Type objective_function<Type>::operator() ()
     }
   }
   nll -= dnorm(loga, meanloga, sdloga, true);
-  nll += pow(x, 2);
 //  for(int i=0; i<Fm.size()-1; ++i){
 //    nll -= dnorm(Fm(i+1), Fm(i), sdFm, true);
 //    nll -= dnorm(Wfs(i+1), Wfs(i), sdWfs, true);
@@ -106,12 +105,12 @@ Type objective_function<Type>::operator() ()
   ADREPORT(ssb);
   ADREPORT(R);
   ADREPORT(u);
-  // ADREPORT(sdFm);
-  // ADREPORT(sdWfs);
-  
   ADREPORT(Rrel);
   ADREPORT(Rp);
   ADREPORT(rmax);
+  // ADREPORT(sdFm);
+  // ADREPORT(sdWfs);
+  
   REPORT(residuals);
   REPORT(Weight);
   REPORT(freq);

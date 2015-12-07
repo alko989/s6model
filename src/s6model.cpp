@@ -32,6 +32,7 @@ Type objective_function<Type>::operator() ()
   Type eta_S = exp(logeta_S);
   vector<Type> Nvec(nwc);
   vector<Type> Weight(nwc);
+  vector<Type> residuals(nwc);
   Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha, ssb, rmax, R, Rp;
   wr = 0.001;
   cumsum=0.0;
@@ -70,20 +71,17 @@ Type objective_function<Type>::operator() ()
         //        Type prob = size / (size + mean);
         //        nll -= dnbinom(freq(i), size, prob, true);
         nll -= dpois(freq(i), Nvec(i) / nc * sigma, true);
-        //nll += pow(sigma, 2);
+        residuals(i) = ppois(freq(i), Nvec(i) / nc * sigma);
       }
     } else {
       if(freq(i) > 0) {
         nll -= dnorm(log(freq(i) / freq.sum()), log(Nvec(i) / nc), sigma, true);
+        resuduals(i) = freq(i) / freq.sum() - Nvec(i) / nc;
       }
     }
   }
   nll -= dnorm(loga, meanloga, sdloga, true);
-  nll += pow(x, 2);
-  vector<Type> residuals(nwc);
-  residuals = Nvec / nc * sigma - freq;
-  
-  
+
   ADREPORT(Fm);
   ADREPORT(Winf);
   ADREPORT(Wfs);
@@ -93,16 +91,16 @@ Type objective_function<Type>::operator() ()
   ADREPORT(Y);
   ADREPORT(ssb);
   ADREPORT(R);
+  ADREPORT(u);
   ADREPORT(Rrel);
   ADREPORT(Rp);
   ADREPORT(rmax);
-  ADREPORT(u);
   
-  REPORT(Nvec);
+  REPORT(residuals);
   REPORT(Weight);
   REPORT(freq);
-  REPORT(residuals);
-  
+  REPORT(Nvec);
+
   return nll;
 }
 
