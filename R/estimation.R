@@ -185,9 +185,9 @@ estimateMultidata <-
 
 ##' @export
 estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, 
-                         eta_m=0.25, a=0.27, Winf = NULL, sigma=NULL, u = 10,
-                         sdloga = 0.89, winf.ubound = 2, Wfs = NULL,
-                         verbose=FALSE, map=list(loga=factor(NA), x=factor(NA)), 
+                         eta_m=0.25, a=0.22, Winf = NULL, sigma=NULL, u = 10,
+                         sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
+                         verbose=FALSE, map=list(loga=factor(NA)), 
                          random=c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
                          totalYield = 0.000001, perturbStartingVals = FALSE, ...) {
   if(is.null(df)) return(NULL)

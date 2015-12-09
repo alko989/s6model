@@ -195,7 +195,7 @@ df2matrix <- function(df){
 #' 
 #' @export
 makeAssessment <- function(inputData, yield = NULL, 
-                           a.mean = 0.27, a.sd = 0.89, nsample = 100, same.as = TRUE, seed = as.integer(rnorm(1, 1000, 100)), 
+                           a.mean = 0.22, a.sd = 0.7, nsample = 100, same.as = TRUE, seed = as.integer(rnorm(1, 1000, 100)), 
                            u = 10, sigma = NULL, binsize = NULL, winf.ubound = 2, equalWinf = TRUE,
                            probs = seq(0, 1, 0.01), 
                            dirout = "results", fnout = format.Date(Sys.time(), "results_%Y%m%d_%H%M.RData"), ...) {
