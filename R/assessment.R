@@ -217,7 +217,7 @@ makeAssessment <- function(inputData, yield = NULL,
     ests <- mapply(function(x, y, s) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound,
                                                   totalYield = y, sigma = s, u = u, DLL = "s6model", ...),
                    inputData, yield, sigma, SIMPLIFY = FALSE)
-    res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 26) else x[1:26] )
+  res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 27) else x[1:27] )
     res <- do.call(rbind.data.frame, res)
     row.names(res) <- names(inputData)
     estpars <- lapply(ests, function(x) attr(x, "estpars"))
@@ -341,7 +341,9 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
                Winf = expression(W[infinity]~(g)), 
                Wfs = "50% retainment size (g)", 
                ssb = paste0("SSB (", ifelse(mult > 1, paste0(mult, " "), "") ,"t)"),
-               stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, ssb, or Wfs"))
+               ssbrel = expression(B[SS]/B[SS]^{msy}),
+               R = "Recruitment",
+               stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, ssb, ssbrel, Wfs, or R"))
   ylab <- if(is.null(ylab)) yl else ylab
   xlab <- if(is.null(xlab)) "Year" else xlab
   xs <- seq(dim(x)[1])

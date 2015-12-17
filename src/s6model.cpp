@@ -16,7 +16,6 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(usePois);
   DATA_SCALAR(totalYield);
   PARAMETER(loga);
-  PARAMETER(x);
   PARAMETER(logFm);
   PARAMETER(logWinf);
   PARAMETER(logWfs);
@@ -71,7 +70,7 @@ Type objective_function<Type>::operator() ()
         //        Type prob = size / (size + mean);
         //        nll -= dnbinom(freq(i), size, prob, true);
         nll -= dpois(freq(i), Nvec(i) / nc * sigma, true);
-        residuals(i) = ppois(freq(i), Nvec(i) / nc * sigma);
+        residuals(i) = qnorm(ppois(freq(i), Nvec(i) / nc * sigma));
       }
     } else {
       if(freq(i) > 0) {

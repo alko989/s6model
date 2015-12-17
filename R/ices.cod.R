@@ -62,6 +62,10 @@ addIces <- function(stock, col="darkgrey", lwd=2, lty = c(2,1,2), what = "FFmsy"
     }
     matplot(ices$Year, ices[ , cols] / fmsy(ices) * mult, 
             add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
+  } else if(what == "ssbrel") {
+    cols <- na.omit(pmatch(c("ssb"), nms, NA))
+    matplot(ices$Year, ices[ , cols] / as.numeric(attr(ices, "MSYBtrigger")) * mult, 
+            add=TRUE, col=col, lwd = lwd, lty = lty, type="l")
   } else {
     n <- pmatch(what, nms)
     cols <- na.omit(n)

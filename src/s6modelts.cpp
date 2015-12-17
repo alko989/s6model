@@ -17,7 +17,6 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(usePois);
   DATA_VECTOR(totalYield);
   PARAMETER(loga);
-  PARAMETER(x);
   PARAMETER_VECTOR(logFm);
   PARAMETER(logWinf);
   PARAMETER_VECTOR(logWfs);
