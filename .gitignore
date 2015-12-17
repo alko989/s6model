@@ -2,7 +2,6 @@
 .Rhistory
 .RData
 .Rprofile
-
 # Example code in package build process
 *-Ex.R
 # Temporary files
@@ -20,9 +19,9 @@ packrat
 *.bak
 tests/testthat/*.pdf
 inst/doc
-
 vignettes/*.html
 vignettes/*.R
 vignettes/*.pdf
 vignettes/*_cache
 vignettes/*_files
+results

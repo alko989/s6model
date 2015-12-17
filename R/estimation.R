@@ -268,7 +268,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
                  sdloga = sdloga, isSurvey = as.integer(isSurvey), usePois = as.integer(usePois),
                  totalYield = totalYield)
-    pars <- list(loga=log(a), x=0, logFm = logFm, logWinf = log(Winf),
+    pars <- list(loga=log(a), logFm = logFm, logWinf = log(Winf),
                  logWfs = logWfs, logSigma=logSigma, logeta_S = logeta_S, logu = logu)
 #     if(perturbStartingVals) {
 #       lapply(pars, function(pp) {
