@@ -260,6 +260,15 @@ print.s6modelResults <- function(x, ...) {
   invisible(x)
 }
 
+#' @rdname s6modelResults
+#' @export
+residuals.s6modelResults <- function(object, ...) {
+  rprt <- attr(object, "obj")$env$report()
+  w <- which(rprt$freq > 0)
+  rprt$residuals[w]
+}
+
+
 makeShading <- function(x, ylow, yhigh, col = grey(0.8), alpha = 1, ...) {
   xs <- c(x, rev(x))
   ys <- c(ylow, rev(yhigh))

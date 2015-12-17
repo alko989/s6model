@@ -4,11 +4,14 @@
 \name{s6modelResults}
 \alias{plot.s6modelResults}
 \alias{print.s6modelResults}
+\alias{residuals.s6modelResults}
 \alias{s6modelResults}
 \alias{s6modelResults-class}
 \title{s6modelResults class}
 \usage{
 \method{print}{s6modelResults}(x, ...)
+
+\method{residuals}{s6modelResults}(object, ...)
 
 \method{plot}{s6modelResults}(x, ..., what = "FFmsy", use.rownames = TRUE,
   years = NULL, xlab = NULL, ylab = NULL, ylim = NULL,
