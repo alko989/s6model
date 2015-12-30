@@ -21,7 +21,7 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logWinf);
   PARAMETER_VECTOR(logWfs);
   PARAMETER_VECTOR(logSigma);
-  PARAMETER_VECTOR(logeta_S);
+  PARAMETER(logeta_S);
   PARAMETER(logu);
   Type u = exp(logu);
 //  PARAMETER(logsdFm);
@@ -29,7 +29,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> Fm = exp(logFm);
   Type Winf = exp(logWinf);
   vector<Type> Wfs = exp(logWfs);
-  vector<Type> eta_S = exp(logeta_S);
+  Type eta_S = exp(logeta_S);
   vector<Type> sigma = exp(logSigma);
   matrix<Type> residuals(nwc,nyrs);
   matrix<Type> Weight(nwc,nyrs);
@@ -57,7 +57,7 @@ Type objective_function<Type>::operator() ()
       w = Weight(j, yr) = binsize * (j + 0.5);
       psi_m = 1 / (1 + pow(w / (Winf * eta_m), -10));
       psi_F = 1 / (1 + pow(w / (Wfs(yr)), -u));
-      psi_S = 1 / (1 + pow(w / (Winf * eta_S(yr)), -u));
+      psi_S = 1 / (1 + pow(w / (Winf * eta_S), -u));
       g = A * pow(w, n) * (1 - pow(w / Winf, 1 - n) * (epsilon_a + (1 - epsilon_a) * psi_m));
       m = a * A * pow(w, n-1);
       cumsum += (m + Fm(yr) *  psi_F) / g * binsize; 
@@ -68,7 +68,6 @@ Type objective_function<Type>::operator() ()
       nc += Nvec(j, yr);
     }
     Rrel(yr) = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb(yr));
-    N = N * Rrel(yr);
     Y(yr) = Y(yr) * Rrel(yr);
     rmax(yr) = totalYield(yr) / Y(yr);
     ssb(yr) *=  Rrel(yr) * rmax(yr);

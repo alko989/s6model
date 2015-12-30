@@ -54,7 +54,6 @@ Type objective_function<Type>::operator() ()
     nc += Nvec(j); // * binsize;
   }
   Type Rrel = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb);
-  N = N * Rrel;
   Y = Y * Rrel;
   rmax = totalYield / Y;
   ssb = ssb * Rrel * rmax;

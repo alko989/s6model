@@ -222,8 +222,11 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
         eta_S <- which(df$Freq != 0)[1] * binsize / Winf
       }
     } else {
-      map$logeta_S  <- rep(factor(NA), nyrs)
+      map$logeta_S  <- factor(NA)
     }
+    if(! isSurvey) {
+      map$logeta_S <- factor(NA)
+    }    
     if(is.null(sigma) || is.na(sigma))  {
       if(isTS) {
         sigma <- if(usePois) colSums(df) else rep(0.0001, nyrs)
@@ -233,12 +236,9 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     } else {
       map$logSigma  <- rep(factor(NA), nyrs)
     }
-    if(! isSurvey) {
-      map$logeta_S <- rep(factor(NA), nyrs)
-    }
     if(is.null(Wfs) || is.na(Wfs))  {
       if(isTS) {
-        Wfs <- apply(df, 2, function(x) (which.max(x) + which(x > 0)[1]) / 2 * binsize - binsize / 2)
+        Wfs <- apply(df, 2, function(x) round((which.max(x) + which(x > 0)[1]) / 2) * binsize - binsize / 2)
       } else {
         Wfs <- df$Weight[round((which.max(df$Freq) + which(df$Freq > 0)[1]) / 2)]## min(df$Weight[df$Freq > 0])
       }
@@ -254,22 +254,17 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
       freq <- df
       nwc <- attr(df, "nwc")
       logFm <- rep(log(0.5), nyrs)
-      logeta_S <- rep(log(eta_S), nyrs)
     } else {
       freq <- df$Freq
       nwc <- dim(df)[1]
       logFm <- log(0.5)
-      logeta_S <- log(eta_S)
-    }
-    logWfs <- log(Wfs)
-    logSigma <- log(sigma)
-    logu <- log(u)
+  }
     data <- list(binsize=binsize, nwc=nwc, freq=freq, n=n, epsilon_a=epsilon_a,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
                  sdloga = sdloga, isSurvey = as.integer(isSurvey), usePois = as.integer(usePois),
                  totalYield = totalYield)
     pars <- list(loga=log(a), logFm = logFm, logWinf = log(Winf),
-                 logWfs = logWfs, logSigma=logSigma, logeta_S = logeta_S, logu = logu)
+                 logWfs = log(Wfs), logSigma=log(sigma), logeta_S = log(eta_S), logu = log(u))
 #     if(perturbStartingVals) {
 #       lapply(pars, function(pp) {
 #         
