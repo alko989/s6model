@@ -313,7 +313,7 @@ getYears <- function(x) {
 }
 
 constrFilename <- function(stock, a, a.sd, winf.ubound, Winf, sigma, usePois, u,
-                           aggryrs, nsample, includeUncertainty = nsample > 1, equalWinf, ...) {
+                           aggryrs, nsample, includeUncertainty = nsample > 1, equalWinf, binsize, ...) {
   estimateWinf <- is.null(Winf)
   paste0(stock, "_a=", a, 
          "_asd=", a.sd, 
@@ -322,7 +322,7 @@ constrFilename <- function(stock, a, a.sd, winf.ubound, Winf, sigma, usePois, u,
          if(usePois) "_usePoison" else "_useGauss", "_aggryrs=", aggryrs,  
          if(is.null(u)) "_estu" else "_fixu=10",
          "_nsample=", if(includeUncertainty) nsample else 1, 
-         if(equalWinf) "_equalWinf" else "_difWinf",
+         if(equalWinf) "_equalWinf" else "_difWinf", "_binsize=", binsize, "_", format(Sys.time(), format = "%Y%m%d_%H%M%S"),
          ".RData")
 }
 
