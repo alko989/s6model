@@ -78,12 +78,12 @@ Type objective_function<Type>::operator() ()
       if(usePois) {
         if(freq(i, yr) > 0) 
         {
-          nll -= dpois(freq(i, yr), Nvec(i) / nc * sigma(yr), true);
-          residuals(i, yr) = ppois(freq(i, yr), Nvec(i) / nc * sigma(yr)); // freq(i, yr) - Nvec(i) / nc * sigma(yr);
+          nll -= dpois(freq(i, yr), Nvec(i,yr) / nc * sigma(yr), true);
+          residuals(i, yr) = qnorm(ppois(freq(i, yr), Nvec(i,yr) / nc * sigma(yr))); // freq(i, yr) - Nvec(i) / nc * sigma(yr);
         }
       } else {
-        nll -= dnorm(freq(i, yr) / freq.sum(), Nvec(i) / nc, sigma(yr), true);
-        residuals(i,yr) = freq(i, yr) / freq.sum() - Nvec(i) / nc;
+        nll -= dnorm(freq(i, yr) / freq.sum(), Nvec(i,yr) / nc, sigma(yr), true);
+        residuals(i,yr) = freq(i, yr) / freq.sum() - Nvec(i,yr) / nc;
       }
     }
   }
