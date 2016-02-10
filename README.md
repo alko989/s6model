@@ -18,3 +18,4 @@ install_github("alko989/s6model")
 ```
 
 Another option is to download the whole code as a zipball and build and install using ```R CMD```
+![Github tracking](https://ga-beacon.appspot.com/UA-73594222-1/s6model/master)
