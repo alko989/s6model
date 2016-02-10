@@ -1,7 +1,7 @@
 # s6model
 
 [![Build Status](https://travis-ci.org/alko989/s6model.svg?branch=master)](https://travis-ci.org/alko989/s6model)
-[![codecov.io](https://codecov.io/github/alko989/s6model/coverage.svg?branch=master)](https://codecov.io/github/alko989/s6model?branch=master)
+[![codecov.io](https://codecov.io/github/alko989/s6model/coverage.svg?branch=master)](https://codecov.io/github/alko989/s6model?branch=master) [![Analytics](https://ga-beacon.appspot.com/UA-73594222-1/s6model/master)](https://github.com/igrigorik/ga-beacon)
 
 Data-poor stock assessment using the s6model
 
@@ -18,4 +18,3 @@ install_github("alko989/s6model")
 ```
 
 Another option is to download the whole code as a zipball and build and install using ```R CMD```
-![Github tracking](https://ga-beacon.appspot.com/UA-73594222-1/s6model/master)
