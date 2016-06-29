@@ -473,27 +473,28 @@ setMethod("plotGrowth", c("Parameters"),
 ##' @rdname plotGrowthMortality
 ##' @docType methods
 ##' @export
-setGeneric("plotMortality", function(object, ...) {standardGeneric("plotMortality")})
+setGeneric("plotMortality", function(object, ...){
+  standardGeneric("plotMortality")
+  })
 ##' @aliases plotMortality,Parameters-method
 setMethod("plotMortality", c("Parameters"),
           function(object, ...) {
             p <- getParams(object)
-            plot(p$w / p$Winf, p$m , type="n", lwd=2, 
-                 xlab="",  log="x", ylab="",xaxt="n", yaxt="n", ... )
-            title(xlab=expression(w/W[infinity]), family="cmmi10")
-            title(ylab="Mortality (1/y)", line=1.4)
-            lines(p$w/p$Winf, p$psi_F* p$Fm, lwd=3, lty="dotted")
-            lines(p$w / p$Winf, p$m - p$psi_F * p$Fm, lty=2, lwd=3)
-            lines(p$w / p$Winf, p$m, lty=1, lwd=3)
+            plot(p$w / p$Winf, p$m , type = "n", lwd=2, 
+                 xlab = "",  log = "x", ylab = "",xaxt = "n", yaxt = "n", ... )
+            title(xlab=expression(w/W[infinity]))
+            title(ylab=expression(Mortality~(y^{-1})), line = 1.4)
+            lines(p$w / p$Winf, p$psi_F * p$Fm, lwd = 3, lty = "dotted")
+            lines(p$w / p$Winf, p$m - p$psi_F * p$Fm, lty = 2, lwd = 3)
+            lines(p$w / p$Winf, p$m, lty = 1, lwd = 3)
             pow <- -2:0
-            ticksat <- as.vector(sapply(pow, function(p) (2:10)*10^p))
-            axis(1, 10^pow, tcl=0.5)
-            axis(1, ticksat, labels=NA, tcl=0.25, lwd=0, lwd.ticks=1)
-            axis(2, labels=NA, tcl=0.5)
-            mtext(seq(par()$usr[2],par()$usr[4],0.1),side=2, line=0.5, at=seq(par()$usr[2],par()$usr[4],0.1))
-            ##abline(v=p$eta_F, lwd=1, lty=2)
-            ##mtext(expression(eta[F]), side=1, at=p$eta_F, line=0)
-            ##legend("topright", legend=c("natural mortality", "total mortality", "fishing mortality"), lty=c(1,2,1), col=c(1,1,"lightgrey"),lwd=c(2,2,10))
+            ticksat <- as.vector(sapply(pow, function(p) (2:10) * 10 ^ p))
+            axis(1, 10 ^ pow, tcl = 0.5)
+            axis(1, ticksat, labels = NA, tcl = 0.25, lwd = 0, lwd.ticks = 1)
+            coords <- par()$usr
+            ys <- round(seq(0, coords[4], length.out = 4), 2)
+            axis(2, labels = NA, at = ys, tcl = 0.5)
+            mtext(ys, side=2, line = 0.5, at = ys)
             invisible(NULL)
           })
 
