@@ -190,10 +190,10 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                          verbose=FALSE, map=list(loga=factor(NA)), 
                          random=c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
                          totalYield = 0.000001, perturbStartingVals = FALSE, ...) {
-  if(is.null(df)) return(NULL)
-  if(! require(TMB)) stop("TMB is not installed! Please install and try again.")
+  if (is.null(df)) return(NULL)
+  if (! require(TMB)) stop("TMB is not installed! Please install and try again.")
   isTS <- is(df, "list")
-  if(isTS) {
+  if (isTS) {
     length(totalYield) == length(df) || stop("Please provide the yield for all years")
     yrs <- names(df)
     df <- df2matrix(df)
