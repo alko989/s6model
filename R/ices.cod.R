@@ -49,8 +49,13 @@
 #' @export
 #'
 #' @note If no active plot exists produces an error
-addIces <- function(stock, col="darkgrey", lwd=2, lty = c(2,1,2), what = "FFmsy", mult = 1, includeuncertainty = FALSE) {
-  ices <- ices.cod[[stock]]
+addIces <- function(stock, col="darkgrey", lwd=2, lty = c(2,1,2), what = "FFmsy", mult = 1, includeuncertainty = FALSE, icesfile = NULL){
+  if(! is.null(icesfile)) {
+    load(icesfile)
+    ices <- ices[[stock]]
+    } else {
+    ices <- ices.cod[[stock]]
+  }
   if(is.null(ices)) stop("Stock ", stock, " was not in the ices.cod dataset")
   nms <- tolower(names(ices))
   what <- tolower(what)
