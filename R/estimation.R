@@ -240,7 +240,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
       if(isTS) {
         Wfs <- apply(df, 2, function(x) round((which.max(x) + which(x > 0)[1]) / 2) * binsize - binsize / 2)
       } else {
-        Wfs <- df$Weight[round((which.max(df$Freq) + which(df$Freq > 0)[1]) / 2)]## min(df$Weight[df$Freq > 0])
+        Wfs <- df$Weight[round((which.max(df$Freq) + which(df$Freq > 0)[1]) / 2)] - binsize / 2## min(df$Weight[df$Freq > 0])
       }
     } else {
       map$logWfs  <- rep(factor(NA), nyrs)
@@ -261,15 +261,11 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
   }
     data <- list(binsize=binsize, nwc=nwc, freq=freq, n=n, epsilon_a=epsilon_a,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
-                 sdloga = sdloga, isSurvey = as.integer(isSurvey), usePois = as.integer(usePois),
-                 totalYield = totalYield)
-    pars <- list(loga=log(a), logFm = logFm, logWinf = log(Winf),
-                 logWfs = log(Wfs), logSigma=log(sigma), logeta_S = log(eta_S), logu = log(u))
-#     if(perturbStartingVals) {
-#       lapply(pars, function(pp) {
-#         
-#       })
-#     }
+                 sdloga = sdloga, isSurvey = as.integer(isSurvey),
+                 usePois = as.integer(usePois), totalYield = totalYield)
+    pars <- list(loga = log(a), logFm = logFm, logWinf = log(Winf),
+                 logWfs = log(Wfs), logSigma = log(sigma),logeta_S = log(eta_S), 
+                 logu = log(u))
     obj <- MakeADFun(data = data, parameters = pars,  map=map, random=random, DLL = DLL)
     upper <- rep(Inf, length(obj$par))
     upper[which(names(obj$par) == "logWinf")] <- log(Winf * winf.ubound)
