@@ -567,3 +567,7 @@ Changes from version  0.10.12 to  0.10.13
  * Confidence interval results are saved
  * Seed is saved
  * Small plotting changes
+
+Changes from version  0.10.14 to  0.10.15 
+ * Major rewrite of the code
+
