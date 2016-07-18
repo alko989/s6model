@@ -194,23 +194,31 @@ df2matrix <- function(df){
 #' }
 #' 
 #' @export
-makeAssessment <- function(inputData, yield = NULL, 
-                           a.mean = 0.22, a.sd = 0.7, nsample = 100, same.as = TRUE, seed = as.integer(rnorm(1, 1000, 100)), 
-                           u = 10, sigma = NULL, binsize = NULL, winf.ubound = 2, equalWinf = TRUE,
-                           probs = seq(0, 1, 0.01), 
-                           dirout = "results", fnout = format.Date(Sys.time(), "results_%Y%m%d_%H%M.RData"), ...) {
+makeAssessment <- 
+  function(inputData, yield = NULL, a.mean = 0.22, a.sd = 0.7, nsample = 100, 
+           same.as = TRUE, u = 10, sigma = NULL, binsize = NULL, 
+           winf.ubound = 2, equalWinf = TRUE, probs = seq(0, 1, 0.01), 
+           seed = as.integer(rnorm(1, 1000, 100)), dirout = "results",
+           fnout = format(Sys.time(),"results_%Y%m%d_%H%M.RData"), ...) {
   set.seed(seed)
-  if(is.null(yield)) yield <- rep(0.0001, length(inputData))
-  sigma <- if(is.null(sigma) || is.na(sigma)) rep(NA, length(inputData)) else sapply(inputData, function(x) mean(rle(x$Freq)$lengths) * sum(x$Freq))
+  haveYield <- TRUE
+  if(is.null(yield)) {
+    yield <- rep(1, length(inputData))
+    haveYield <- FALSE
+  }
+  sigma <- if(is.null(sigma) || is.na(sigma)) {
+    rep(NA, length(inputData)) 
+  } else {
+    sapply(inputData, function(x) mean(rle(x$Freq)$lengths) * sum(x$Freq))
+  }
   starting <- Sys.time()
-  if(! is.null(binsize)) inputData <- changeBinsize2(inputData, binsize = binsize)
+  if(! is.null(binsize)) {
+    inputData <- changeBinsize2(inputData, binsize = binsize)
+  }
   if(equalWinf) {
-    ests <- try(estimate_TMB(inputData, DLL = "s6modelts", totalYield = yield, 
-                             sigma = sigma, a=a.mean, winf.ubound = winf.ubound, u = u, ...))
-    #     while(is(ests, "try-error")) {
-    #       ests <- try(estimate_TMB(inputData, DLL = "s6modelts", totalYield = yield, 
-    #                                sigma = sigma, a=a.mean, winf.ubound = winf.ubound, ...))
-    #     }
+    ests <- try(
+      estimate_TMB(inputData, DLL = "s6modelts", totalYield = yield, u = u,
+                   sigma = sigma, a = a.mean, winf.ubound = winf.ubound, ...))
     estpars <- attr(ests, "estpars")
     res <- ests
   } else {
@@ -232,7 +240,7 @@ makeAssessment <- function(inputData, yield = NULL,
                              same.as = same.as, nsample = nsample, winf.ubound = winf.ubound, yield = yield, probs = probs, ...)
   } 
   opts <- list(...)
-  res <- structure(res, Results = ests, version = getVersion(), timeToCompletion = Sys.time() - starting,
+  res <- structure(res, Results = ests, version = getVersion(), timeToCompletion = Sys.time() - starting, haveYield = haveYield,
                    seed = seed, opts = list(tmbopts = c(opts, a.mean = a.mean, a.sd = a.sd, 
                                                         winf.ubound = winf.ubound, yield = yield, u = u), probs = probs))
   if( ! is(res,"try-error")) { 

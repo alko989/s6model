@@ -5,10 +5,10 @@
 \title{Makes assessment of a fish stock given weight frequency data for several years}
 \usage{
 makeAssessment(inputData, yield = NULL, a.mean = 0.22, a.sd = 0.7,
-  nsample = 100, same.as = TRUE, seed = as.integer(rnorm(1, 1000, 100)),
-  u = 10, sigma = NULL, binsize = NULL, winf.ubound = 2,
-  equalWinf = TRUE, probs = seq(0, 1, 0.01), dirout = "results",
-  fnout = format.Date(Sys.time(), "results_\%Y\%m\%d_\%H\%M.RData"), ...)
+  nsample = 100, same.as = TRUE, u = 10, sigma = NULL, binsize = NULL,
+  winf.ubound = 2, equalWinf = TRUE, probs = seq(0, 1, 0.01),
+  seed = as.integer(rnorm(1, 1000, 100)), dirout = "results",
+  fnout = format(Sys.time(), "results_\%Y\%m\%d_\%H\%M.RData"), ...)
 }
 \arguments{
 \item{inputData}{list of data.frames, each data.frame has columns \code{Weight} and  \code{Freq} and attribute \code{binsize}}
@@ -23,8 +23,6 @@ makeAssessment(inputData, yield = NULL, a.mean = 0.22, a.sd = 0.7,
 
 \item{same.as}{logical, if TRUE use the same random values of physiological mortality for each year.}
 
-\item{seed}{numeric, the random number generator seed.}
-
 \item{u}{numeric, the selectivity steepness parameter.}
 
 \item{sigma}{numeric, if NULL the parameter is estimated, otherwise a constant is used, see Details.}
@@ -36,6 +34,8 @@ makeAssessment(inputData, yield = NULL, a.mean = 0.22, a.sd = 0.7,
 \item{equalWinf}{logical, if TRUE estimate one asymptotic weight for all years, if FALSE estimate one for each year.}
 
 \item{probs}{numeric vector of probabilites with values in [0,1] for the uncertainty sample quantiles.}
+
+\item{seed}{numeric, the random number generator seed.}
 
 \item{dirout}{Output directory}
 
