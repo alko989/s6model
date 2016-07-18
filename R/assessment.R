@@ -60,12 +60,17 @@ fitWL <- function(df, colname.weight = "Weight", colname.length = "Length", plot
     if(levels(df[[3]]$Species) != levels(df[[1]]$Species)) {
       warning("The CA and HL parts of the DATRASraw object do not have the same species")
     }
-    return(fitWL(df[[1]], colname.weight = "IndWgt", colname.length = "LngtCm"))
+    return(fitWL(df[[1]], colname.weight = "IndWgt", colname.length = "LngtCm", plotFit = plotFit))
   }
   if(plotFit) {
-    plot(Weight ~ Length, data = df, pch = 20, cex = 0.7, ...)
+    xlim <- range(0, df$Length)
+    plot(Weight ~ Length, data = df, pch = ".", cex = 1.1, xlim = xlim, ...)
     newdat <- data.frame(Length = seq(0, max(df$Length), length.out = 100))
-    lines(newdat$Length, exp(predict(fit, newdata = newdat)), col =2)
+    lines(newdat$Length, exp(predict(fit, newdata = newdat)), col =2, lwd = 2)
+    ss <- summary(fit)
+    mtext(side = 3, adj = 0, at = 0, bquote(W == .(round(res$a,4))* L^.(round(res$b,2))), line = -2)
+    mtext(side = 3, adj = 0, at = 0, bquote(paste(adj.R^2, "=", .(round(ss$adj.r.squared, 2)))), line = -3.2)
+    mtext(side = 3, adj = 0, at = 0, bquote(paste(n, "=", .(nrow(df)))), line = -4.4)
   }
   res
 }
