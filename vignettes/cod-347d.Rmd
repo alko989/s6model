@@ -1,14 +1,14 @@
 ---
 title: "Using s6model to assess the status of North Sea cod (cod-347d)"
-author: "Alexandros Kokkalis"
-date: "`r Sys.Date()`"
+author: "Alexandros Kokkalis `r Sys.Date()`"
+date: ""#"`r Sys.Date()`"
 output: 
 #  rmarkdown::html_vignette:
 #    fig_caption: yes
   pdf_document:
     toc: true
     highlight: default
-# bibliography: bib.bibtex
+bibliography: bib.bibtex
 vignette: >
   %\VignetteIndexEntry{Using s6model to assess the status of North Sea cod (cod-347d)}
   %\VignetteEngine{knitr::rmarkdown}
@@ -16,6 +16,7 @@ vignette: >
 ---
 
 ## Introduction
+The usage of `s6model` R-package is illustrated using the North Sea cod (_Gadus morhua_) as an example. The status of this data-rich stock is assessed using only fisheries independent information, i.e. size frequency distributions from scientific surveys. Data from the North Sea International Bottom Trawl Survey (NS-IBTS) are downloaded from the [DATRAS](http://datras.ices.dk) database. Further, total yearly landings and the results from the official assessment are also obtained from ICES.
 
 The North Sea cod (_Gadus morhua_) is assessed in this example using only survey data from the NS-IBTS survey. The data can be downloaded from the [DATRAS](http://datras.ices.dk) database. 
 
@@ -57,13 +58,13 @@ Now the data are in a format that can be used to assess the stock status. The da
 
 Now the data are in the correct format the assessment can be done using the `makeAssessment` function. It has many arguments and only a subset of them are presented here. There are default values for most of them, so that a preliminary assessment can be done using `makeAssessment(dat)`, where `dat` has the data in the correct format. The results are saved after a successful run of the function so that they can accessed at a later point to make plots and reports.
 
-Since it is an assessment using only survey data, we are using `isSurvey = TRUE` and we make the assumption that all sizes are selected by the gear by setting the relative selectivity parameter ($\eta_S$, argument `eta_S`) of the gear very small. The results are not saved (`fnout = NULL`). The default values for mean and sd of physiological mortality from @Kokkalis2015 are used.
+Since it is an assessment using only survey data, we are using `isSurvey = TRUE` and we make the assumption that all sizes are selected by the gear by setting the relative selectivity parameter ($\eta_S$, argument `eta_S`) of the gear very small. The results are not saved (`fnout = NULL`). The default values for mean and sd of physiological mortality from @Kokkalis2016 are used.
 ```{r assessment, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
 library(s6model)
 yrs <- s6model:::getYears(names(nscoddat))
 w <- ices.cod[["cod-347d"]]$Year %in% yrs
 land <- ices.cod[["cod-347d"]]$Landings[w]
-res <- makeAssessment(nscoddat, fnout = NULL, isSurvey = TRUE, eta_S = 1e-3, yield = land, u = NULL,
+res <- makeAssessment(nscoddat, fnout = NULL, isSurvey = TRUE, eta_S = 1e-3, yield = land, u = 10,
                       a = 0.22, a.sd = 0.7, nsample = 20, binsize = 500)
 ```
 
@@ -73,7 +74,7 @@ res <- makeAssessment(nscoddat, fnout = NULL, isSurvey = TRUE, eta_S = 1e-3, yie
 The results of the assessment of $F/F_{msy}$ are plotted using `plot` function. The y-axis is in log-scale and its limits are set.
 ```{r plotting, echo = TRUE, eval = TRUE, cache = TRUE, dependson="assessment"}
 par(mar = c(3.1, 3.1, 0.1, 0.1))
-plot(res, ylim = c(1/15,15), log = "y")
+s6model:::plot.s6modelResults(res, ylim = c(1/15,15), log = "y")
 addIces("cod-347d", col = "lightgrey")
 plot(res, what = "ssb", ylim = c(1, 150), mult = 1000)
 addIces("cod-347d", mult = 1/1000, what = "SSB")
