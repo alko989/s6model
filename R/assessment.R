@@ -122,13 +122,20 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
                    u = u, ...)
     })
     reps <- results
+    asused <- as.list(as)
     err <- sapply(results, function(x) is(x, "try-error"))
     errmsg <- reps[err]
     reps[err] <- NULL
+    asused[err] <- NULL
     notConv <- sapply(reps, function(x) attr(x, "opt")$convergence == 1)
     reps[notConv] <- NULL
+    asused[notConv] <- NULL
     verySmall <- sapply(reps, function(x) x$Fm < 1e-5)
     reps[verySmall] <- NULL
+    asused[verySmall] <- NULL
+    negRrel <- sapply(reps, function(x) x$Rrel < 0)
+    reps[negRrel] <- NULL
+    asused[negRrel] <- NULL
     repsdf <- do.call(rbind.data.frame, reps)
     nrep <- nrow(repsdf)
     n <- function(x) if(length(x) > 0) sum(x) else 0
@@ -141,12 +148,15 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
   alims <- sapply(ci, function(x) attr(x, "alim"))
   reps <- sapply(ci, function(x) attr(x, "nrep"))
   nerr <- sapply(ci, function(x) attr(x, "nerr"))
+  nnegRrel <- sapply(ci, function(x) attr(x, "nnegRrel"))
   nVerySmall <- sapply(ci, function(x) attr(x, "nVerySmall"))
   err <- sapply(ci, function(x) attr(x, "err"))
   errmsg <- sapply(ci, function(x) attr(x, "errmsg"))
   notConv <- sapply(ci, function(x) attr(x, "notConv"))
+  pointests <-  sapply(ci, function(x) attr(x, "pointests"))
   ## allResults <- lapply(ci, function(x) attr(x, "results"))
   as <-  lapply(ci, function(x) attr(x, "as"))
+  asused <-  lapply(ci, function(x) attr(x, "asused"))
   nms <- names(ci[[1]])
   ci <- lapply(nms, function(nm) lapply(ci, function(d) d[[nm]]))
   ci <- lapply(ci, function(yy) {
@@ -156,9 +166,10 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
     setNames(do.call(cbind.data.frame, yy), names(inputData))
   })
   ci <- setNames(ci, nms)
-  structure(ci, alims = alims, as = as, reps = reps, nVerySmall = nVerySmall, notConv = notConv, nerr = nerr, 
-            err = err, errmsg = errmsg #, allResults = allResults
-            )
+  structure(ci, alims = alims, as = unlist(as), asused = unlist(asused),
+            nVerySmall = nVerySmall, notConv = notConv, nnegRrel = nnegRrel,
+            pointests = pointests, err = nerr, err = err, errmsg = errmsg, 
+            reps = reps)
 }
 
 
