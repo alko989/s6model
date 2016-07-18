@@ -83,7 +83,9 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
   Rrel <- 1 - (Winf^(1-n) * w_egg/(epsilon_r * (1 - epsilon_a) * A * B))## * (w_r/w_egg)^(a-1)
   Rp <- epsilon_r * (1 - epsilon_a) * A * Winf ^ (n-1) / w_egg * B
   Y <- Fm * Rrel * sum((psi_F * N * w)[-M] * delta)
-  YR <- Fm * sum((psi_F * N * w)[-M] * delta)
+  wF <- which.min(abs(Wfs - w)) ## Find the closest weight to Wfs
+  
+  YR <- Y * 1 / (N[wF] * Rrel * g[wF])# Fm * sum((psi_F * N * w)[-M] * delta)
   
   if(calcBRPs) {
     Fmsy <- optimise(f=getParams, interval=c(0,10), maximum=TRUE, p=p, optim.fmsy=TRUE)$maximum
