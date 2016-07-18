@@ -345,10 +345,31 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
                                 ci = c("bootstrap", "estimated", "none"), grey.intensity = 1.5,
                                 exclude = 0, mult = 1, add = FALSE, alpha = 1) {
   ci <- match.arg(ci)
+  ys <- x[[what]] / mult
+  CI <- attr(x, "CI")
+  if(ci == "bootstrap" & ! is.null(CI)) {
+    cidf <- CI[[what]] / mult
+    if(is.null(cidf)) {
+      warning("There is no confidence interval for ", what, " in the results. Only the default line will be plotted")
+      ci <- "none"
+      addDefault <- TRUE
+    } else {
+      d <- nrow(cidf) - 1
+      median <- cidf[d/2 + 1, ]
+    }
+  }
   yl <- switch(what, FFmsy = expression(F/F[msy]), Fm = expression(F~(y^-1)), 
                Winf = expression(W[infinity]~(g)), 
                Wfs = "50% retainment size (g)", 
-               ssb = paste0("SSB (", ifelse(mult > 1, paste0(mult, " "), "") ,"t)"),
+               ssb = {
+                 haveYield <- attr(x, "haveYield")
+                 if(is.null(haveYield) || haveYield) {
+                   paste0("SSB (", ifelse(mult > 1, paste0(mult, " "), "") ,"t)")
+                 } else { 
+                   cidf <- data.frame(mapply(`/`, cidf, x$rmax))
+                   bquote(B[SS]/R[max]~(g*y))
+                 }
+               },
                ssbrel = expression(B[SS]/B[SS]^{msy}),
                R = "Recruitment",
                stop("Unidentified `what` argument. Please select one of FFmsy, Fm, Winf, ssb, ssbrel, Wfs, or R"))
@@ -358,36 +379,40 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
   if(use.rownames) {
     xs <- getYears(rownames(x))
   }
-  if(! is.null(years) & ! use.rownames) {
+  if(! is.null(years) && ! use.rownames) {
     xs <- years
   }
-  ys <- x[[what]] / mult
-  CI <- attr(x, "CI")
-  cidf <- CI[[what]] / mult
-  ylim <- if(is.null(ylim)) range(ys, cidf, na.rm = TRUE) else ylim
   if(! add) {
+    ## Calculate y-axis range if ylim is not provided
+    if(is.null(ylim)) {
+      if(is.null(list(...)$log) || (! grepl("y", list(...)$log))) ylim <- c(0,0)
+      if(addMedian) ylim <- range(ylim, median, na.rm = TRUE)
+      if(addDefault) ylim <- range(ylim, ys, na.rm = TRUE)
+      if(ci == "bootstrap") ylim <- range(ylim, cidf[-c(1:exclude, (nrow(cidf) - 5 + 1):nrow(cidf)), ], na.rm = TRUE)
+    }    
     plot(xs, ys, type="n", ylim=ylim, xlab = "", ylab = "", xaxs = xaxs, yaxs = yaxs, ...)  
   }
   
   title(xlab = xlab, ylab=ylab, line=2)
-  if("bootstrap" %in% ci) {
+  if(ci == "bootstrap") {
     if( ! is.null(cidf)) {
       addConfidenceShading(xs, cidf, grey.intensity = grey.intensity, 
                            addMedian = addMedian, col.median = col.median, 
                            lty.median = lty.median, lwd.median = lwd.median,
                            exclude = exclude, alpha = alpha)
     }
-  } else if("estimated" %in% ci) {
+  } else if(ci == "estimated") {
     addConfidenceShading(xs, x, what = what)  
-  } else if("none" %in% ci) {
-    col.def <- 1
-    addDefault <- TRUE
+  } else if(ci == "none") {
+    ## Nothing to see here, move along  
   } else stop(ci, " is not recognized confidence interval")
-  
+  if(addMedian) {
+    lines(xs, median, col = col.median, lty = lty.median, lwd=lwd.median)
+  }  
   if(addDefault){
     lines(xs, ys, lty=2, lwd=3, col= col.def)
   }
-  if(!is.null(addhline)) {
+  if( ! is.null(addhline)) {
     abline(h=addhline, lwd=2, col=col.hline, lty=lty.hline)
   }
   if(version) {
