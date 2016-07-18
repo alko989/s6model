@@ -101,24 +101,26 @@ getalim <- function (p) {
 getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.ubound, yield, probs, Winf, u, ...) {
   if(is(ests, "Parameters")) {
     ests <- list(ests)
-    inputData
   }
-  
   aplfun <- if(require(parallel)) mclapply else lapply
   maplfun <- if(require(parallel)) mcmapply else mapply
   r <- function(x) round(x, 2)
   if(same.as) {
     alim <- getalim(meanParameters(ests))  
-    as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
+    as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, 
+                 b = alim)
   }
   ci <- lapply(seq(along.with = inputData), function(i) {
     if(!same.as) {
       alim <- getalim(ests[[i]])
-      as <- rtrunc(nsample, spec ="lnorm",  meanlog = log(a.mean), sdlog = a.sd, b = alim)
+      as <- rtrunc(nsample, spec ="lnorm", meanlog = log(a.mean), sdlog = a.sd, 
+                   a = -Inf, b = alim)
     }
     Winf <- if(is.null(ests[[i]])) NULL else getWinf(ests[[i]])
-    results <- aplfun(as, function(a) estimate_TMB(inputData[[i]], a = a, Winf = Winf, u = u,
-                                                   totalYield = yield[i], ...))
+    results <- aplfun(as, function(a) {
+      estimate_TMB(inputData[[i]], a = a, Winf = Winf, totalYield = yield[i],
+                   u = u, ...)
+    })
     reps <- results
     err <- sapply(results, function(x) is(x, "try-error"))
     errmsg <- reps[err]
@@ -130,9 +132,11 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
     repsdf <- do.call(rbind.data.frame, reps)
     nrep <- nrow(repsdf)
     n <- function(x) if(length(x) > 0) sum(x) else 0
-    structure(as.data.frame(apply(repsdf, 2, quantile, probs = probs, na.rm = TRUE)), results = results,
-              alim=alim, as = as, nrep = nrep, notConv = n(notConv) , nVerySmall = n(verySmall),
-              nerr = n(err), err = err, errmsg = errmsg)
+    resdf <- as.data.frame(apply(repsdf, 2, quantile, probs=probs, na.rm=TRUE))
+    structure(resdf, results = results, alim=alim, as = as, nrep = nrep,
+              notConv = n(notConv) , nVerySmall = n(verySmall), nerr = n(err), 
+              err = err, errmsg = errmsg, pointests = repsdf, asused = asused,
+              nnegRrel = n(negRrel))
   })
   alims <- sapply(ci, function(x) attr(x, "alim"))
   reps <- sapply(ci, function(x) attr(x, "nrep"))
