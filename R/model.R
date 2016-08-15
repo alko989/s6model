@@ -150,8 +150,8 @@ simulateData3 <- function(samplesize= 1000, params = parameters(), binsize = 5, 
 ##' @author alko
 ##' @export
 sample2df <- function(sam, binsize, keepZeros=TRUE) {
-  df <- as.data.frame(table(cut(sam, seq(0,max(sam) + binsize, binsize),
-                                labels=seq(binsize/2, max(sam) + binsize/2, binsize) )), stringsAsFactors=FALSE)
+  df <- as.data.frame(table(cut(sam, seq(0,max(sam, na.rm = TRUE) + binsize, binsize),
+                                labels=seq(binsize/2, max(sam, na.rm = TRUE) + binsize/2, binsize) )), stringsAsFactors=FALSE)
   names(df) <- c("Weight","Freq")
   if (! keepZeros) df <- df[df$Freq > 0, ]
   df$Weight <- as.numeric(df$Weight)
