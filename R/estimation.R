@@ -102,13 +102,10 @@ estimateParam <-
     }
 
     start[which(names == "Winf")] <- 
-      ifelse(is(data, "data.frame"), (max(data$Weight) + 1) / p@scaleWinf, (max(data) + 1) / p@scaleWinf)
-    
-    scales <- sapply(names, function(n) get(paste0("getscale", n))(p))
+      ifelse(is(data, "data.frame"), (max(data$Weight) + 1), (max(data) + 1))
 
     if( ! fixed.transformed) {
-      fixed.scales <- sapply(fixed.names, function(n) get(paste0("getscale", n))(p))
-      fixed.vals <- log(fixed.vals / fixed.scales)
+      fixed.vals <- log(fixed.vals)
     }
     
     useapply <- if(require(parallel)) mclapply else lapply
@@ -133,7 +130,7 @@ estimateParam <-
     st.er <- NA
     if( ! is(vcm, "try-error")) {
       st.er <- sqrt(diag(vcm)) 
-      ci <- cbind(exp(res)*scales, exp(outer(1.96 * st.er, c(-1,1), '*') + res) * scales)
+      ci <- cbind(exp(res), exp(outer(1.96 * st.er, c(-1,1), '*') + res))
     }
     
     p <- parameters(c(names, fixed.names), c(t(simplify2array(res)), fixed.vals))
@@ -164,7 +161,7 @@ estimateMultidata <-
            start= rep(0.5, length(names)), lower = rep(0.1, length(names)),
            fixed.names=c(), fixed.vals=numeric(0),
            plotFit=FALSE, ...) {
-    start[which(names == "Winf")] <- (max(surdata, comdata) + 1) / parameters()@scaleWinf
+    start[which(names == "Winf")] <- (max(surdata, comdata) + 1)
     lower[which(names == "eta_F")] <- 0.0001
     
     useapply <- ifelse(require(parallel), mclapply, lapply)
@@ -187,21 +184,21 @@ estimateMultidata <-
 estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, 
                          eta_m=0.25, a=0.22, Winf = NULL, sigma=NULL, u = 10,
                          sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
-                         verbose=FALSE, map=list(loga=factor(NA)), 
-                         random=c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
+                         verbose = FALSE, map = list(loga = factor(NA)), 
+                         random = c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
                          totalYield = NULL, perturbStartingVals = FALSE, ...) {
   if (is.null(df)) return(NULL)
   if (! require(TMB)) stop("TMB is not installed! Please install and try again.")
   isTS <- is(df, "list")
   if (isTS) {
-    is.null(totalYield) && {totalYield <- rep(0.01234567, length(df))}
+    if (is.null(totalYield)) totalYield <- rep(0.01234567, length(df))
     length(totalYield) == length(df) || stop("Please provide the yield for all years")
     yrs <- names(df)
     df <- df2matrix(df)
     nyrs <- ncol(df)
     DLL <- "s6modelts"
   } else {
-    is.null(totalYield) || {totalYield <- 0.01234567}
+    if (is.null(totalYield)) totalYield <- 0.01234567
     yrs <- 1
     nyrs <- 1
     DLL <- "s6model"
@@ -308,7 +305,8 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
   nw <- function(x) grepl(paste0("^", x, "$"), nms)
   structure(data.frame(Fm=vals[nw("Fm")], Fm_sd = sds[nw("Fm")],
                        Winf=rep(vals[nw("Winf")], nyrs), Winf_sd=rep(sds[nw("Winf")], nyrs),
-                       Fmsy = Fmsy, FFmsy = vals[nw("Fm")]/Fmsy, 
+                       Fmsy = Fmsy, FFmsy = vals[nw("Fm")]/Fmsy,
+                       ##Fmsyest = vals[nw("Fmsy")], Fmsyest_sd = sds[nw("Fmsy")],
                        Wfs = vals[nw("Wfs")], Wfs_sd = sds[nw("Wfs")],
                        a = rep(vals[nw("a")], nyrs), eta_S = vals[nw("eta_S")],
                        sigma = vals[nw("sigma")], sigma_sd = sds[nw("sigma")],

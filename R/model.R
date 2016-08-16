@@ -26,87 +26,77 @@
 #'  getParams()
 #' 
 #' @export
-getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE, 
+getParams <- function(p = parameters(),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE, 
                       optim.fmsy=FALSE, optim.fmsyr = FALSE, optim.Rrel =FALSE) {
-  if( ! is(p,"Parameters"))
+  if( ! is(p, "Parameters"))
     stop("Wrong input argument in getParams. Use the Parameters class instead.")  
-  Winf <- exp(p@logWinf) * p@scaleWinf
-  Fm <- exp(p@logFm) * p@scaleFm
-  if(optim.fmsy | optim.fmsyr | optim.Rrel)
-    Fm <- FF
-  A <- exp(p@logA) * p@scaleA
-  n <- exp(p@logn) *p@scalen
-  eta_m <- exp(p@logeta_m) * p@scaleeta_m
-  eta_S <- exp(p@logeta_S) * p@scaleeta_S
-  a <- exp(p@loga) *  p@scalea
-  epsilon_a <- exp(p@logepsilon_a) * p@scaleepsilon_a
-  epsilon_r <- exp(p@logepsilon_r) * p@scaleepsilon_r
-  Wfs <- exp(p@logWfs) * p@scaleWfs
-  eta_F <- Wfs/Winf
-  if(!(isTRUE(all.equal(p@logeta_F, log(eta_F / p@scaleeta_F))))) warning("Wfs and eta_F do not match! Wfs was used and eta_F was returned correctly")
-  p@logeta_F <- log(eta_F / p@scaleeta_F)
-  u <-exp(p@logu) * p@scaleu
-  M <- p@M
-  
-  w_r <- w_egg<- 0.001
-  Delta <- (log(Winf) - log(w_r)) / (M - 1)
-  w <- exp(log(w_r) + (1:M - 1) * Delta)
-  
-  delta <- diff(w)
-  
-  psi_F <- (1 + (w / Wfs)^-u )^-1
-  
-  psi_S <- (1 + (w / (eta_S * Winf))^-u )^-1
-  
-  psi_m <- (1 + (w / (eta_m * Winf))^-10 )^-1
-  m <- a * A * w^(n - 1) +  Fm * psi_F
-  m[M] <- Inf
-  g <- A*w^n *(1 - (w/Winf)^(1-n) * (epsilon_a + (1 - epsilon_a) * psi_m))
-  
-  N <- exp(- cumsum((m / g)[-1] * delta)) / g[-1]
-  N <- c(1/g[1], N)
-  N[M] <- 0
-  if(isSurvey)
-  {
-    fishing <- psi_S * N
-  }
-  else
-  {
-    fishing <- psi_F * N
-  }
-  if( ! (optim.fmsy | optim.fmsyr | optim.Rrel)) {    
-    pdfN <-  fishing / sum(fishing * c(delta, 0))
-    pdfN.approx <- approxfun(w, pdfN, yleft=0, yright=.Machine$double.xmin)
-    cdf <-approxfun(w, cumsum(pdfN * c(delta,0)), yleft=0, yright=1)
-  }
-  B <- sum((psi_m  * N * w)[-M] * delta)
-  Rrel <- 1 - (Winf^(1-n) * w_egg/(epsilon_r * (1 - epsilon_a) * A * B))## * (w_r/w_egg)^(a-1)
-  Rp <- epsilon_r * (1 - epsilon_a) * A * Winf ^ (n-1) / w_egg * B
-  Y <- Fm * Rrel * sum((psi_F * N * w)[-M] * delta)
-  wF <- which.min(abs(Wfs - w)) ## Find the closest weight to Wfs
-  
-  YR <- Y * 1 / (N[wF] * Rrel * g[wF])# Fm * sum((psi_F * N * w)[-M] * delta)
-  
-  if(calcBRPs) {
-    Fmsy <- optimise(f=getParams, interval=c(0,10), maximum=TRUE, p=p, optim.fmsy=TRUE)$maximum
-    FoverFmsy <- Fm/Fmsy
-    ##Fmsyr <- optimise(f=getParams, interval=c(0,2), maximum=TRUE, p=p, optim.fmsyr=TRUE)$maximum
-    ##FoverFmsyr <- Fm/Fmsyr
-    Fcrash <- try(uniroot(f=getParams, interval=c(1e-25,10), p=p, optim.fmsy=TRUE)$root, silent=TRUE)
-    Flim <-try(uniroot(f=getParams, interval=c(1e-25,10), p=p,  optim.Rrel = TRUE)$root, silent=TRUE)
-  }   
-  vb.M <- a * A * Winf^(n-1)*eta_m^(n-1)
-  vb.K <- A * Winf^(n-1) / 3
-  vb.MK <- vb.M / vb.K
-  if(optim.fmsy)
-    return(Y)
-  if(optim.fmsyr)
-    return(YR)
-  if(optim.Rrel)
-    return(Rrel - 0.5)
-  res <- as.list(environment())
-  attr(res, "version") <- getVersion()
-  return(invisible(res))
+  with(as.list(p), {
+    if (optim.fmsy | optim.fmsyr | optim.Rrel)
+      Fm <- FF
+    if (abs(p@logeta_F != log(eta_F))) warning("Wfs and eta_F do not match! Wfs was used and eta_F was returned correctly.")
+    p@logeta_F <- log(eta_F)
+    
+    w_r <- w_egg <- 0.001
+    Delta <- (log(Winf) - log(w_r)) / (M - 1)
+    w <- exp(log(w_r) + (1:M - 1) * Delta)
+    
+    delta <- diff(w)
+    
+    psi_F <- (1 + (w / Wfs) ^ -u ) ^ -1
+    psi_S <- (1 + (w / (eta_S * Winf)) ^ -u) ^ -1
+    psi_m <- (1 + (w / (eta_m * Winf))^ -10 )^-1
+    m <- a * A * w^(n - 1) +  Fm * psi_F
+    m[M] <- Inf
+    g <- A * w ^ n * (1 - (w / Winf) ^ (1 - n) * (epsilon_a + (1 - epsilon_a) * psi_m))
+    
+    N <- exp(- cumsum((m / g)[-1] * delta)) / g[-1]
+    N <- c(1/g[1], N)
+    N[M] <- 0
+    if(isSurvey)
+    {
+      fishing <- psi_S * N
+    }
+    else
+    {
+      fishing <- psi_F * N
+    }
+    if( ! (optim.fmsy | optim.fmsyr | optim.Rrel)) {    
+      pdfN <-  fishing / sum(fishing * c(delta, 0))
+      pdfN.approx <- approxfun(w, pdfN, yleft = 0, yright = 0)## .Machine$double.xmin)
+      cdf <- approxfun(w, cumsum(pdfN * c(0, delta)), yleft = 0, yright = 1)
+    }
+    B <- sum((psi_m  * N * w)[-M] * delta)
+    Rrel <- 1 - (Winf^(1-n) * w_egg/(epsilon_r * (1 - epsilon_a) * A * B))## * (w_r/w_egg)^(a-1)
+    Rp <- epsilon_r * (1 - epsilon_a) * A * Winf ^ (n-1) / w_egg * B
+    Y <- Fm * Rrel * sum((psi_F * N * w)[-M] * delta)
+    wF <- which.min(abs(Wfs - w)) ## Find the closest weight to Wfs
+    
+    YR <- Y * 1 / (N[wF] * Rrel * g[wF])# Fm * sum((psi_F * N * w)[-M] * delta)
+    
+    if(calcBRPs) {
+      Fmsy <- optimise(f = getParams, interval=c(0,10), maximum=TRUE, 
+                       p = p, optim.fmsy = TRUE)$maximum
+      FoverFmsy <- Fm / Fmsy
+      ##Fmsyr <- optimise(f=getParams, interval=c(0,2), maximum=TRUE, p=p, optim.fmsyr=TRUE)$maximum
+      ##FoverFmsyr <- Fm/Fmsyr
+      Fcrash <- try(uniroot(f = getParams, interval=c(1e-25,10),
+                            p = p, optim.fmsy = TRUE)$root, silent = TRUE)
+      Flim <-try(uniroot(f = getParams, interval = c(1e-25, 10),
+                         p = p,  optim.Rrel = TRUE)$root, silent = TRUE)
+    }   
+    vb.M <- a * A * Winf^(n-1)*eta_m^(n-1)
+    vb.K <- A * Winf^(n-1) / 3
+    vb.MK <- vb.M / vb.K
+    if(optim.fmsy)
+      return(Y)
+    if(optim.fmsyr)
+      return(YR)
+    if(optim.Rrel)
+      return(Rrel - 0.5)
+    res <- as.list(environment())
+    attr(res, "version") <- getVersion()
+    return(invisible(res))
+  })
 }
 
 ##' Simulates catch-at-weight data using the s6model
