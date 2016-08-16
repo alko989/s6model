@@ -194,14 +194,14 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
   if (! require(TMB)) stop("TMB is not installed! Please install and try again.")
   isTS <- is(df, "list")
   if (isTS) {
-    is.null(totalYield) && {totalYield <- rep(0.01234567, length(df))}
+    if(is.null(totalYield)) {totalYield <- rep(0.01234567, length(df))}
     length(totalYield) == length(df) || stop("Please provide the yield for all years")
     yrs <- names(df)
     df <- df2matrix(df)
     nyrs <- ncol(df)
     DLL <- "s6modelts"
   } else {
-    is.null(totalYield) || {totalYield <- 0.01234567}
+    if (is.null(totalYield)) {totalYield <- 0.01234567}
     yrs <- 1
     nyrs <- 1
     DLL <- "s6model"
