@@ -1,10 +1,13 @@
-all: calcFmsy.so s6model.so s6modelts.so
+all: calcFmsy.so s6model.so s6modelts.so s6modelcomb.so
 
 calcFmsy.so: calcFmsy.cpp
 	Rscript --vanilla -e "TMB::compile('calcFmsy.cpp')"
 
 s6model.so: s6model.cpp
 	Rscript --vanilla -e "TMB::compile('s6model.cpp')"
+	
+s6modelcomb.so: s6modelcomb.cpp
+	Rscript --vanilla -e "TMB::compile('s6modelcomb.cpp')"
 
 s6modelts.so: s6modelts.cpp
 	Rscript --vanilla -e "TMB::compile('s6modelts.cpp')"
