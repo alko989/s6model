@@ -39,6 +39,7 @@ Type objective_function<Type>::operator() ()
 //  Type sdWfs = exp(logsdWfs);
   Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha;
   vector<Type> ssb(nyrs);
+  vector<Type> Bexpl(nyrs);
   vector<Type> rmax(nyrs);
   vector<Type> R(nyrs);
   vector<Type> Rrel(nyrs);
@@ -51,6 +52,7 @@ Type objective_function<Type>::operator() ()
      cumsum=0.0;
      nc = 0.0;
      ssb(yr) = 0.0;
+     Bexpl(yr) = 0.0;
      Y(yr) = 0.0;
      Rrel(yr) = 0.0;
     for(int j=0; j<nwc; j++) {
@@ -63,6 +65,7 @@ Type objective_function<Type>::operator() ()
       cumsum += (m + Fm(yr) *  psi_F) / g * binsize; 
       N = exp(-cumsum) / g;
       ssb(yr) += psi_m  * N * w * binsize;
+      Bexpl(yr) += psi_F  * N * w * binsize;
       Nvec(j, yr) = N * (isSurvey ? psi_S : psi_F);
       Y(yr) +=  Fm(yr) * N * psi_F * w * binsize;
       nc += Nvec(j, yr);
@@ -71,6 +74,7 @@ Type objective_function<Type>::operator() ()
     Y(yr) = Y(yr) * Rrel(yr);
     rmax(yr) = totalYield(yr) / Y(yr);
     ssb(yr) *=  Rrel(yr) * rmax(yr);
+    Bexpl(yr) *=  Rrel(yr) * rmax(yr);
     R(yr) = Rrel(yr) * rmax(yr);
     alpha = epsilon_r * (1 - epsilon_a) * A * pow(Winf, n-1) / wr;
     Rp(yr)  = alpha * ssb(yr);
@@ -101,6 +105,7 @@ Type objective_function<Type>::operator() ()
   ADREPORT(sigma);
   ADREPORT(Y);
   ADREPORT(ssb);
+  ADREPORT(Bexpl);
   ADREPORT(R);
   ADREPORT(u);
   ADREPORT(Rrel);

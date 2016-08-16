@@ -319,6 +319,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                        rmax = vals[nw("rmax")], rmax_sd = sds[nw("rmax")],
                        Y = vals[nw("Y")], Y_sd = sds[nw("Y")],
                        ssb = vals[nw("ssb")], ssb_sd = sds[nw("ssb")],
+                       Bexpl = vals[nw("Bexpl")], Bexpl_sd = sds[nw("Bexpl")],
                        ssbrel = SSBrel,
                        row.names=yrs),
             obj=obj, opt=opt, sdr = sdr, estpars=estpars)

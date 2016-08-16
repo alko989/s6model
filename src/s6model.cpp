@@ -32,11 +32,12 @@ Type objective_function<Type>::operator() ()
   vector<Type> Nvec(nwc);
   vector<Type> Weight(nwc);
   vector<Type> residuals(nwc);
-  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha, ssb, rmax, R, Rp;
+  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha, ssb, Bexpl, rmax, R, Rp;
   wr = 0.001;
   cumsum=0.0;
   nc = 0.0;
   ssb = 0.0;
+  Bexpl = 0.0;
   Type Y = 0.0;
   for(int j=0; j<nwc; j++) {
     w = binsize * (j + 0.5);
@@ -49,6 +50,7 @@ Type objective_function<Type>::operator() ()
     cumsum += (m + Fm *  psi_F) / g * binsize; 
     N = exp(-cumsum) / g;
     ssb += psi_m  * N * w * binsize;
+    Bexpl += psi_F  * N * w * binsize;
     Nvec(j) = N * (isSurvey == 0 ? psi_F : psi_S);
     Y +=  Fm * N * psi_F * w * binsize;
     nc += Nvec(j); // * binsize;
@@ -56,7 +58,8 @@ Type objective_function<Type>::operator() ()
   Type Rrel = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb);
   Y = Y * Rrel;
   rmax = totalYield / Y;
-  ssb = ssb * Rrel * rmax;
+  ssb *= Rrel * rmax;
+  Bexpl *= Rrel * rmax;
   R = Rrel * rmax;
   alpha = epsilon_r * (1 - epsilon_a) * A * pow(Winf, n-1) / wr;
   Rp = alpha * ssb;
@@ -93,6 +96,7 @@ Type objective_function<Type>::operator() ()
   ADREPORT(Rrel);
   ADREPORT(Rp);
   ADREPORT(rmax);
+  ADREPORT(Bexpl);
   
   REPORT(residuals);
   REPORT(Weight);
