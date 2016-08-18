@@ -80,6 +80,7 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
     cdf <-approxfun(w, cumsum(pdfN * c(delta,0)), yleft=0, yright=1)
   }
   B <- sum((psi_m  * N * w)[-M] * delta)
+  Bexpl <- sum((psi_F  * N * w)[-M] * delta)
   Rrel <- 1 - (Winf^(1-n) * w_egg/(epsilon_r * (1 - epsilon_a) * A * B))## * (w_r/w_egg)^(a-1)
   Rp <- epsilon_r * (1 - epsilon_a) * A * Winf ^ (n-1) / w_egg * B
   Y <- Fm * Rrel * sum((psi_F * N * w)[-M] * delta)

@@ -296,6 +296,8 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     Fmsy <- sapply(estpars, calcFmsy)
     SSBrel <- sapply(estpars, function(x) getParams(x)$B) / 
               mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$B, estpars, Fmsy, SIMPLIFY = TRUE)
+    Bexplrel <- sapply(estpars, function(x) getParams(x)$Bexpl) / 
+      mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$Bexpl, estpars, Fmsy, SIMPLIFY = TRUE)
     if(nyrs == 1) {
       estpars <- estpars[[1]]
       Fmsy <- Fmsy[[1]]
@@ -320,7 +322,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                        Y = vals[nw("Y")], Y_sd = sds[nw("Y")],
                        ssb = vals[nw("ssb")], ssb_sd = sds[nw("ssb")],
                        Bexpl = vals[nw("Bexpl")], Bexpl_sd = sds[nw("Bexpl")],
-                       ssbrel = SSBrel,
+                       ssbrel = SSBrel, Bexplrel = Bexplrel,
                        row.names=yrs),
             obj=obj, opt=opt, sdr = sdr, estpars=estpars)
 }

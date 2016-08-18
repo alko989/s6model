@@ -245,7 +245,7 @@ makeAssessment <-
     ests <- mapply(function(x, y, s) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound,
                                                   totalYield = y, sigma = s, u = u, DLL = "s6model", ...),
                    inputData, yield, sigma, SIMPLIFY = FALSE)
-  res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 29) else x[1:29] )
+  res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 30) else x[1:30] )
     res <- do.call(rbind.data.frame, res)
     row.names(res) <- names(inputData)
     estpars <- lapply(ests, function(x) attr(x, "estpars"))
