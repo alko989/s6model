@@ -12,6 +12,9 @@ Type objective_function<Type>::operator() ()
   DATA_SCALAR(Wfs);
   DATA_INTEGER(M);
   DATA_SCALAR(u);
+  DATA_INTEGER(sigmoid_sel);
+  DATA_SCALAR(sigmab);
+  DATA_SCALAR(sigmaa);
   PARAMETER(logF);
   Type Fmsy = exp(logF);
   ADREPORT(Fmsy);
@@ -39,7 +42,16 @@ Type objective_function<Type>::operator() ()
     ww(i) = exp(log(w_r) + i * (log(Winf) - log(w_r)) / (M - 1.0));
     delta(i) = ww(i) - ww(i-1);
     psi_m(i) = 1 / (1 + pow(ww(i)/(eta_m * Winf),-10));
-    psi_F(i) = 1 / (1 + pow(ww(i)/(Wfs),-u));
+    if(sigmoid_sel) {
+      psi_F(i) = 1 / (1 + pow(ww(i)/(Wfs),-u));  
+    } else {
+      if(ww(i) <= Wfs) {
+        psi_F(i) = exp( - pow( ((ww(i) - Wfs)/ Winf), 2) / (2 * pow(sigmab, 2))); 
+      } else {
+        psi_F(i) = exp( - pow( ((ww(i) - Wfs)/ Winf), 2) / (2 * pow(sigmaa, 2)));
+      }
+    }
+    
     m(i) = a * A * pow(ww(i), n - 1) + Fmsy * psi_F(i);
     g(i) = A * pow(ww(i),n) * (1 - pow(ww(i)/Winf, 1-n) * (epsilon_a + (1-epsilon_a)*psi_m(i)));
     cumsum += (m(i-1))/g(i-1) * delta(i);

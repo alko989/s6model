@@ -92,7 +92,7 @@ estimateParam <-
            fixed.names=c(), fixed.vals=numeric(0), fixed.transformed = TRUE,
            plotFit=FALSE, isSurvey=FALSE, verbose=getOption("verbose"), useTMB = TRUE, ...) {
     p <- parameters()
-
+    
     if(is(data, "list")) {
       if("df" %in% names(data)) {
         data <- data$df
@@ -100,12 +100,12 @@ estimateParam <-
         data <- data$sample
       } else stop("`data` is a list not containing an element named sample or df.")
     }
-
+    
     start[which(names == "Winf")] <- 
       ifelse(is(data, "data.frame"), (max(data$Weight) + 1) / p@scaleWinf, (max(data) + 1) / p@scaleWinf)
     
     scales <- sapply(names, function(n) get(paste0("getscale", n))(p))
-
+    
     if( ! fixed.transformed) {
       fixed.scales <- sapply(fixed.names, function(n) get(paste0("getscale", n))(p))
       fixed.vals <- log(fixed.vals / fixed.scales)
@@ -189,7 +189,8 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                          sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
                          verbose=FALSE, map=list(loga=factor(NA)), 
                          random=c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
-                         totalYield = NULL, perturbStartingVals = FALSE, ...) {
+                         totalYield = NULL, perturbStartingVals = FALSE, 
+                         sigmoid_sel = TRUE, sigmaa = NULL, ...) {
   if (is.null(df)) return(NULL)
   if (! require(TMB)) stop("TMB is not installed! Please install and try again.")
   isTS <- is(df, "list")
@@ -260,14 +261,21 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
       freq <- df$Freq
       nwc <- dim(df)[1]
       logFm <- log(0.5)
-  }
+    }
+    if(is.null(sigmaa)) {
+      sigmaa <- 10
+    }
+    if(sigmoid_sel){
+      map$logsigmaa <- factor(NA)
+    }
     data <- list(binsize=binsize, nwc=nwc, freq=freq, n=n, epsilon_a=epsilon_a,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
                  sdloga = sdloga, isSurvey = as.integer(isSurvey),
-                 usePois = as.integer(usePois), totalYield = totalYield)
+                 usePois = as.integer(usePois), totalYield = totalYield, 
+                 sigmoid_sel = as.integer(sigmoid_sel))
     pars <- list(loga = log(a), logFm = logFm, logWinf = log(Winf),
                  logWfs = log(Wfs), logSigma = log(sigma),logeta_S = log(eta_S), 
-                 logu = log(u))
+                 logu = log(u), logsigmaa = log(sigmaa))
     obj <- MakeADFun(data = data, parameters = pars,  map=map, random=random, DLL = DLL)
     upper <- rep(Inf, length(obj$par))
     upper[which(names(obj$par) == "logWinf")] <- log(Winf * winf.ubound)
@@ -280,7 +288,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     }
     opt <- nlminb(obj$par, obj$fn, obj$gr, upper = upper)
     sdr <- sdreport(obj)
-    parnms <- c("Fm","Winf","Wfs", "a", "eta_S")
+    parnms <- c("Fm","Winf","Wfs", "a", "eta_S", "sigmaa")
     vals <- sdr$value
     nms <- names(vals)
     sds <- setNames(sdr$sd, nms)
@@ -289,13 +297,13 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
         match <- vals[grepl(paste0("^", x, "$"), nms)]
         if(length(match) == 1) match else match[i]
       })
-      parameters(c(parnms, "n", "epsilon_a", "epsilon_r", "A", "eta_m"),
-                 as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m)),
+      parameters(c(parnms, "n", "epsilon_a", "epsilon_r", "A", "eta_m", "sigmoid_sel"),
+                 as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m, sigmoid_sel)),
                  transformed=FALSE)
     })
     Fmsy <- sapply(estpars, calcFmsy)
     SSBrel <- sapply(estpars, function(x) getParams(x)$B) / 
-              mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$B, estpars, Fmsy, SIMPLIFY = TRUE)
+      mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$B, estpars, Fmsy, SIMPLIFY = TRUE)
     Bexplrel <- sapply(estpars, function(x) getParams(x)$Bexpl) / 
       mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$Bexpl, estpars, Fmsy, SIMPLIFY = TRUE)
     if(nyrs == 1) {
@@ -323,6 +331,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                        ssb = vals[nw("ssb")], ssb_sd = sds[nw("ssb")],
                        Bexpl = vals[nw("Bexpl")], Bexpl_sd = sds[nw("Bexpl")],
                        ssbrel = SSBrel, Bexplrel = Bexplrel,
+                       sigmaa = vals[nw("sigmaa")], sigmaa_sd = sds[nw("sigmaa")],
                        row.names=yrs),
             obj=obj, opt=opt, sdr = sdr, estpars=estpars)
 }

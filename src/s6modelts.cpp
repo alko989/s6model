@@ -16,6 +16,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(isSurvey);
   DATA_INTEGER(usePois);
   DATA_VECTOR(totalYield);
+  DATA_INTEGER(sigmoid_sel);
   PARAMETER(loga);
   PARAMETER_VECTOR(logFm);
   PARAMETER(logWinf);
@@ -23,6 +24,9 @@ Type objective_function<Type>::operator() ()
   PARAMETER_VECTOR(logSigma);
   PARAMETER(logeta_S);
   PARAMETER(logu);
+  PARAMETER(logsigmaa);
+  Type sigmaa = exp(logsigmaa);
+  Type sigmab = 0.001;
   Type u = exp(logu);
 //  PARAMETER(logsdFm);
 //  PARAMETER(logsdWfs);
@@ -58,7 +62,15 @@ Type objective_function<Type>::operator() ()
     for(int j=0; j<nwc; j++) {
       w = Weight(j, yr) = binsize * (j + 0.5);
       psi_m = 1 / (1 + pow(w / (Winf * eta_m), -10));
-      psi_F = 1 / (1 + pow(w / (Wfs(yr)), -u));
+      if(sigmoid_sel) {
+        psi_F = 1 / (1 + pow(w / (Wfs(yr)), -u));  
+      } else {
+        if(w <= Wfs(yr)) {
+          psi_F = exp( - pow( ((w - Wfs(yr))/ Winf), 2) / pow(sigmab, 2)); 
+        } else {
+          psi_F = exp( - pow( ((w - Wfs(yr))/ Winf), 2) / pow(sigmaa, 2));
+        }
+      }
       psi_S = 1 / (1 + pow(w / (Winf * eta_S), -u));
       g = A * pow(w, n) * (1 - pow(w / Winf, 1 - n) * (epsilon_a + (1 - epsilon_a) * psi_m));
       m = a * A * pow(w, n-1);
@@ -111,6 +123,7 @@ Type objective_function<Type>::operator() ()
   ADREPORT(Rrel);
   ADREPORT(Rp);
   ADREPORT(rmax);
+  ADREPORT(sigmaa);
   // ADREPORT(sdFm);
   // ADREPORT(sdWfs);
   

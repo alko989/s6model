@@ -50,8 +50,11 @@ setClass("Parameters",
                         loga ="numeric",            # Natural mortality
                         logepsilon_a ="numeric",    # Allocation to maintenance
                         logepsilon_r ="numeric",    # Efficiancy of reproduction
-                        logWfs = "numeric",         # Starting weight of fishing
+                        logWfs = "numeric",         # Inflection point (sigmoid) / Max selectivity (double normal)
                         logu = "numeric",           # Width of change from 0 to F fishing mortality
+                        sigmoid_sel = "numeric",    # Use sigmoid selectivity (1 = yes, 0 = no)
+                        logsigmab = "numeric",      # Double-normal selectivity (sd before max selection)
+                        logsigmaa = "numeric",      # Double-normal selectivity (sd after max selection)
                         M ="numeric",
                         scaleWinf="numeric",        # Asymptotic weight
                         scaleFm="numeric",          # Fishing mortality
@@ -66,7 +69,9 @@ setClass("Parameters",
                         scaleepsilon_r ="numeric",
                         scaleeta_S="numeric",
                         scaleWfs = "numeric",
-                        scaleu = "numeric"),
+                        scaleu = "numeric",
+                        scalesigmab = "numeric",
+                        scalesigmaa = "numeric"),
          prototype(logWinf = log(2),
                    logFm = log(1),
                    logA = log(1),
@@ -79,6 +84,9 @@ setClass("Parameters",
                    logepsilon_r = log(1),
                    logWfs = log(1),
                    logu=log(1),
+                   sigmoid_sel = as.integer(1),
+                   logsigmab = log(0.001),
+                   logsigmaa = log(2),
                    M = 1000,
                    scaleWinf = 10000,
                    scaleFm = 0.25,
@@ -91,7 +99,9 @@ setClass("Parameters",
                    scaleepsilon_r = 0.1,
                    scaleeta_S=0.001,
                    scaleWfs = 1000,
-                   scaleu=10))
+                   scaleu=10,
+                   scalesigmab = 1,
+                   scalesigmaa = 1))
 
 setGeneric("getscaleWinf",function(object){standardGeneric ("getscaleWinf")})
 setMethod("getscaleWinf","Parameters", function(object){ return(object@scaleWinf) })
@@ -117,7 +127,10 @@ setGeneric("getscaleWfs",function(object){standardGeneric ("getscaleWfs")})
 setMethod("getscaleWfs","Parameters", function(object){ return(object@scaleWfs) })
 setGeneric("getscaleu",function(object){standardGeneric ("getscaleu")})
 setMethod("getscaleu","Parameters", function(object){ return(object@scaleu) })
-
+setGeneric("getscalesigmab",function(object){standardGeneric ("getscalesigmab")})
+setMethod("getscalesigmab","Parameters", function(object){ return(object@scalesigmab) })
+setGeneric("getscalesigmaa",function(object){standardGeneric ("getscalesigmaa")})
+setMethod("getscalesigmaa","Parameters", function(object){ return(object@scalesigmaa) })
 #' @param names String vector. Contains the names of the parameters that will
 #' have non default values.
 #' @param vals Numeric vector. The corresponding values, transformed if \code{transformed} is TRUE.
@@ -163,8 +176,8 @@ parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Param
     }
   }
   for(i in seq(along=names))
-    if(names[i] %in% c("M")) {
-      eval(parse(text=paste("res@", names[i]," <- ", vals[i], sep="" )))
+    if(names[i] %in% c("M", "sigmoid_sel")) {
+      slot(res, names[i]) <- vals[[i]]
     } else if (names[i] == "matSize") {
       mats <- i
     } else if (names[i] == "Wfs") {
@@ -173,20 +186,20 @@ parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Param
       etaf <- i
     } else {
       if(transformed) {
-        eval(parse(text=paste("res@log", names[i]," <- ", vals[i] , sep="" )))
+        slot(res, paste0("log", names[i])) <- vals[[i]]
       } else {
         scale <- do.call(paste0("getscale", names[i]), list(res))
-        eval(parse(text=paste0("res@log", names[i], " <- " , log(vals[i] / scale))))
+        slot(res, paste0("log", names[i])) <- log(vals[[i]] / scale)
       }
     }
   if(mats > 0) {
-    res@logeta_m <- log(vals[mats] / (exp(res@logWinf)*res@scaleWinf) / res@scaleeta_m)
+    res@logeta_m <- log(vals[[mats]] / (exp(res@logWinf)*res@scaleWinf) / res@scaleeta_m)
   }
   if(wfs > 0) {
     if(transformed) {
-      res@logWfs <- vals[wfs]
+      res@logWfs <- vals[[wfs]]
     } else {
-      res@logWfs <- log(vals[wfs] /getscaleWfs(res))
+      res@logWfs <- log(vals[[wfs]] /getscaleWfs(res))
     }
     res@logeta_F <- log((exp(res@logWfs) * res@scaleWfs) / (exp(res@logWinf) * res@scaleWinf) / res@scaleeta_F)
     if(etaf > 0)
@@ -216,12 +229,13 @@ meanParameters <- function(x) {
     return(NULL)
   }
   p <- as.list(parameters())
-  do.call(parameters, 
-          list(names = names(p), 
-               vals = sapply(seq(p), function(i) mean(sapply(x, function(xx) {
-                 if(is.null(xx)) return(NA)
-                 c(as.list(xx)[[i]])  
-               }), na.rm = TRUE)), transformed = FALSE))
+  res <- list(names = names(p), 
+       vals = sapply(seq(p), function(i) mean(sapply(x, function(xx) {
+         if(is.null(xx)) return(NA)
+         as.list(xx)[[i]]
+       }), na.rm = TRUE)), transformed = FALSE)
+  res$vals[[which(res$names == "sigmoid_sel")]] <- as.integer(res$vals[res$names == "sigmoid_sel"])
+  do.call(parameters, res)
 }
 
 ##' Takes a Parameters object and changes its asymptotic weight
@@ -294,6 +308,9 @@ setMethod("show", "Parameters",
                 "|", formatEntry("  eta_S = ",exp(object@logeta_S)*object@scaleeta_S, width = width),
                 "|", formatEntry("  Wfs = ", exp(object@logWfs) * object@scaleWfs, width = width),
                 "|", formatEntry("  u = ", exp(object@logu) * object@scaleu, width = width),"|\n",
+                "|", formatEntry("  Sigmoid sel: ", object@sigmoid_sel, width = width),
+                "|", formatEntry("  sigmab = ", exp(object@logsigmab), width = width),
+                "|", formatEntry("  sigmaa = ", exp(object@logsigmaa), width = width),"|\n",
                 sep="")
             cat("|", rep("_", width), "|", rep("_", width), "|", rep("_", width), "|\n", sep="")
             cat("\n")
@@ -326,7 +343,13 @@ lines.Parameters <- function(x, ...){
 ##' @export
 ##' @rdname Parameters
 as.list.Parameters <- function(x, ...) {
-  with(getParams(x), list(Winf=Winf, Fm=Fm, Wfs=Wfs, eta_m=eta_m, epsilon_r=epsilon_r, epsilon_a=epsilon_a, A=A, a=a, n=n, u=u))
+  res <- with(getParams(x), list(Winf=Winf, Fm=Fm, Wfs=Wfs, eta_m=eta_m, epsilon_r=epsilon_r,
+                                 epsilon_a=epsilon_a, A=A, a=a, n=n, u=u))
+  res$M <- slot(x, "M")
+  res$sigmoid_sel <- slot(x, "sigmoid_sel")
+  res$sigmab <- exp(slot(x, "logsigmab"))
+  res$sigmaa <- exp(slot(x, "logsigmaa"))
+  res
 }
 
 ##' Difference between two \code{Parameters} objects

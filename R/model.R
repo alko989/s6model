@@ -46,6 +46,9 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
   if(!(isTRUE(all.equal(p@logeta_F, log(eta_F / p@scaleeta_F))))) warning("Wfs and eta_F do not match! Wfs was used and eta_F was returned correctly")
   p@logeta_F <- log(eta_F / p@scaleeta_F)
   u <-exp(p@logu) * p@scaleu
+  sigmab <- exp(p@logsigmab)
+  sigmaa <- exp(p@logsigmaa)
+  sigmoid_sel <- p@sigmoid_sel
   M <- p@M
   
   w_r <- w_egg<- 0.001
@@ -53,8 +56,13 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
   w <- exp(log(w_r) + (1:M - 1) * Delta)
   
   delta <- diff(w)
-  
-  psi_F <- (1 + (w / Wfs)^-u )^-1
+  psi_F <- if(sigmoid_sel) {
+    (1 + (w / Wfs)^-u )^-1
+  } else {
+    ifelse(w < Wfs, 
+           exp(- (((w - Wfs)/ Winf)^2 / (2 * sigmab^2))),
+           exp(- (((w - Wfs) / Winf)^2 / (2 * sigmaa)^ 2)))
+  }
   
   psi_S <- (1 + (w / (eta_S * Winf))^-u )^-1
   
@@ -297,7 +305,8 @@ calcFmsy <- function(params=NULL) {
   }
   if( ! is(params,"list"))
     stop("params is of class ", class(params))
-  def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.27, M=1000, u = 10)
+  def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.27, 
+              M=1000, u = 10, sigmoid_sel = 1, sigmab = 0.001, sigmab = 2)
   def <- replace(def, names(params), unlist(params))
   obj <- MakeADFun(def, list(logF = log(0.2)), DLL="calcFmsy")
   obj$env$tracemgc <- FALSE
@@ -364,7 +373,7 @@ changeBinsize3 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
     group_by_(WeightClass = ~cut(weight.col, breaks = seq(0, max(weight.col) + binsize, by = binsize) )) %>% 
     summarise_(Freq = ~sum(freq.col)) %>% 
     mutate_(Weight = ~WeightClass %>% 
-             sapply( . %>% as.character %>% getmid)) %>% 
+              sapply( . %>% as.character %>% getmid)) %>% 
     select(Weight, Freq, WeightClass) %>% 
     `attr<-`("binsize", binsize)
   if (! keepZeros) {
