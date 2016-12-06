@@ -33,7 +33,8 @@ getParams <- function(p = parameters(),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE
   with(as.list(p), {
     if (optim.fmsy | optim.fmsyr | optim.Rrel)
       Fm <- FF
-    if (abs(p@logeta_F != log(eta_F))) warning("Wfs and eta_F do not match! Wfs was used and eta_F was returned correctly.")
+    eta_F <- Wfs/Winf
+    if (! isTRUE(all.equal(p@logeta_F, log(eta_F)))) warning("Wfs and eta_F do not match! Wfs was used and eta_F was returned correctly.")
     p@logeta_F <- log(eta_F)
     
     w_r <- w_egg <- 0.001
