@@ -1,7 +1,6 @@
 context("getParams function")
 
-test_that("getParams reads parameters correctly", {
-
+test_that("Check if getParams reads parameters correctly", {
     p1 <- parameters()
     p2 <- p1
     p2@logeta_F <- log(0.01)
