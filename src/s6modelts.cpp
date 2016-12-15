@@ -16,7 +16,8 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(isSurvey);
   DATA_INTEGER(usePois);
   DATA_VECTOR(totalYield);
-  DATA_INTEGER(sigmoid_sel);
+  DATA_INTEGER(selType);
+  DATA_VECTOR(sel3params);
   PARAMETER(loga);
   PARAMETER_VECTOR(logFm);
   PARAMETER(logWinf);
@@ -25,11 +26,17 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logeta_S);
   PARAMETER(logu);
   PARAMETER(logsigmaa);
+  Type G1 = sel3params(0);
+  Type G2 = sel3params(1);
+  Type mesh = sel3params(2);
+  Type OP = sel3params(3);
+  Type wla = sel3params(4);
+  Type wlb = sel3params(5)
   Type sigmaa = exp(logsigmaa);
   Type sigmab = 0.001;
   Type u = exp(logu);
-//  PARAMETER(logsdFm);
-//  PARAMETER(logsdWfs);
+  //  PARAMETER(logsdFm);
+  //  PARAMETER(logsdWfs);
   vector<Type> Fm = exp(logFm);
   Type Winf = exp(logWinf);
   vector<Type> Wfs = exp(logWfs);
@@ -39,8 +46,8 @@ Type objective_function<Type>::operator() ()
   matrix<Type> Weight(nwc,nyrs);
   matrix<Type> Nvec(nwc,nyrs);
   Type a = exp(loga);
-//  Type sdFm = exp(logsdFm);
-//  Type sdWfs = exp(logsdWfs);
+  //  Type sdFm = exp(logsdFm);
+  //  Type sdWfs = exp(logsdWfs);
   Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha;
   vector<Type> ssb(nyrs);
   vector<Type> Bexpl(nyrs);
@@ -53,24 +60,27 @@ Type objective_function<Type>::operator() ()
   Type nll = 0.0;
   
   for(int yr = 0; yr < nyrs; ++yr) {
-     cumsum=0.0;
-     nc = 0.0;
-     ssb(yr) = 0.0;
-     Bexpl(yr) = 0.0;
-     Y(yr) = 0.0;
-     Rrel(yr) = 0.0;
+    cumsum=0.0;
+    nc = 0.0;
+    ssb(yr) = 0.0;
+    Bexpl(yr) = 0.0;
+    Y(yr) = 0.0;
+    Rrel(yr) = 0.0;
     for(int j=0; j<nwc; j++) {
       w = Weight(j, yr) = binsize * (j + 0.5);
       psi_m = 1 / (1 + pow(w / (Winf * eta_m), -10));
-      if(sigmoid_sel) {
+      if(selType == 1) {
         psi_F = 1 / (1 + pow(w / (Wfs(yr)), -u));  
-      } else {
+      } else if (selType == 2) {
         if(w <= Wfs(yr)) {
-          psi_F = exp( - pow( ((w - Wfs(yr))/ Winf), 2) / pow(sigmab, 2)); 
+          psi_F = exp( - pow(((w - Wfs(yr))/ Winf), 2) / (2 * pow(sigmab, 2))); 
         } else {
-          psi_F = exp( - pow( ((w - Wfs(yr))/ Winf), 2) / pow(sigmaa, 2));
+          psi_F = exp( - pow(((w - Wfs(yr))/ Winf), 2) / (2 * pow(sigmaa, 2)));
         }
+      } else if (selType == 3) {
+        psi_F = exp(- pow((pow(w / wla, 1 / wlb) * G1 + G2) /(2 * mesh) - OP, 2) / (2 * pow( sigmaa, 2)));
       }
+      
       psi_S = 1 / (1 + pow(w / (Winf * eta_S), -u));
       g = A * pow(w, n) * (1 - pow(w / Winf, 1 - n) * (epsilon_a + (1 - epsilon_a) * psi_m));
       m = a * A * pow(w, n-1);
@@ -104,11 +114,14 @@ Type objective_function<Type>::operator() ()
     }
   }
   nll -= dnorm(loga, meanloga, sdloga, true);
-//  for(int i=0; i<Fm.size()-1; ++i){
-//    nll -= dnorm(Fm(i+1), Fm(i), sdFm, true);
-//    nll -= dnorm(Wfs(i+1), Wfs(i), sdWfs, true);
-//  }
-
+  if (selType == 3) { 
+    nll += pow(Wfs.sum(), 2);
+  }
+  //  for(int i=0; i<Fm.size()-1; ++i){
+  //    nll -= dnorm(Fm(i+1), Fm(i), sdFm, true);
+  //    nll -= dnorm(Wfs(i+1), Wfs(i), sdWfs, true);
+  //  }
+  
   ADREPORT(Fm);
   ADREPORT(Winf);
   ADREPORT(Wfs);

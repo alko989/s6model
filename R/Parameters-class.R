@@ -52,7 +52,7 @@ setClass("Parameters",
                         logepsilon_r ="numeric",    # Efficiancy of reproduction
                         logWfs = "numeric",         # Inflection point (sigmoid) / Max selectivity (double normal)
                         logu = "numeric",           # Width of change from 0 to F fishing mortality
-                        sigmoid_sel = "numeric",    # Use sigmoid selectivity (1 = yes, 0 = no)
+                        selType = "numeric",        # Selectivity type (1 = sigmoid, 2 = double normal, 3 = single normal)
                         logsigmab = "numeric",      # Double-normal selectivity (sd before max selection)
                         logsigmaa = "numeric",      # Double-normal selectivity (sd after max selection)
                         M ="numeric",
@@ -84,7 +84,7 @@ setClass("Parameters",
                    logepsilon_r = log(1),
                    logWfs = log(1),
                    logu=log(1),
-                   sigmoid_sel = as.integer(1),
+                   selType = as.integer(1),
                    logsigmab = log(0.001),
                    logsigmaa = log(2),
                    M = 1000,
@@ -176,7 +176,7 @@ parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Param
     }
   }
   for(i in seq(along=names))
-    if(names[i] %in% c("M", "sigmoid_sel")) {
+    if(names[i] %in% c("M", "selType")) {
       slot(res, names[i]) <- vals[[i]]
     } else if (names[i] == "matSize") {
       mats <- i
@@ -234,7 +234,7 @@ meanParameters <- function(x) {
          if(is.null(xx)) return(NA)
          as.list(xx)[[i]]
        }), na.rm = TRUE)), transformed = FALSE)
-  res$vals[[which(res$names == "sigmoid_sel")]] <- as.integer(res$vals[res$names == "sigmoid_sel"])
+  res$vals[[which(res$names == "selType")]] <- as.integer(res$vals[res$names == "selType"])
   do.call(parameters, res)
 }
 
@@ -290,6 +290,11 @@ formatEntry <- function(..., width=20) {
   }
   format(paste(res, sep="", collapse=""), width=width)
 }
+
+stype <- function(s) {
+  switch(s, "sigmoid","dnormal","snormal")
+}
+
 setMethod("show", "Parameters",
           function(object) {
             width <- min(floor(getOption("width") / 5), 20)
@@ -308,7 +313,7 @@ setMethod("show", "Parameters",
                 "|", formatEntry("  eta_S = ",exp(object@logeta_S)*object@scaleeta_S, width = width),
                 "|", formatEntry("  Wfs = ", exp(object@logWfs) * object@scaleWfs, width = width),
                 "|", formatEntry("  u = ", exp(object@logu) * object@scaleu, width = width),"|\n",
-                "|", formatEntry("  Sigmoid sel: ", object@sigmoid_sel, width = width),
+                "|", formatEntry("  Sel. type: ", stype(object@selType), width = width),
                 "|", formatEntry("  sigmab = ", exp(object@logsigmab), width = width),
                 "|", formatEntry("  sigmaa = ", exp(object@logsigmaa), width = width),"|\n",
                 sep="")
@@ -346,7 +351,7 @@ as.list.Parameters <- function(x, ...) {
   res <- with(getParams(x), list(Winf=Winf, Fm=Fm, Wfs=Wfs, eta_m=eta_m, epsilon_r=epsilon_r,
                                  epsilon_a=epsilon_a, A=A, a=a, n=n, u=u))
   res$M <- slot(x, "M")
-  res$sigmoid_sel <- slot(x, "sigmoid_sel")
+  res$selType <- slot(x, "selType")
   res$sigmab <- exp(slot(x, "logsigmab"))
   res$sigmaa <- exp(slot(x, "logsigmaa"))
   res
@@ -569,7 +574,7 @@ simulate.Parameters <- function(object, nsim = 1000, seed = NULL, binsize = 5, k
 
 ##' @export
 plot.WeightFreq <- function(x, ...) {
-  plot(x, ...)
+  plot(x$Weight, x$Freq, ...)
 }
 
 ##' @export

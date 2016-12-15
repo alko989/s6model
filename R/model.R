@@ -48,7 +48,7 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
   u <-exp(p@logu) * p@scaleu
   sigmab <- exp(p@logsigmab)
   sigmaa <- exp(p@logsigmaa)
-  sigmoid_sel <- p@sigmoid_sel
+  selType <- p@selType
   M <- p@M
   
   w_r <- w_egg<- 0.001
@@ -56,12 +56,15 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
   w <- exp(log(w_r) + (1:M - 1) * Delta)
   
   delta <- diff(w)
-  psi_F <- if(sigmoid_sel) {
+  psi_F <- if(selType == 1) {
     (1 + (w / Wfs)^-u )^-1
-  } else {
+  } else if (selType == 2) {
     ifelse(w < Wfs, 
            exp(- (((w - Wfs)/ Winf)^2 / (2 * sigmab^2))),
-           exp(- (((w - Wfs) / Winf)^2 / (2 * sigmaa)^ 2)))
+           exp(- (((w - Wfs) / Winf)^2 / (2 * sigmaa^ 2))))
+  } else if (selType == 3){
+    l <- (w / 0.006) ^ (1/3.21) 
+    exp(-(((l * 0.58 - 3.51) / (2*10.1)    - 1.22)^2)/ (2*0.15^2))
   }
   
   psi_S <- (1 + (w / (eta_S * Winf))^-u )^-1
@@ -306,7 +309,7 @@ calcFmsy <- function(params=NULL) {
   if( ! is(params,"list"))
     stop("params is of class ", class(params))
   def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.27, 
-              M=1000, u = 10, sigmoid_sel = 1, sigmab = 0.001, sigmab = 2)
+              M=1000, u = 10, selType = 1, sigmab = 0.001, sigmab = 2)
   def <- replace(def, names(params), unlist(params))
   obj <- MakeADFun(def, list(logF = log(0.2)), DLL="calcFmsy")
   obj$env$tracemgc <- FALSE

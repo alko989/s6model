@@ -12,7 +12,7 @@ Type objective_function<Type>::operator() ()
   DATA_SCALAR(Wfs);
   DATA_INTEGER(M);
   DATA_SCALAR(u);
-  DATA_INTEGER(sigmoid_sel);
+  DATA_INTEGER(selType);
   DATA_SCALAR(sigmab);
   DATA_SCALAR(sigmaa);
   PARAMETER(logF);
@@ -42,14 +42,16 @@ Type objective_function<Type>::operator() ()
     ww(i) = exp(log(w_r) + i * (log(Winf) - log(w_r)) / (M - 1.0));
     delta(i) = ww(i) - ww(i-1);
     psi_m(i) = 1 / (1 + pow(ww(i)/(eta_m * Winf),-10));
-    if(sigmoid_sel) {
+    if(selType == 1) {
       psi_F(i) = 1 / (1 + pow(ww(i)/(Wfs),-u));  
-    } else {
+    } else if (selType == 2){
       if(ww(i) <= Wfs) {
         psi_F(i) = exp( - pow( ((ww(i) - Wfs)/ Winf), 2) / (2 * pow(sigmab, 2))); 
       } else {
         psi_F(i) = exp( - pow( ((ww(i) - Wfs)/ Winf), 2) / (2 * pow(sigmaa, 2)));
       }
+    } else if (selType == 3) {
+      psi_F(i) = exp(- pow((pow(ww(i) / 0.006, 1/3.21)*0.58 -3.51) /(2*10.1) - 1.22, 2) / (2 * pow( sigmaa, 2)));
     }
     
     m(i) = a * A * pow(ww(i), n - 1) + Fmsy * psi_F(i);

@@ -190,7 +190,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                          verbose=FALSE, map=list(loga=factor(NA)), 
                          random=c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
                          totalYield = NULL, perturbStartingVals = FALSE, 
-                         sigmoid_sel = TRUE, sigmaa = NULL, ...) {
+                         selType = 1, sigmaa = NULL, sel3params = c(1,1,1,1), ...) {
   if (is.null(df)) return(NULL)
   if (! require(TMB)) stop("TMB is not installed! Please install and try again.")
   isTS <- is(df, "list")
@@ -265,14 +265,14 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     if(is.null(sigmaa)) {
       sigmaa <- 10
     }
-    if(sigmoid_sel){
+    if(selType == 1){
       map$logsigmaa <- factor(NA)
     }
     data <- list(binsize=binsize, nwc=nwc, freq=freq, n=n, epsilon_a=epsilon_a,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
                  sdloga = sdloga, isSurvey = as.integer(isSurvey),
                  usePois = as.integer(usePois), totalYield = totalYield, 
-                 sigmoid_sel = as.integer(sigmoid_sel))
+                 selType = as.integer(selType), sel3params = sel3params)
     pars <- list(loga = log(a), logFm = logFm, logWinf = log(Winf),
                  logWfs = log(Wfs), logSigma = log(sigma),logeta_S = log(eta_S), 
                  logu = log(u), logsigmaa = log(sigmaa))
@@ -297,8 +297,8 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
         match <- vals[grepl(paste0("^", x, "$"), nms)]
         if(length(match) == 1) match else match[i]
       })
-      parameters(c(parnms, "n", "epsilon_a", "epsilon_r", "A", "eta_m", "sigmoid_sel"),
-                 as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m, sigmoid_sel)),
+      parameters(c(parnms, "n", "epsilon_a", "epsilon_r", "A", "eta_m", "selType"),
+                 as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m, selType)),
                  transformed=FALSE)
     })
     Fmsy <- sapply(estpars, calcFmsy)
