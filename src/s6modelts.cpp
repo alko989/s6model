@@ -31,7 +31,7 @@ Type objective_function<Type>::operator() ()
   Type mesh = sel3params(2);
   Type OP = sel3params(3);
   Type wla = sel3params(4);
-  Type wlb = sel3params(5)
+  Type wlb = sel3params(5);
   Type sigmaa = exp(logsigmaa);
   Type sigmab = 0.001;
   Type u = exp(logu);
