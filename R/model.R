@@ -206,8 +206,8 @@ getRandomParameters <-
                                             parameter.lbound[x],
                                             parameter.ubound[x],
                                             parameter.unif[x]))
-      res <- parameters(parameter.names, par.vals, FALSE)
-      if( getParams(res)$Rrel >=  Rrel.gt & getParams(res, calcBRPs=T)$Fmsy >= Fmsy.gt) return(res)
+      res <- parameters(setNames(par.vals, parameter.names))
+      if( getParams(res)$Rrel >=  Rrel.gt & getParams(res, calcBRPs=TRUE)$Fmsy >= Fmsy.gt) return(res)
     }
   }
 

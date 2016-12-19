@@ -93,7 +93,7 @@ getalim <- function (p) {
     return(0.8)
   }
   optimize(function(x) {
-    getParams(parameters("a", x, FALSE, base = p), optim.Rrel = TRUE, FF = 0)^2
+    getParams(parameters(c(a = x, base = p)), optim.Rrel = TRUE, FF = 0)^2
   }, c(0,2) )$minimum
 }
 

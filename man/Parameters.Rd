@@ -12,8 +12,7 @@
 \alias{simulate.Parameters}
 \title{The Parameters class and constructor}
 \usage{
-parameters(names = c(), vals = c(), transformed = TRUE,
-  base = new("Parameters"))
+parameters(pars = list(), base = new("Parameters"))
 
 meanParameters(l)
 
@@ -27,11 +26,7 @@ meanParameters(l)
   binsize = 100, keepZeros = TRUE, ndataset = 1, ...)
 }
 \arguments{
-\item{names}{string vector, parameter names}
-
-\item{vals}{numeric vector, Values corresponding to the names; log transformed if \code{transformed} is TRUE}
-
-\item{transformed}{logical, if TRUE vals are the transformed parameter values.}
+\item{pars}{named list, parameter values. If the name starts with log the values are expected to be log transformed}
 
 \item{base}{\code{Parameters} object, the parameters of this object are used instead of the default values}
 
@@ -56,7 +51,7 @@ meanParameters(l)
 \item{x}{a Parameters object}
 }
 \value{
-The constructor \code{parameters} returns a \code{Parameters} object.
+A \code{Parameters} object.
 
 \code{meanParameters} returns a \code{Parameters} object with mean 
 values of the input Parameters. It returns NULL if \code{x} is NULL and 
@@ -97,16 +92,15 @@ In \code{simulate}, all zero bins after the last non-zero bin are droped; even i
 ## Without any arguments gives a Parameters object with default values
 parameters()
 
-## Changing some parameters gives the corresponding object
-par1 <- parameters(c("Winf", "Fm", "Wfs"), c(log(1000), log(0.4), log(100)))
-par2 <- parameters(c("Winf", "Fm", "Wfs"), c(1000 , 0.4, 100), transformed=FALSE)
+## Log transformed parameters are expected if the parameter name starts with 'log'
+par1 <- parameters(c(logWinf = log(1000), logFm = log(0.4), logWfs = log(100)))
 
-## Check if the two objects are equal
-all.equal(par1, par2)
+## The same is achieved with not transformed parameters
+par2 <- parameters(c(Winf = 1000, Fm = 0.4, Wfs = 100))
 
 ## Take a Parameters object and change one parameter
-par <- parameters(c("Winf", "a", "Fm", "Wfs"), c(1000, 0.4, 0.2, 100), transformed = FALSE)
-changeMatsize <- parameters("eta_m", 0.3, transformed = FALSE, base=par)
+par <- parameters(list(Winf = 1000, a = 0.4, Fm = 0.2, Wfs = 100))
+changeMatsize <- parameters(list(eta_m = 0.3), base= par)
 
 difference(par, changeMatsize)
 ##       base comp difference percent.difference

@@ -59,11 +59,9 @@ setClass("Parameters",
                    logu=log(10),
                    M = 1000))
 
-#' @param names string vector, parameter names
-#' @param vals numeric vector, Values corresponding to the names; log transformed if \code{transformed} is TRUE
-#' @param transformed logical, if TRUE vals are the transformed parameter values.
+#' @param pars named list, parameter values. If the name starts with log the values are expected to be log transformed
 #' @param base \code{Parameters} object, the parameters of this object are used instead of the default values
-#' @return The constructor \code{parameters} returns a \code{Parameters} object.
+#' @return A \code{Parameters} object.
 #' @author alko
 #' @keywords constructor
 #' @examples
@@ -71,77 +69,74 @@ setClass("Parameters",
 #' ## Without any arguments gives a Parameters object with default values
 #' parameters()
 #' 
-#' ## Changing some parameters gives the corresponding object
-#' par1 <- parameters(c("Winf", "Fm", "Wfs"), c(log(1000), log(0.4), log(100)))
-#' par2 <- parameters(c("Winf", "Fm", "Wfs"), c(1000 , 0.4, 100), transformed=FALSE)
-#'
-#' ## Check if the two objects are equal
-#' all.equal(par1, par2)
+#' ## Log transformed parameters are expected if the parameter name starts with 'log'
+#' par1 <- parameters(c(logWinf = log(1000), logFm = log(0.4), logWfs = log(100)))
+#' 
+#' ## The same is achieved with not transformed parameters
+#' par2 <- parameters(c(Winf = 1000, Fm = 0.4, Wfs = 100))
 #'
 #' ## Take a Parameters object and change one parameter
-#' par <- parameters(c("Winf", "a", "Fm", "Wfs"), c(1000, 0.4, 0.2, 100), transformed = FALSE)
-#' changeMatsize <- parameters("eta_m", 0.3, transformed = FALSE, base=par)
+#' par <- parameters(list(Winf = 1000, a = 0.4, Fm = 0.2, Wfs = 100))
+#' changeMatsize <- parameters(list(eta_m = 0.3), base= par)
 #'
 #' difference(par, changeMatsize)
 #' ##       base comp difference percent.difference
 #' ## eta_m 0.25  0.3      -0.05                 20
 #' @rdname Parameters
 #' @export 
-parameters <- function(names= c(), vals = c(), transformed = TRUE, base = new("Parameters")) {
+parameters <- function(pars = list(), base = new("Parameters")) {
   res <- base
+  nms <- names(pars)
   mats <- wfs <- etaf <- 0
-  if (length(names) == 1) {
-    if (names=="Winf") {
-      if (transformed) {
-        res@logWinf <- vals
-      } else {
-        res@logWinf <- log(vals)
-      }
-      res@logWfs <- res@logeta_F + res@logWinf
-      return(res)
+  ## This check should not be necessary
+  # if (length(nms) == 1) {
+  #   if (nms=="Winf") {
+  #     res@logWinf <- pars[[1]]
+  #     res@logWfs <- res@logeta_F + res@logWinf
+  #     return(res)
+  #   }
+  # }
+  for(i in seq(along = nms)) {
+    nm <- nms[i]
+    if(nm %in% c("M")) {
+      slot(res, nm) <- pars[[i]]
+    } else if (nm == "matSize") {
+      mats <- i
+    } else if (nm %in% c("Wfs", "logWfs")) {
+      wfs <- i
+    } else if (nm %in% c("eta_F", "logeta_F")) {
+      etaf <- i
+    } else if (grepl("^log", nm)) {
+      slot(res, nm) <- pars[[i]]
+    } else {
+      slot(res, paste0("log", nm)) <- log(pars[[i]])
     }
   }
-  for(i in seq(along=names))
-    if(names[i] %in% c("M")) {
-      eval(parse(text=paste("res@", names[i]," <- ", vals[i], sep="" )))
-    } else if (names[i] == "matSize") {
-      mats <- i
-    } else if (names[i] == "Wfs") {
-      wfs <- i
-    } else if (names[i] == "eta_F") {
-      etaf <- i
-    } else {
-      if(transformed) {
-        slot(res, paste0("log", names[i])) <- vals[i]
-      } else {
-        slot(res, paste0("log", names[i])) <- log(vals[i])
-      }
-    }
   if(mats > 0) {
     res@logeta_m <- log(vals[mats]) - res@logWinf
   }
   if (wfs > 0) {
-    if (transformed) {
-      res@logWfs <- vals[wfs]
+    res@logWfs <- if (grepl("^log", nms[wfs])) {
+       pars[[wfs]]
     } else {
-      res@logWfs <- log(vals[wfs])
+      log(pars[[wfs]])
     }
     res@logeta_F <- res@logWfs - res@logWinf
     if (etaf > 0)
       warning("Do not use Wfs and eta_F at the same time. Only Wfs was used")
   }
   if (etaf > 0 & wfs == 0) {
-    if (transformed) {
-      res@logeta_F <- vals[etaf]
+    res@logeta_F <- if (grepl("^log", nms[etaf])) {
+      pars[[etaf]]
     } else {
-      res@logeta_F <- log(vals[etaf])
+      log(pars[[etaf]])
     }
     res@logWfs <- res@logeta_F + res@logWinf
   }
   if (etaf == 0 & wfs == 0) {
     res@logWfs <- res@logeta_F + res@logWinf
   }
-  if (exp(res@logWinf) <= exp(res@logWfs)) {
+  if (res@logWinf <= res@logWfs) {
     warning("The start of fishing occurs at a weight equal or greater than the asymptotic weight")
   }
   res    
