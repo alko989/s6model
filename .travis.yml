@@ -1,6 +1,7 @@
 language: R
-sudo: required
+sudo: false
 warnings_are_errors: false
+cache: packages
 
 notifications:
   email:
