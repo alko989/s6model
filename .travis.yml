@@ -18,8 +18,8 @@ notifications:
 #    repo: alko989/s6model
 #    branch: poormansts
 
-r_github_packages:
-  - jimhester/covr
+r_packages:
+  - covr
 
 after_success:
   - Rscript -e 'library(covr);codecov()'
