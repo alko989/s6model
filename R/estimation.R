@@ -34,7 +34,6 @@ estimate <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                          random = c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
                          totalYield = NULL, ...) {
   if (is.null(df)) return(NULL)
-  if (! require(TMB)) stop("TMB is not installed! Please install and try again.")
   isTS <- is(df, "list")
   if (isTS) {
     if (is.null(totalYield)) totalYield <- rep(0.01234567, length(df))

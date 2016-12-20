@@ -102,8 +102,13 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
   if(is(ests, "s6params")) {
     ests <- list(ests)
   }
-  aplfun <- if(require(parallel)) mclapply else lapply
-  maplfun <- if(require(parallel)) mcmapply else mapply
+  if(requireNamespace("parallel")) {
+    aplfun <- parallel::mclapply
+    maplfun <- parallel::mcmapply
+  } else {
+    aplfun <- lapply
+    maplfun <- mapply
+  }
   r <- function(x) round(x, 2)
   if(same.as) {
     alim <- getalim(meanParameters(ests))  
@@ -116,7 +121,7 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
       as <- rtrunc(nsample, spec ="lnorm", meanlog = log(a.mean), sdlog = a.sd, 
                    a = -Inf, b = alim)
     }
-    Winf <- if(is.null(ests[[i]])) NULL else getWinf(ests[[i]])
+    Winf <- if(is.null(ests[[i]])) NULL else Winf(ests[[i]])
     results <- aplfun(as, function(a) {
       estimate(inputData[[i]], a = a, Winf = Winf, totalYield = yield[i],
                    u = u, ...)
@@ -233,7 +238,7 @@ makeAssessment <-
   }
   starting <- Sys.time()
   if(! is.null(binsize)) {
-    inputData <- changeBinsize2(inputData, binsize = binsize)
+    inputData <- changeBinsize(inputData, binsize = binsize)
   }
   if(equalWinf) {
     ests <- try(

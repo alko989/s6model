@@ -33,7 +33,7 @@ If \code{v} is \code{NULL}, the version returned by the internal function \code{
 }
 \examples{
 
-hist(simulateData3()$sample)
+hist(simulate(s6params()))
 addVersion()
 
 }

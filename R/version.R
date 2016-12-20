@@ -27,7 +27,7 @@ getVersion <- function(pkg=packageName()) {
 #' @keywords aplot
 #' @examples
 #' 
-#' hist(simulateData3()$sample)
+#' hist(simulate(s6params()))
 #' addVersion()
 #' 
 #' @export

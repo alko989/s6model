@@ -137,27 +137,27 @@ s6params <- function(pars = list(), base = new("s6params")) {
 }
 
 ##' Calculate the mean value of 
-##' @param x list of \code{s6params} objects
+##' @param l list of \code{s6params} objects
 ##'
 ##' @return A \code{s6params} object with mean 
 ##' values of the input \code{s6params}. If the input is NULL it returns NULL
 ##' and it returns the i
 ##' 
 ##' It returns NULL if \code{x} is NULL and 
-##' \code{x} if \code{x} is an object of class \code{s6params}
+##' \code{l} if \code{l} is an object of class \code{s6params}
 ##' @export
 ##' @rdname s6params
-meanParameters <- function(x, ...) {
-  if(is.null(x)) {
-    warning("Argument x in `meanParameters` is NULL")
+meanParameters <- function(l, ...) {
+  if(is.null(l)) {
+    warning("Argument l in `meanParameters` is NULL")
     return(NULL)
   }
-  if(is(x, "s6params")) return(x)
-  p <- as.list(parameters())
+  if(is(l, "s6params")) return(l)
+  p <- as.list(s6params())
   do.call(s6params, 
           list(names = names(p), 
                vals = sapply(seq(p), function(i) {
-                 allvals <- sapply(x, function(xx) {
+                 allvals <- sapply(l, function(xx) {
                    if(is.null(xx)) return(NA)
                    c(as.list(xx)[[i]])  
                  })
@@ -242,7 +242,7 @@ setMethod("show", "s6params",
           })
 
 
-#' @param x a s6params object
+#' @param l a s6params object
 #' @param xlim the x limits (x1, x2) of the plot.
 #' @param ... Arguments passed to other methods.
 #' @note Additional arguments are passed to \code{\link{plot.default}} 
@@ -478,7 +478,7 @@ simulate.s6params <- function(object, nsim = 1000, seed = NULL, binsize = 100,
     df <- structure(df, binsize = binsize)
     rl <- rle(df$Freq)
     df <- head(df, nrow(df) - if(tail(rl$values, 1) == 0) tail(rl$lengths, 1) else 0)
-    class(df) <-c("s6Input", "data.frame")  
+    class(df) <-c("s6input", "data.frame")  
     df
   })
   if(ndataset == 1) return(res[[1]])
@@ -486,11 +486,11 @@ simulate.s6params <- function(object, nsim = 1000, seed = NULL, binsize = 100,
 }
 
 ##' @export
-plot.s6Input <- function(x, ...) {
+plot.s6input <- function(x, ...) {
   plot(x$Weight, x$Freq, type = "h", lwd = 5, ...)
 }
 
 ##' @export
-hist.WeightFreq <- function(x, ..., main = "", xlab = "Weight") {
+hist.s6input <- function(x, ..., main = "", xlab = "Weight") {
   hist(rep(x$Weight, x$Freq), xlab = xlab,  main = main, ...)
 }

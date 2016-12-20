@@ -202,7 +202,6 @@ getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
 ##' @author alko
 ##' @export
 calcFmsy <- function(params=NULL) {
-  if(!require(TMB)) stop("TMB package not installed.")
   if(is.null(params)) return (NULL)
   if(is(params, "s6params")) {
     params <- as.list(params)
@@ -236,26 +235,27 @@ calcFmsy <- function(params=NULL) {
 ##' 
 ##' @examples 
 ##' ## Simulate a data set with bin size equal to 100 gr
-##' dat <- simulateData3(binsize=100)
+##' dat <- simulate(s6params(), binsize=100)
 ##' 
 ##' ## Change the bin size to 200 gr
-##' dat <- changeBinsize(dat$df, binsize = 200)
+##' dat <- changeBinsize(dat, binsize = 200)
 ##' @return data.frame with weight frequencies binned with bin size \code{binsize}
 changeBinsize <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq") {
   if(is(df, "list")) { 
-    return(lapply (df, changeBinsize2, binsize = binsize, keepZeros = keepZeros, 
+    return(lapply (df, changeBinsize, binsize = binsize, keepZeros = keepZeros, 
                    weight.col = weight.col, freq.col = freq.col)) 
   }
   if(dim(df)[1] == 0 ) return( structure(data.frame(Weight = numeric(0), Freq = integer(0)), binsize = binsize))
-  if(require(dplyr)) {
+  if(requireNamespace("dplyr", quietly = TRUE)) {
+    `%>%` <- dplyr::`%>%`
     mx <- max(df[weight.col], na.rm = TRUE)
     res <- df %>% 
-      mutate_(Weight = weight.col) %>% 
-      mutate(Weight = Weight - (Weight - 1) %% binsize + binsize / 2 - 1) %>%
-      group_by(Weight) %>%  
-      summarise_(Freq = ~as.integer(round(sum(Freq)))) %>%
-      full_join(data.frame(Weight = seq(binsize / 2, mx + binsize, binsize)), by = "Weight") %>%
-      mutate(Freq = as.integer(ifelse(is.na(Freq), 0, Freq)))
+      dplyr::mutate_(Weight = weight.col) %>% 
+      dplyr::mutate(Weight = Weight - (Weight - 1) %% binsize + binsize / 2 - 1) %>%
+      dplyr::group_by(Weight) %>%  
+      dplyr::summarise_(Freq = ~as.integer(round(sum(Freq)))) %>%
+      dplyr::full_join(data.frame(Weight = seq(binsize / 2, mx + binsize, binsize)), by = "Weight") %>%
+      dplyr::mutate(Freq = as.integer(ifelse(is.na(Freq), 0, Freq)))
   } else {
     cuts <- seq(0, max(df[weight.col], na.rm = TRUE) + binsize, binsize)
     labs <- head(cuts + binsize/2, -1)

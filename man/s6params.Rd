@@ -13,7 +13,7 @@
 \usage{
 s6params(pars = list(), base = new("s6params"))
 
-meanParameters(x, ...)
+meanParameters(l, ...)
 
 \method{plot}{s6params}(x, xlim = c(0.001, 1), ...)
 
@@ -29,7 +29,7 @@ meanParameters(x, ...)
 
 \item{base}{\code{s6params} object, the parameters of this object are used instead of the default values}
 
-\item{x}{list of \code{s6params} objects}
+\item{l}{list of \code{s6params} objects}
 
 \item{...}{Arguments passed to other methods.}
 
@@ -47,7 +47,7 @@ meanParameters(x, ...)
 
 \item{ndataset}{integer, the number of datasets to simulate.}
 
-\item{x}{a s6params object}
+\item{l}{a s6params object}
 }
 \value{
 A \code{s6params} object.
@@ -57,7 +57,7 @@ values of the input \code{s6params}. If the input is NULL it returns NULL
 and it returns the i
 
 It returns NULL if \code{x} is NULL and 
-\code{x} if \code{x} is an object of class \code{s6params}
+\code{l} if \code{l} is an object of class \code{s6params}
 }
 \description{
 s6params is an S4 class that contains all model parameters. The 

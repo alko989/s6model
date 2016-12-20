@@ -83,7 +83,7 @@ getDfYears <- function(dat, years = as.numeric(levels(dat[[2]]$Year)), binsize =
   setNames(lapply(years, function(yr) {
     cat("Making the data.frame for year", yr, "\n")
     dyr <- subset(dat, Year %in% yr)
-    changeBinsize2(datrasraw2weightfreq(dyr, a=a, b=b, estWL=estWL, ...), binsize = binsize)
+    changeBinsize(datrasraw2weightfreq(dyr, a=a, b=b, estWL=estWL, ...), binsize = binsize)
   }), years)
 }
 
