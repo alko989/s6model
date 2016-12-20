@@ -1,0 +1,8 @@
+title: S6model
+description: Data-poor stock assessment modelling using the s6model
+google_analytics: UA-49429508-1
+show_downloads: true
+theme: jekyll-theme-tactile
+
+gems:
+  - jekyll-mentions
