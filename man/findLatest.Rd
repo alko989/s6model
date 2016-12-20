@@ -2,7 +2,7 @@
 % Please edit documentation in R/model.R
 \name{findLatest}
 \alias{findLatest}
-\title{Find newest file in folder matching pattern}
+\title{Find newest file in a folder matching a pattern}
 \usage{
 findLatest(path = ".", pattern = "")
 }
@@ -12,7 +12,7 @@ findLatest(path = ".", pattern = "")
 \item{pattern}{the pattern to search for, used by \code{link{dir}}}
 }
 \description{
-Given a folder and a pattern, rerurns the file that was modified latest.
+Given a folder and a pattern rerurns the file that was modified latest.
 }
 \seealso{
 \code{\link{dir}}

@@ -100,37 +100,6 @@ getParams <- function(p = s6params(),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE,
   })
 }
 
-##' Simulates catch-at-weight data using the s6model
-##'
-##' Simulate a data set of individual catch weight or 
-##' @param samplesize Integer. Number of simulated individuals
-##' @param params Object of class \code{s6params}. Model parameters
-##' @param binsize Numeric. Weight class width. If \code{retDF} is FALSE, \code{binsize} is ignored
-##' @param keepZeros Logical. If TRUE the resulting data.frame includes weight classes with zero individuals. Otherwise these weight classes are dropped. Ignored if \code{retDF} is FALSE
-##' @param retDF Logical. If TRUE a data.frame is returned with columns Weight (weight classes) and Freq (numbers per weight class)
-##' @param ... Extra named arguments passed to \code{getParams}
-##' @return Invisible list with
-##' \itemize{
-##'   \item `sample` containing weights of individuals,
-##'   \item `s6params` the parameters as a \code{s6params} object
-##'   \item `Fmsy` the Fmsy of the given parameters
-##'   \item `df` A data.frame with columns Weight and Freq with number per 
-##'   weight class. This is returned only if \code{retDF} is TRUE
-##' }
-##' @author alko
-##' @export
-simulateData3 <- function(params = s6params(), samplesize= 1000, binsize = 5, 
-                          keepZeros=TRUE, retDF = TRUE, ...) {
-  applyfun <- if(require(parallel)) mclapply else sapply
-  sam <- with(getParams(params, ...), { 
-    simplify2array(applyfun(runif(samplesize), function(u) uniroot(function(x) {cdf(x) - u}, c(w_r, Winf), extendInt = "yes")$root))
-  })
-  res <- list(sample = sam, s6params = params, Fmsy = getParams(params,calcBRPs=TRUE)$Fmsy)
-  if(retDF) res$df <- sample2df(sam, binsize, keepZeros=keepZeros)
-  attr(res, "version") <- getVersion()
-  return(invisible(res))  
-}
-
 ##' Convert a vector sample to data.frame with counts per weight class
 ##'
 ##' Takes a vector containing individual catch weights and returns a data.frame with numbers per weight class
@@ -259,7 +228,10 @@ calcFmsy <- function(params=NULL) {
 ##' 
 ##' @param df data.frame with colums 'Weight' and 'Freq'
 ##' @param binsize numeric, the bin size in grams
-##' @param keepZeros logical, if TRUE the bins with zero observation are not removed
+##' @param weight.col The weight column name
+##' @param freq.col The frequency column name
+##' @param keepZeros logical, if FALSE the bins with zero observations are removed
+##'
 ##' @export
 ##' 
 ##' @examples 
@@ -269,59 +241,43 @@ calcFmsy <- function(params=NULL) {
 ##' ## Change the bin size to 200 gr
 ##' dat <- changeBinsize(dat$df, binsize = 200)
 ##' @return data.frame with weight frequencies binned with bin size \code{binsize}
-changeBinsize <- function(df, binsize = 10, keepZeros = TRUE) {
-  sample2df(rep(df$Weight, df$Freq), binsize, keepZeros=keepZeros)
-}
-
-##' @export
-changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq", verbose = options()$verbose) {
+changeBinsize <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq") {
   if(is(df, "list")) { 
     return(lapply (df, changeBinsize2, binsize = binsize, keepZeros = keepZeros, 
-                   weight.col = weight.col, freq.col = freq.col, verbose = verbose)) 
+                   weight.col = weight.col, freq.col = freq.col)) 
   }
   if(dim(df)[1] == 0 ) return( structure(data.frame(Weight = numeric(0), Freq = integer(0)), binsize = binsize))
-  cuts <- seq(0, max(df[weight.col], na.rm = TRUE) + binsize, binsize)
-  labs <- head(cuts + binsize/2, -1)
-  res <- data.frame(Weight = cut(df[[weight.col]], breaks = cuts, labels = labs), Freq = df[[freq.col]])
-  res <- rbind(res, data.frame(Weight = labs, Freq = 0))
-  res <- aggregate(Freq ~ Weight, data = res, FUN = sum )
-  res$Weight <- as.numeric(as.character(res$Weight))
-  res$Freq <- as.integer(round(as.numeric(as.character(res$Freq)), digits = 0))
-  rl <- rle(res$Freq)
-  res <- head(res, nrow(res) - if(tail(rl$values, 1) == 0) tail(rl$lengths, 1) else 0)
+  if(require(dplyr)) {
+    mx <- max(df[weight.col], na.rm = TRUE)
+    res <- df %>% 
+      mutate_(Weight = weight.col) %>% 
+      mutate(Weight = Weight - (Weight - 1) %% binsize + binsize / 2 - 1) %>%
+      group_by(Weight) %>%  
+      summarise_(Freq = ~as.integer(round(sum(Freq)))) %>%
+      full_join(data.frame(Weight = seq(binsize / 2, mx + binsize, binsize)), by = "Weight") %>%
+      mutate(Freq = as.integer(ifelse(is.na(Freq), 0, Freq)))
+  } else {
+    cuts <- seq(0, max(df[weight.col], na.rm = TRUE) + binsize, binsize)
+    labs <- head(cuts + binsize/2, -1)
+    res <- data.frame(Weight = c(cut(df[[weight.col]], breaks = cuts, labels = labs), labs), 
+                      Freq = c(df[[freq.col]], rep(0, length(labs))),
+                      stringsAsFactors = TRUE)
+    res <- aggregate(Freq ~ Weight, data = res, FUN = sum)
+    res$Weight <- as.numeric(res$Weight)
+    res$Freq <- as.integer(round(as.numeric(res$Freq), digits = 0))
+    rl <- rle(res$Freq)
+    res <- head(res, nrow(res) - if(tail(rl$values, 1) == 0) tail(rl$lengths, 1) else 0)  
+  }
   if (! keepZeros) {
     res <- res[df$Freq > 0, ]
   }
   res <- structure(res, binsize = binsize)
-  if(verbose) cat("Done")
   res
 }
-
-#' @export
-changeBinsize3 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq", verbose = options()$verbose) {
-  if(is(df, "list")) { 
-    return(lapply (df, changeBinsize2, binsize = binsize, keepZeros = keepZeros, 
-                   weight.col = weight.col, freq.col = freq.col, verbose = verbose)) 
-  }
-  if(dim(df)[1] == 0 ) return( structure(data.frame(Weight = numeric(0), Freq = integer(0)), binsize = binsize))
-  res <- df %>% 
-    group_by_(WeightClass = ~cut(weight.col, breaks = seq(0, max(weight.col) + binsize, by = binsize) )) %>% 
-    summarise_(Freq = ~sum(freq.col)) %>% 
-    mutate_(Weight = ~WeightClass %>% 
-             sapply( . %>% as.character %>% getmid)) %>% 
-    select(Weight, Freq, WeightClass) %>% 
-    `attr<-`("binsize", binsize)
-  if (! keepZeros) {
-    res <- res[df$Freq > 0, ]
-  }
-  if(verbose) cat("Done")
-  res
-}
-
 
 ##' @export
-##' @title Find newest file in folder matching pattern
-##' @description Given a folder and a pattern, rerurns the file that was modified latest.
+##' @title Find newest file in a folder matching a pattern
+##' @description Given a folder and a pattern rerurns the file that was modified latest.
 ##'
 ##' @param path character, relative or absolute path
 ##' @param pattern the pattern to search for, used by \code{link{dir}}

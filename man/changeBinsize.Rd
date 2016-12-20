@@ -4,14 +4,19 @@
 \alias{changeBinsize}
 \title{Change the bin size of a weight frequency data.frame}
 \usage{
-changeBinsize(df, binsize = 10, keepZeros = TRUE)
+changeBinsize(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight",
+  freq.col = "Freq")
 }
 \arguments{
 \item{df}{data.frame with colums 'Weight' and 'Freq'}
 
 \item{binsize}{numeric, the bin size in grams}
 
-\item{keepZeros}{logical, if TRUE the bins with zero observation are not removed}
+\item{keepZeros}{logical, if FALSE the bins with zero observations are removed}
+
+\item{weight.col}{The weight column name}
+
+\item{freq.col}{The frequency column name}
 }
 \value{
 data.frame with weight frequencies binned with bin size \code{binsize}
