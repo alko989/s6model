@@ -33,6 +33,8 @@ meanParameters(l, ...)
 
 \item{...}{Arguments passed to other methods.}
 
+\item{x}{a s6params object}
+
 \item{xlim}{the x limits (x1, x2) of the plot.}
 
 \item{object}{a \code{s6params} object.}
@@ -46,8 +48,6 @@ meanParameters(l, ...)
 \item{keepZeros}{logical, if TRUE keep bins with zero frequency.}
 
 \item{ndataset}{integer, the number of datasets to simulate.}
-
-\item{l}{a s6params object}
 }
 \value{
 A \code{s6params} object.

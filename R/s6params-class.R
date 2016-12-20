@@ -242,7 +242,7 @@ setMethod("show", "s6params",
           })
 
 
-#' @param l a s6params object
+#' @param x a s6params object
 #' @param xlim the x limits (x1, x2) of the plot.
 #' @param ... Arguments passed to other methods.
 #' @note Additional arguments are passed to \code{\link{plot.default}} 
