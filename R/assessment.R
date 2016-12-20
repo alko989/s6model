@@ -89,17 +89,17 @@ addWeight <- function(df, a, b, lengthcol = "Length") {
 
 
 getalim <- function (p) {
-  if(!is(p, "Parameters")) { 
+  if(!is(p, "s6params")) { 
     return(0.8)
   }
   optimize(function(x) {
-    getParams(parameters(c(a = x, base = p)), optim.Rrel = TRUE, FF = 0)^2
+    getParams(s6params(c(a = x, base = p)), optim.Rrel = TRUE, FF = 0)^2
   }, c(0,2) )$minimum
 }
 
 
 getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.ubound, yield, probs, Winf, u, ...) {
-  if(is(ests, "Parameters")) {
+  if(is(ests, "s6params")) {
     ests <- list(ests)
   }
   aplfun <- if(require(parallel)) mclapply else lapply
@@ -118,7 +118,7 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
     }
     Winf <- if(is.null(ests[[i]])) NULL else getWinf(ests[[i]])
     results <- aplfun(as, function(a) {
-      estimate_TMB(inputData[[i]], a = a, Winf = Winf, totalYield = yield[i],
+      estimate(inputData[[i]], a = a, Winf = Winf, totalYield = yield[i],
                    u = u, ...)
     })
     reps <- results
@@ -196,7 +196,7 @@ df2matrix <- function(df){
 #' @param probs numeric vector of probabilites with values in [0,1] for the uncertainty sample quantiles.
 #' @param dirout Output directory
 #' @param fnout Output file name
-#' @param ... Arguments passed to \code{estimate_TMB} that does the estimation
+#' @param ... Arguments passed to \code{estimate} that does the estimation
 #'
 #' @return object of class s6modelResults which is a data.frame with parameter estimates with attributes \describe{
 #' \item{CI}{confidence levels as sample quantiles}
@@ -237,12 +237,12 @@ makeAssessment <-
   }
   if(equalWinf) {
     ests <- try(
-      estimate_TMB(inputData, DLL = "s6modelts", totalYield = yield, u = u,
+      estimate(inputData, DLL = "s6modelts", totalYield = yield, u = u,
                    sigma = sigma, a = a.mean, winf.ubound = winf.ubound, ...))
     estpars <- attr(ests, "estpars")
     res <- ests
   } else {
-    ests <- mapply(function(x, y, s) estimate_TMB(x, a=a.mean, winf.ubound = winf.ubound,
+    ests <- mapply(function(x, y, s) estimate(x, a=a.mean, winf.ubound = winf.ubound,
                                                   totalYield = y, sigma = s, u = u, DLL = "s6model", ...),
                    inputData, yield, sigma, SIMPLIFY = FALSE)
   res <- lapply(ests, function(x) if(class(x)== "try-error") rep(NA, 27) else x[1:27] )

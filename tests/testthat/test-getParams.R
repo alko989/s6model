@@ -1,7 +1,7 @@
 context("getParams function")
 
 test_that("Check if getParams reads parameters correctly", {
-    p1 <- parameters()
+    p1 <- s6params()
     p2 <- p1
     p2@logeta_F <- log(0.01)
     expect_warning(gpp2 <- getParams(p2))
@@ -10,6 +10,6 @@ test_that("Check if getParams reads parameters correctly", {
     expect_equal(gpp2$p, p1)
     expect_equal(getParams(p1)$p, p1)
 
-    expect_warning(pp <- s6model::getParams(p <- parameters(c(Winf = 0.5, eta_F = 0.11)))$p, regexp = NA)
+    expect_warning(pp <- s6model::getParams(p <- s6params(c(Winf = 0.5, eta_F = 0.11)))$p, regexp = NA)
     expect_equal(pp, p)
 })

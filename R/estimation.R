@@ -27,7 +27,7 @@
 #' @export
 #'
 #' @examples
-estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, 
+estimate <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, 
                          eta_m=0.25, a=0.22, Winf = NULL, sigma=NULL, u = 10,
                          sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
                          verbose = FALSE, map = list(loga = factor(NA)), 
@@ -132,11 +132,11 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
         match <- vals[grepl(paste0("^", x, "$"), nms)]
         if(length(match) == 1) match else match[i]
       })
-      parameters(setNames(as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m)), c(parnms, "n", "epsilon_a", "epsilon_r", "A", "eta_m")))
+      s6params(setNames(as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m)), c(parnms, "n", "epsilon_a", "epsilon_r", "A", "eta_m")))
     })
     Fmsy <- sapply(estpars, calcFmsy)
     SSBrel <- sapply(estpars, function(x) getParams(x)$B) / 
-              mapply(function(p, fmsy) getParams(parameters(c(Fm = fmsy), base = p))$B, estpars, Fmsy, SIMPLIFY = TRUE)
+              mapply(function(p, fmsy) getParams(s6params(c(Fm = fmsy), base = p))$B, estpars, Fmsy, SIMPLIFY = TRUE)
     if(nyrs == 1) {
       estpars <- estpars[[1]]
       Fmsy <- Fmsy[[1]]

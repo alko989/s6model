@@ -1,10 +1,10 @@
 #' Returns a list with all parameters and functions
 #' 
-#' Given a Parameters object, it returns as a list all relevant parameters and
+#' Given a s6params object, it returns as a list all relevant parameters and
 #' corresponding functions like pdf and cdf.
 #' 
 #' 
-#' @param p A Parameters object
+#' @param p A s6params object
 #' @param FF Numeric. Fishing mortality. This argument is ignored if all optim.* are FALSE 
 #' @param calcBRPs Boolean. If true, calculates biological reference points.
 #' @param isSurvey boolean, if TRUE a survey selectivity is used for the pdf
@@ -19,17 +19,17 @@
 #' \item If optim.Rrel is TRUE, only the R/Rmax - 0.5 is returned
 #' }
 #' @author alko
-#' @seealso \code{\link{parameters}}
+#' @seealso \code{\link{s6params}}
 #' @keywords misc
 #' @examples
 #' 
 #'  getParams()
 #' 
 #' @export
-getParams <- function(p = parameters(),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE, 
+getParams <- function(p = s6params(),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE, 
                       optim.fmsy=FALSE, optim.fmsyr = FALSE, optim.Rrel =FALSE) {
-  if( ! is(p, "Parameters"))
-    stop("Wrong input argument in getParams. Use the Parameters class instead.")  
+  if( ! is(p, "s6params"))
+    stop("Wrong input argument in getParams. Use the 's6params' class instead.")  
   with(as.list(p), {
     if (optim.fmsy | optim.fmsyr | optim.Rrel)
       Fm <- FF
@@ -104,7 +104,7 @@ getParams <- function(p = parameters(),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE
 ##'
 ##' Simulate a data set of individual catch weight or 
 ##' @param samplesize Integer. Number of simulated individuals
-##' @param params Object of class \code{Parameters}. Model parameters
+##' @param params Object of class \code{s6params}. Model parameters
 ##' @param binsize Numeric. Weight class width. If \code{retDF} is FALSE, \code{binsize} is ignored
 ##' @param keepZeros Logical. If TRUE the resulting data.frame includes weight classes with zero individuals. Otherwise these weight classes are dropped. Ignored if \code{retDF} is FALSE
 ##' @param retDF Logical. If TRUE a data.frame is returned with columns Weight (weight classes) and Freq (numbers per weight class)
@@ -112,20 +112,20 @@ getParams <- function(p = parameters(),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE
 ##' @return Invisible list with
 ##' \itemize{
 ##'   \item `sample` containing weights of individuals,
-##'   \item `parameters` the parameters as a \code{Parameters} object
+##'   \item `s6params` the parameters as a \code{s6params} object
 ##'   \item `Fmsy` the Fmsy of the given parameters
-##'   \item `df` A data.frame with columns Weight and Freq with number per weight class. This is returned only if \code{retDF} is TRUE
+##'   \item `df` A data.frame with columns Weight and Freq with number per 
+##'   weight class. This is returned only if \code{retDF} is TRUE
 ##' }
 ##' @author alko
 ##' @export
-simulateData3 <- function(samplesize= 1000, params = parameters(), binsize = 5, keepZeros=TRUE, retDF=TRUE, ...)
-{
+simulateData3 <- function(params = s6params(), samplesize= 1000, binsize = 5, 
+                          keepZeros=TRUE, retDF = TRUE, ...) {
   applyfun <- if(require(parallel)) mclapply else sapply
-  sam <- c()
-  with(getParams(params, ...), {
-    sam <<- simplify2array(applyfun(runif(samplesize), function(u) uniroot(function(x) {cdf(x) - u}, c(w_r, Winf))$root))
+  sam <- with(getParams(params, ...), { 
+    simplify2array(applyfun(runif(samplesize), function(u) uniroot(function(x) {cdf(x) - u}, c(w_r, Winf), extendInt = "yes")$root))
   })
-  res <- list(sample = sam, parameters = params, Fmsy = getParams(params,calcBRPs=TRUE)$Fmsy)
+  res <- list(sample = sam, s6params = params, Fmsy = getParams(params,calcBRPs=TRUE)$Fmsy)
   if(retDF) res$df <- sample2df(sam, binsize, keepZeros=keepZeros)
   attr(res, "version") <- getVersion()
   return(invisible(res))  
@@ -187,7 +187,7 @@ rparam <- function(value, range.sd, range.cv, lb= -Inf, ub = Inf, unif=FALSE)
 ##' to Rrel at least equal to Rrel.gt
 ##' @param Fmsy.gt Numeric. Fmsy constraint. It allows parameters that lead
 ##' to Fmsy at least equal to Fmsy.gt
-##' @return \code{Parameters}
+##' @return \code{s6params}
 ##' @author alko
 ##' @export
 getRandomParameters <-
@@ -206,7 +206,7 @@ getRandomParameters <-
                                             parameter.lbound[x],
                                             parameter.ubound[x],
                                             parameter.unif[x]))
-      res <- parameters(setNames(par.vals, parameter.names))
+      res <- s6params(setNames(par.vals, parameter.names))
       if( getParams(res)$Rrel >=  Rrel.gt & getParams(res, calcBRPs=TRUE)$Fmsy >= Fmsy.gt) return(res)
     }
   }
@@ -215,7 +215,7 @@ getRandomParameters <-
 ##'
 ##' Shorthand function for a specific asymptotic weight
 ##' @param winf Numeric. Asymptotic weight
-##' @return \code{Parameters}
+##' @return \code{s6params}
 ##' @author alko
 ##' @rdname getRandomParameters
 ##' @export
@@ -225,64 +225,17 @@ getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
   getRandomParameters(parameter.names, parameter.value, Rrel.gt=Rrel.gt, Fmsy.gt=Fmsy.gt)
 }
 
-# ##' Multicore lapply function with progress bar
-# ##'
-# ##' Wrapper around parallel::mclapply function with text progress bar
-# ##' @param X  a vector (atomic or list) or an expressions vector.  Other
-# ##' objects (including classed objects) will be coerced by `as.list`.
-# ##' @param FUN the function to be applied to (`mclapply`) each element of `X` or (`mcmapply`) in parallel to `...`.
-# ##' @param ... Optional arguments to FUN
-# ##' @param progressbar Logical. If TRUE a text progress bar is shown.
-# ##' @return Result from mclapply
-# ##' @note If mclapply is not available, lapply is used instead.
-# ##' @author alko
-# ##' @export
-# tmclapply <- function(X, FUN, ..., progressbar=TRUE){
-#   aplfun <- if(require(parallel)) mclapply else lapply
-#   start <- Sys.time()
-#   if(progressbar)
-#     pb <- txtProgressBar(min = 0, max = 100, style=3)
-#   results <- local({
-#     f <- fifo(tempfile(), open="w+b", blocking=TRUE)
-#     if (inherits(parallel:::mcfork(), "masterProcess")) {
-#       progress <- 0.0
-#       while(progress < 1 && !isIncomplete(f)) {
-#         msg <- readBin(f, "double")
-#         progress <- progress + as.numeric(msg)
-#         if(progressbar)
-#           setTxtProgressBar(pb, progress * 100)
-#         tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
-#         cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
-#         if( ! progressbar) cat("\r")
-#       } 
-#       parallel:::mcexit()
-#     }
-#     res <- aplfun(X, function(x) {
-#       rr <- FUN(x)
-#       writeBin(1/length(X), f)
-#       rr
-#     })
-#     close(f)
-#     if(progressbar) {
-#       setTxtProgressBar(pb,100)
-#       close(pb)
-#     }
-#     res
-#   })
-#   cat(difftime(Sys.time(), start, units="mins"), "mins\n")
-#   results
-# } 
 
 ##' Calculates the Fmsy reference point
 ##'
-##' @param params An object of class \code{Parameters} 
+##' @param params An object of class \code{s6params} 
 ##' @return numeric F that leads to MSY
 ##' @author alko
 ##' @export
 calcFmsy <- function(params=NULL) {
   if(!require(TMB)) stop("TMB package not installed.")
   if(is.null(params)) return (NULL)
-  if(is(params, "Parameters")) {
+  if(is(params, "s6params")) {
     params <- as.list(params)
   }
   if( ! is(params,"list"))
@@ -291,7 +244,8 @@ calcFmsy <- function(params=NULL) {
   def <- replace(def, names(params), unlist(params))
   obj <- MakeADFun(def, list(logF = log(0.2)), DLL="calcFmsy")
   obj$env$tracemgc <- FALSE
-  obj$env$silent <- TRUE; newtonOption(obj=obj,trace=0); config(trace.optimize = 0,DLL="calcFmsy")
+  obj$env$silent <- TRUE
+  newtonOption(obj=obj,trace=0); config(trace.optimize = 0, DLL="calcFmsy")
   opt <- try(do.call("optim", obj))
   res <- try(sdreport(obj)$val)
   if(is(res, "try-error"))

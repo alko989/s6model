@@ -41,7 +41,7 @@ makeAssessment(inputData, yield = NULL, a.mean = 0.22, a.sd = 0.7,
 
 \item{fnout}{Output file name}
 
-\item{...}{Arguments passed to \code{estimate_TMB} that does the estimation}
+\item{...}{Arguments passed to \code{estimate} that does the estimation}
 }
 \value{
 object of class s6modelResults which is a data.frame with parameter estimates with attributes \describe{

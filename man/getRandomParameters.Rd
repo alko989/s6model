@@ -40,9 +40,9 @@ to Fmsy at least equal to Fmsy.gt}
 \item{winf}{Numeric. Asymptotic weight}
 }
 \value{
-\code{Parameters}
+\code{s6params}
 
-\code{Parameters}
+\code{s6params}
 }
 \description{
 Random model parameters with constraints in Fmsy and relative recruitment (Rrel = R/Rmax)

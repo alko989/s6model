@@ -4,13 +4,13 @@
 \alias{simulateData3}
 \title{Simulates catch-at-weight data using the s6model}
 \usage{
-simulateData3(samplesize = 1000, params = parameters(), binsize = 5,
+simulateData3(params = s6params(), samplesize = 1000, binsize = 5,
   keepZeros = TRUE, retDF = TRUE, ...)
 }
 \arguments{
-\item{samplesize}{Integer. Number of simulated individuals}
+\item{params}{Object of class \code{s6params}. Model parameters}
 
-\item{params}{Object of class \code{Parameters}. Model parameters}
+\item{samplesize}{Integer. Number of simulated individuals}
 
 \item{binsize}{Numeric. Weight class width. If \code{retDF} is FALSE, \code{binsize} is ignored}
 
@@ -24,9 +24,10 @@ simulateData3(samplesize = 1000, params = parameters(), binsize = 5,
 Invisible list with
 \itemize{
   \item `sample` containing weights of individuals,
-  \item `parameters` the parameters as a \code{Parameters} object
+  \item `s6params` the parameters as a \code{s6params} object
   \item `Fmsy` the Fmsy of the given parameters
-  \item `df` A data.frame with columns Weight and Freq with number per weight class. This is returned only if \code{retDF} is TRUE
+  \item `df` A data.frame with columns Weight and Freq with number per 
+  weight class. This is returned only if \code{retDF} is TRUE
 }
 }
 \description{

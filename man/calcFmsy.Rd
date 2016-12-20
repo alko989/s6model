@@ -7,7 +7,7 @@
 calcFmsy(params = NULL)
 }
 \arguments{
-\item{params}{An object of class \code{Parameters}}
+\item{params}{An object of class \code{s6params}}
 }
 \value{
 numeric F that leads to MSY

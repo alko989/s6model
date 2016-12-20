@@ -4,12 +4,11 @@
 \alias{getParams}
 \title{Returns a list with all parameters and functions}
 \usage{
-getParams(p = parameters(), FF = NULL, calcBRPs = FALSE,
-  isSurvey = FALSE, optim.fmsy = FALSE, optim.fmsyr = FALSE,
-  optim.Rrel = FALSE)
+getParams(p = s6params(), FF = NULL, calcBRPs = FALSE, isSurvey = FALSE,
+  optim.fmsy = FALSE, optim.fmsyr = FALSE, optim.Rrel = FALSE)
 }
 \arguments{
-\item{p}{A Parameters object}
+\item{p}{A s6params object}
 
 \item{FF}{Numeric. Fishing mortality. This argument is ignored if all optim.* are FALSE}
 
@@ -33,7 +32,7 @@ functions. spawning stock biomass (SSB), yield. If calcBRPs is TRUE also Fmsy.
 }
 }
 \description{
-Given a Parameters object, it returns as a list all relevant parameters and
+Given a s6params object, it returns as a list all relevant parameters and
 corresponding functions like pdf and cdf.
 }
 \examples{
@@ -45,7 +44,7 @@ corresponding functions like pdf and cdf.
 alko
 }
 \seealso{
-\code{\link{parameters}}
+\code{\link{s6params}}
 }
 \keyword{misc}
 

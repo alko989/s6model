@@ -1,10 +1,10 @@
-#' The Parameters class and constructor
+#' The s6params class and constructor
 #'
-#' Parameters is an S4 class that contains all model parameters. The 
-#' \code{parameters} function is a constructor of the class. Convienient 
+#' s6params is an S4 class that contains all model parameters. The 
+#' \code{s6params} function is a constructor of the class. Convienient 
 #' functions are available to \code{plot}, draw \code{lines}, \code{simulate} 
 #' data, return a named list of all parameters (\code{as.list}) and get the 
-#' mean parameters of a list of \code{Parameter} objects.
+#' mean parameters of a list of \code{s6params} objects.
 #'
 #' @section Slots:
 #' \describe{
@@ -24,78 +24,72 @@
 #' }
 #' @author alko
 #' 
-#' @exportClass Parameters
-#' @name Parameters
-#' @aliases Parameters-class
-#' @rdname Parameters
+#' @exportClass s6params
+#' @name s6params
+#' @aliases s6params-class
+#' @rdname s6params
 #' @export
-setClass("Parameters",
-         representation(logWinf="numeric",          # Asymptotic weight
-                        logFm="numeric",            # Fishing mortality
-                        logA="numeric",             # Growth parameter
-                        logn="numeric",             # Exponent of consumtion
-                        logeta_F="numeric",         # Starting weight of fishing
-                                                    # (related to Winf) **Deprecated**
-                        logeta_m ="numeric",        # Maturation weight
-                                                    # (related to Winf)
-                        logeta_S="numeric",         # 
-                        loga ="numeric",            # Natural mortality
-                        logepsilon_a ="numeric",    # Allocation to maintenance
-                        logepsilon_r ="numeric",    # Efficiancy of reproduction
-                        logWfs = "numeric",         # Starting weight of fishing
-                        logu = "numeric",
-                        M = "numeric"),
-         prototype(logWinf = log(10000),
-                   logFm = log(0.25),
-                   logA = log(4.47),
-                   logn = log(0.75),
-                   logeta_F = log(0.05),
-                   logeta_m = log(0.25),
-                   logeta_S = log(0.001),
-                   loga = log(0.22),
-                   logepsilon_a = log(0.8),
-                   logepsilon_r = log(0.1),
-                   logWfs = log(500),
-                   logu=log(10),
-                   M = 1000))
+setClass("s6params",
+         representation(
+           logWinf="numeric",          # Asymptotic weight
+           logFm="numeric",            # Fishing mortality
+           logA="numeric",             # Growth parameter
+           logn="numeric",             # Exponent of consumtion
+           logeta_F="numeric",         # 50% ratainment weight, commercial gear
+           # (related to Winf) **Deprecated**
+           logeta_m ="numeric",        # Maturation weight (relative to Winf)
+           logeta_S="numeric",         # 50% retainment weight, survey gear
+           loga ="numeric",            # Natural mortality
+           logepsilon_a ="numeric",    # Allocation to maintenance
+           logepsilon_r ="numeric",    # Efficiancy of reproduction
+           logWfs = "numeric",         # Starting weight of fishing
+           logu = "numeric",
+           M = "numeric"),
+         prototype(
+           logWinf = log(10000),
+           logFm = log(0.25),
+           logA = log(4.47),
+           logn = log(0.75),
+           logeta_F = log(0.05),
+           logeta_m = log(0.25),
+           logeta_S = log(0.001),
+           loga = log(0.22),
+           logepsilon_a = log(0.8),
+           logepsilon_r = log(0.1),
+           logWfs = log(500),
+           logu=log(10),
+           M = 1000)
+         )
 
 #' @param pars named list, parameter values. If the name starts with log the values are expected to be log transformed
-#' @param base \code{Parameters} object, the parameters of this object are used instead of the default values
-#' @return A \code{Parameters} object.
+#' @param base \code{s6params} object, the parameters of this object are used instead of the default values
+#' @return A \code{s6params} object.
 #' @author alko
 #' @keywords constructor
 #' @examples
 #' 
-#' ## Without any arguments gives a Parameters object with default values
-#' parameters()
+#' ## Without any arguments gives a \code{s6params} object with default values
+#' s6params()
 #' 
-#' ## Log transformed parameters are expected if the parameter name starts with 'log'
-#' par1 <- parameters(c(logWinf = log(1000), logFm = log(0.4), logWfs = log(100)))
+#' ## Log transformed s6params are expected if the parameter name starts with 'log'
+#' par1 <- s6params(c(logWinf = log(1000), logFm = log(0.4), logWfs = log(100)))
 #' 
 #' ## The same is achieved with not transformed parameters
-#' par2 <- parameters(c(Winf = 1000, Fm = 0.4, Wfs = 100))
+#' par2 <- s6params(c(Winf = 1000, Fm = 0.4, Wfs = 100))
 #'
-#' ## Take a Parameters object and change one parameter
-#' par <- parameters(list(Winf = 1000, a = 0.4, Fm = 0.2, Wfs = 100))
-#' changeMatsize <- parameters(list(eta_m = 0.3), base= par)
+#' ## Take a s6params object and change one parameter
+#' par <- s6params(list(Winf = 1000, a = 0.4, Fm = 0.2, Wfs = 100))
+#' changeMatsize <- s6params(list(eta_m = 0.3), base= par)
 #'
 #' difference(par, changeMatsize)
 #' ##       base comp difference percent.difference
 #' ## eta_m 0.25  0.3      -0.05                 20
-#' @rdname Parameters
+#' @rdname s6params
 #' @export 
-parameters <- function(pars = list(), base = new("Parameters")) {
+s6params <- function(pars = list(), base = new("s6params")) {
   res <- base
   nms <- names(pars)
   mats <- wfs <- etaf <- 0
-  ## This check should not be necessary
-  # if (length(nms) == 1) {
-  #   if (nms=="Winf") {
-  #     res@logWinf <- pars[[1]]
-  #     res@logWfs <- res@logeta_F + res@logWinf
-  #     return(res)
-  #   }
-  # }
   for(i in seq(along = nms)) {
     nm <- nms[i]
     if(nm %in% c("M")) {
@@ -117,7 +111,7 @@ parameters <- function(pars = list(), base = new("Parameters")) {
   }
   if (wfs > 0) {
     res@logWfs <- if (grepl("^log", nms[wfs])) {
-       pars[[wfs]]
+      pars[[wfs]]
     } else {
       log(pars[[wfs]])
     }
@@ -142,21 +136,25 @@ parameters <- function(pars = list(), base = new("Parameters")) {
   res    
 }
 
-##' @param x list of Parameters objects
+##' Calculate the mean value of 
+##' @param x list of \code{s6params} objects
 ##'
-##' @return \code{meanParameters} returns a \code{Parameters} object with mean 
-##' values of the input Parameters. It returns NULL if \code{x} is NULL and 
-##' \code{x} if \code{x} is an object of class \code{Parameters}
+##' @return A \code{s6params} object with mean 
+##' values of the input \code{s6params}. If the input is NULL it returns NULL
+##' and it returns the i
+##' 
+##' It returns NULL if \code{x} is NULL and 
+##' \code{x} if \code{x} is an object of class \code{s6params}
 ##' @export
-##' @rdname Parameters
-meanParameters <- function(l) {
+##' @rdname s6params
+meanParameters <- function(x, ...) {
   if(is.null(x)) {
     warning("Argument x in `meanParameters` is NULL")
     return(NULL)
   }
-  if(is(x, "Parameters")) return(x)
+  if(is(x, "s6params")) return(x)
   p <- as.list(parameters())
-  do.call(parameters, 
+  do.call(s6params, 
           list(names = names(p), 
                vals = sapply(seq(p), function(i) {
                  allvals <- sapply(x, function(xx) {
@@ -167,11 +165,11 @@ meanParameters <- function(l) {
                }), transformed = FALSE))
 }
 
-##' Takes a Parameters object and changes its asymptotic weight
+##' Takes a \code{s6params} object and changes its asymptotic weight
 ##'
 ##' The asymptotic weight is changed, along with the relative and absolute sizes of 50\% retention 
 ##' @param value Numeric. The new asymptotic weight
-##' @return \code{Parameters} object with changed asymptotic weight, and absolute and
+##' @return \code{s6params} object with changed asymptotic weight, and absolute and
 ##' relative 50\% retention sizes
 ##' @author alko
 ##' @docType methods
@@ -180,11 +178,11 @@ meanParameters <- function(l) {
 setGeneric("Winf<-",function(object,value){standardGeneric("Winf<-")})
 
 ##' @rdname Winf-methods
-##' @aliases Winf<--methods, Winf<-,Parameters-method
+##' @aliases Winf<--methods, Winf<-,s6params-method
 ##' @name Winfsetter
 setReplaceMethod(
   f = "Winf",
-  signature = "Parameters",
+  signature = "s6params",
   definition = function(object, value) {
     object@logWinf <- log(value)
     eF <- exp(object@logeta_F)
@@ -193,16 +191,16 @@ setReplaceMethod(
     return (object)
   })
 
-##' @param object \code{Parameters} object 
+##' @param object \code{s6params} object 
 ##' @export
 ##' @docType methods
 ##' @rdname Winf-methods
-setGeneric("getWinf", function(object) standardGeneric("getWinf"))
+setGeneric("Winf", function(object) standardGeneric("Winf"))
 
 ##' @rdname Winf-methods
-##' @aliases Winf,Parameters-method
-setMethod("getWinf", 
-          signature(object = "Parameters"), 
+##' @aliases Winf,s6params-method
+setMethod("Winf", 
+          signature(object = "s6params"), 
           function(object) {
             exp(object@logWinf)
           }
@@ -220,11 +218,11 @@ formatEntry <- function(..., width = 20) {
   format(paste(res, sep = "", collapse = ""), width = width)
 }
 
-setMethod("show", "Parameters",
+setMethod("show", "s6params",
           function(object) {
             width <- min(floor(getOption("width") / 5), 20)
             cat(" ___________________________________\n")
-            cat("|  An object of class 'Parameters'  |\n")
+            cat("|  An object of class 's6params'    |\n")
             cat("|___________________________________|",rep("_", width * 3 - 34), "\n", sep="")
             cat("|", formatEntry("  Winf  = ", exp(object@logWinf), width = width), 
                 "|", formatEntry("  A = ", exp(object@logA), width = width),
@@ -244,47 +242,49 @@ setMethod("show", "Parameters",
           })
 
 
-#' @param x a Parameters object
+#' @param x a s6params object
 #' @param xlim the x limits (x1, x2) of the plot.
 #' @param ... Arguments passed to other methods.
-#' @note Additional arguments are passed to \code{\link{plot.default}} (from plot) and to \code{\link{lines}} (from lines). From all other functions the extra arguments are ignored.
+#' @note Additional arguments are passed to \code{\link{plot.default}} 
+#' (from plot) and to \code{\link{lines}} (from lines). From all other 
+#' functions the extra arguments are ignored.
 #'
 #' @export
-#' @rdname Parameters
-plot.Parameters <- function(x, xlim = c(0.001, 1), ...) {
+#' @rdname s6params
+plot.s6params <- function(x, xlim = c(0.001, 1), ...) {
   p <- getParams(x)
   plot.default(p$w / p$Winf, p$N * (p$w ^ 2), log="xy",
-               main="Biomass with respect to relative weight",
-               xlab="w/Winf", ylab="Biomass",
-               xlim=xlim,
-               type="l", ...)
+               main = "Biomass with respect to relative weight",
+               xlab = "w/Winf", ylab = "Biomass",
+               xlim = xlim,
+               type = "l", ...)
 }
 
 #' @export
-#' @rdname Parameters
-lines.Parameters <- function(x, ...){
+#' @rdname s6params
+lines.s6params <- function(x, ...){
   p <- getParams(x)
   lines(xy.coords(p$w / p$Winf, p$N * (p$w ^ 2)), ...)
 }
 
 ##' @export
-##' @rdname Parameters
-as.list.Parameters <- function(x, ...) {
-  res <- lapply(slotNames("Parameters"), function(nm) {
+##' @rdname s6params
+as.list.s6params <- function(x, ...) {
+  res <- lapply(slotNames("s6params"), function(nm) {
     exp(slot(x, nm))
   })
-  res <- setNames(res, sub(slotNames("Parameters"), pattern = "log", replacement = ""))
+  res <- setNames(res, sub(slotNames("s6params"), pattern = "log", replacement = ""))
   res$M <- slot(x, "M")
   res
 }
 
-##' Difference between two \code{Parameters} objects
+##' Difference between two \code{s6params} objects
 ##' 
-##' @param base \code{Parameters} object. First object
-##' @param comp \code{Parameters} object. Second object
+##' @param base \code{s6params} object. First object
+##' @param comp \code{s6params} object. Second object
 ##' @return TRUE if they are the same. If there are differences, a data.frame is returned
 ##' with the untransformed parameter values of the two objects, the relative difference (base - comp)
-##' and the percent difference 
+##' and the percent difference. 
 ##' @author alko
 ##' @docType methods
 ##' @rdname difference-methods
@@ -294,19 +294,21 @@ setGeneric("difference", function(base, comp) {
 })
 
 ##' @rdname difference-methods
-##' @aliases difference,Parameters,Parameters-method
-setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
-  res <- data.frame(base=numeric(), comp=numeric(),difference=numeric(), percent.difference=numeric(), stringsAsFactors = FALSE)
-  r <- sapply(slotNames("Parameters"), function(n) {
+##' @aliases difference,s6params,s6params-method
+setMethod("difference", c("s6params", "s6params"), function(base, comp) {
+  res <- sapply(slotNames("s6params"), function(n) {
     if (slot(base, n) != slot(comp, n)) {
       val1 <- exp(slot(base, n))
       val2 <- exp(slot(comp, n))
-      res[substr(n, 4, nchar(n)), ] <<- c(val1, val2, val1 - val2, abs((val1 - val2) / (mean(val1, val2))) * 100)
+       c(val1, val2, val1 - val2, abs((val1 - val2) / (mean(val1, val2))) * 100)
     } else {
-      NA
+      c(NA, NA, NA, NA)
     }
   })
-  if(dim(res)[1] == 0) return(TRUE)
+  res <- res[,which(!is.na(res[1,])), drop = FALSE]
+  rownames(res) <- c("base", "comp", "difference", "percent.difference")
+  colnames(res) <- gsub("log", "", colnames(res))
+  if(dim(res)[2] == 0) return(TRUE)
   round(res, 4)
 })
 
@@ -316,7 +318,7 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
 ##' @title plotFit
 ##' @name plotFit-methods
 ##' @aliases plotFit
-##' @param object A \code{Parameters} object
+##' @param object A \code{s6params} object
 ##' @param data Numeric vector or data.frame with columns Weight and Freq.
 ##' @param add Boolean. If TRUE, the plot is added to an existing graphics device.
 ##' @param ... Extra named arguments are passed to the plotting function
@@ -328,18 +330,18 @@ setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
 setGeneric("plotFit", function(object, data, add, ...){ standardGeneric ("plotFit") })
 
 ##' @rdname plotFit-methods
-##' @aliases plotFit,Parameters,numeric,missing-method
-setMethod("plotFit", c("Parameters", "numeric", "missing"),
+##' @aliases plotFit,s6params,numeric,missing-method
+setMethod("plotFit", c("s6params", "numeric", "missing"),
           function(object, data,...) {plotFit(object, data, FALSE,...)})
 
 ##' @rdname plotFit-methods
-##' @aliases plotFit,Parameters,data.frame,missing-method
-setMethod("plotFit", c("Parameters", "data.frame", "missing"),
+##' @aliases plotFit,s6params,data.frame,missing-method
+setMethod("plotFit", c("s6params", "data.frame", "missing"),
           function(object, data,...) {plotFit(object, data, FALSE,...)})
 
 ##' @rdname plotFit-methods
-##' @aliases plotFit,Parameters,numeric,logical-method
-setMethod("plotFit", c("Parameters", "numeric", "logical"),
+##' @aliases plotFit,s6params,numeric,logical-method
+setMethod("plotFit", c("s6params", "numeric", "logical"),
           function(object, data, add,...) {
             p <- getParams(object)
             if(add == FALSE) {
@@ -355,8 +357,8 @@ setMethod("plotFit", c("Parameters", "numeric", "logical"),
           })
 
 ##' @rdname plotFit-methods
-##' @aliases plotFit,Parameters,data.frame,logical-method
-setMethod("plotFit", c("Parameters", "data.frame", "logical"),
+##' @aliases plotFit,s6params,data.frame,logical-method
+setMethod("plotFit", c("s6params", "data.frame", "logical"),
           function(object, data, add, ...) {
             p <- getParams(object)
             if(add == FALSE) {
@@ -379,7 +381,7 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
 
 ##' Plots growth function
 ##'
-##' @param object A \code{Parameters} object
+##' @param object A \code{s6params} object
 ##' @param ... Additional arguments for plot
 ##' @return Invisible \code{NULL}
 ##' @author alko
@@ -387,8 +389,8 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
 ##' @rdname plotGrowthMortality
 ##' @export
 setGeneric("plotGrowth", function(object, ...) {standardGeneric("plotGrowth")})
-##' @aliases plotGrowth,Parameters-methods
-setMethod("plotGrowth", c("Parameters"),
+##' @aliases plotGrowth,s6params-methods
+setMethod("plotGrowth", c("s6params"),
           function(object, ...) {
             p <- getParams(object)
             ylim.min <- max(p$g) / 100
@@ -425,9 +427,9 @@ setMethod("plotGrowth", c("Parameters"),
 ##' @export
 setGeneric("plotMortality", function(object, ...){
   standardGeneric("plotMortality")
-  })
-##' @aliases plotMortality,Parameters-method
-setMethod("plotMortality", c("Parameters"),
+})
+##' @aliases plotMortality,s6params-method
+setMethod("plotMortality", c("s6params"),
           function(object, ...) {
             p <- getParams(object)
             plot(p$w / p$Winf, p$m , type = "n", lwd=2, 
@@ -449,7 +451,7 @@ setMethod("plotMortality", c("Parameters"),
           })
 
 
-##' @param object a \code{Parameters} object.
+##' @param object a \code{s6params} object.
 ##' @param nsim number of individuals in the simulated sample.
 ##' @param seed the seed that is passed to \code{\link{set.seed}}.
 ##' @param binsize numeric, the width of the weight classes in grams.
@@ -459,8 +461,8 @@ setMethod("plotMortality", c("Parameters"),
 ##' @note In \code{simulate}, all zero bins after the last non-zero bin are droped; even if \code{keepZeros} is TRUE.
 ##'
 ##' @export
-##' @rdname Parameters
-simulate.Parameters <- function(object, nsim = 1000, seed = NULL, binsize = 100, 
+##' @rdname s6params
+simulate.s6params <- function(object, nsim = 1000, seed = NULL, binsize = 100, 
                                 keepZeros = TRUE, ndataset = 1, ...) {
   if ( ! is.null(seed)) set.seed(seed)
   p <- getParams(object)
@@ -485,7 +487,7 @@ simulate.Parameters <- function(object, nsim = 1000, seed = NULL, binsize = 100,
 
 ##' @export
 plot.s6Input <- function(x, ...) {
-  plot(x, ...)
+  plot(x$Weight, x$Freq, type = "h", lwd = 5, ...)
 }
 
 ##' @export
