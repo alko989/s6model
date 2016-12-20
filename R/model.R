@@ -80,10 +80,13 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
     cdf <-approxfun(w, cumsum(pdfN * c(delta,0)), yleft=0, yright=1)
   }
   B <- sum((psi_m  * N * w)[-M] * delta)
+  Bexpl <- sum((psi_F  * N * w)[-M] * delta)
   Rrel <- 1 - (Winf^(1-n) * w_egg/(epsilon_r * (1 - epsilon_a) * A * B))## * (w_r/w_egg)^(a-1)
-  
+  Rp <- epsilon_r * (1 - epsilon_a) * A * Winf ^ (n-1) / w_egg * B
   Y <- Fm * Rrel * sum((psi_F * N * w)[-M] * delta)
-  YR <- Fm * sum((psi_F * N * w)[-M] * delta)
+  wF <- which.min(abs(Wfs - w)) ## Find the closest weight to Wfs
+  
+  YR <- Y * 1 / (N[wF] * Rrel * g[wF])# Fm * sum((psi_F * N * w)[-M] * delta)
   
   if(calcBRPs) {
     Fmsy <- optimise(f=getParams, interval=c(0,10), maximum=TRUE, p=p, optim.fmsy=TRUE)$maximum
@@ -148,8 +151,8 @@ simulateData3 <- function(samplesize= 1000, params = parameters(), binsize = 5, 
 ##' @author alko
 ##' @export
 sample2df <- function(sam, binsize, keepZeros=TRUE) {
-  df <- as.data.frame(table(cut(sam, seq(0,max(sam) + binsize, binsize),
-                                labels=seq(binsize/2, max(sam) + binsize/2, binsize) )), stringsAsFactors=FALSE)
+  df <- as.data.frame(table(cut(sam, seq(0,max(sam, na.rm = TRUE) + binsize, binsize),
+                                labels=seq(binsize/2, max(sam, na.rm = TRUE) + binsize/2, binsize) )), stringsAsFactors=FALSE)
   names(df) <- c("Weight","Freq")
   if (! keepZeros) df <- df[df$Freq > 0, ]
   df$Weight <- as.numeric(df$Weight)
@@ -229,56 +232,56 @@ getRandomParameters <-
 getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
   parameter.names <- c("A", "n" ,"eta_m","eta_F", "a" ,"Fm","Winf","epsilon_a", "epsilon_r")
   parameter.value <- c(4.5,0.75 , 0.25  ,  0.05 , 0.35,0.25,  winf ,    0.8    ,     0.1    )
-  getRandomParameters(parameter.names, parameter.value,, Rrel.gt=Rrel.gt, Fmsy.gt=Fmsy.gt)
+  getRandomParameters(parameter.names, parameter.value, Rrel.gt=Rrel.gt, Fmsy.gt=Fmsy.gt)
 }
 
-##' Multicore lapply function with progress bar
-##'
-##' Wrapper around parallel::mclapply function with text progress bar
-##' @param X  a vector (atomic or list) or an expressions vector.  Other
-##' objects (including classed objects) will be coerced by `as.list`.
-##' @param FUN the function to be applied to (`mclapply`) each element of `X` or (`mcmapply`) in parallel to `...`.
-##' @param ... Optional arguments to FUN
-##' @param progressbar Logical. If TRUE a text progress bar is shown.
-##' @return Result from mclapply
-##' @note If mclapply is not available, lapply is used instead.
-##' @author alko
-##' @export
-tmclapply <- function(X, FUN, ..., progressbar=TRUE){
-  aplfun <- if(require(parallel)) mclapply else lapply
-  start <- Sys.time()
-  if(progressbar)
-    pb <- txtProgressBar(min = 0, max = 100, style=3)
-  results <- local({
-    f <- fifo(tempfile(), open="w+b", blocking=TRUE)
-    if (inherits(parallel:::mcfork(), "masterProcess")) {
-      progress <- 0.0
-      while(progress < 1 && !isIncomplete(f)) {
-        msg <- readBin(f, "double")
-        progress <- progress + as.numeric(msg)
-        if(progressbar)
-          setTxtProgressBar(pb, progress * 100)
-        tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
-        cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
-        if( ! progressbar) cat("\r")
-      } 
-      parallel:::mcexit()
-    }
-    res <- aplfun(X, function(x) {
-      rr <- FUN(x)
-      writeBin(1/length(X), f)
-      rr
-    })
-    close(f)
-    if(progressbar) {
-      setTxtProgressBar(pb,100)
-      close(pb)
-    }
-    res
-  })
-  cat(difftime(Sys.time(), start, units="mins"), "mins\n")
-  results
-} 
+# ##' Multicore lapply function with progress bar
+# ##'
+# ##' Wrapper around parallel::mclapply function with text progress bar
+# ##' @param X  a vector (atomic or list) or an expressions vector.  Other
+# ##' objects (including classed objects) will be coerced by `as.list`.
+# ##' @param FUN the function to be applied to (`mclapply`) each element of `X` or (`mcmapply`) in parallel to `...`.
+# ##' @param ... Optional arguments to FUN
+# ##' @param progressbar Logical. If TRUE a text progress bar is shown.
+# ##' @return Result from mclapply
+# ##' @note If mclapply is not available, lapply is used instead.
+# ##' @author alko
+# ##' @export
+# tmclapply <- function(X, FUN, ..., progressbar=TRUE){
+#   aplfun <- if(require(parallel)) mclapply else lapply
+#   start <- Sys.time()
+#   if(progressbar)
+#     pb <- txtProgressBar(min = 0, max = 100, style=3)
+#   results <- local({
+#     f <- fifo(tempfile(), open="w+b", blocking=TRUE)
+#     if (inherits(parallel:::mcfork(), "masterProcess")) {
+#       progress <- 0.0
+#       while(progress < 1 && !isIncomplete(f)) {
+#         msg <- readBin(f, "double")
+#         progress <- progress + as.numeric(msg)
+#         if(progressbar)
+#           setTxtProgressBar(pb, progress * 100)
+#         tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
+#         cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
+#         if( ! progressbar) cat("\r")
+#       } 
+#       parallel:::mcexit()
+#     }
+#     res <- aplfun(X, function(x) {
+#       rr <- FUN(x)
+#       writeBin(1/length(X), f)
+#       rr
+#     })
+#     close(f)
+#     if(progressbar) {
+#       setTxtProgressBar(pb,100)
+#       close(pb)
+#     }
+#     res
+#   })
+#   cat(difftime(Sys.time(), start, units="mins"), "mins\n")
+#   results
+# } 
 
 ##' Calculates the Fmsy reference point
 ##'
@@ -294,11 +297,11 @@ calcFmsy <- function(params=NULL) {
   }
   if( ! is(params,"list"))
     stop("params is of class ", class(params))
-  def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.35, M=1000)
+  def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.27, M=1000, u = 10)
   def <- replace(def, names(params), unlist(params))
   obj <- MakeADFun(def, list(logF = log(0.2)), DLL="calcFmsy")
   obj$env$tracemgc <- FALSE
-  obj$env$silent <- TRUE; newtonOption(trace=0); config(trace.optimize = 0,DLL="calcFmsy")
+  obj$env$silent <- TRUE; newtonOption(obj=obj,trace=0); config(trace.optimize = 0,DLL="calcFmsy")
   opt <- try(do.call("optim", obj))
   res <- try(sdreport(obj)$val)
   if(is(res, "try-error"))
@@ -306,11 +309,9 @@ calcFmsy <- function(params=NULL) {
   names(res) <- NULL
   res
 }
-## simplify2dataframe <- function(dd) {
-##   data.frame(t(simplify2array(dd)))
-## }
 
-##' @title Change the bin size of a weight frequency data.frame
+##' Change the bin size of a weight frequency data.frame
+##' 
 ##' 
 ##' @param df data.frame with colums 'Weight' and 'Freq'
 ##' @param binsize numeric, the bin size in grams
@@ -330,13 +331,20 @@ changeBinsize <- function(df, binsize = 10, keepZeros = TRUE) {
 
 ##' @export
 changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq", verbose = options()$verbose) {
+  if(is(df, "list")) { 
+    return(lapply (df, changeBinsize2, binsize = binsize, keepZeros = keepZeros, 
+                   weight.col = weight.col, freq.col = freq.col, verbose = verbose)) 
+  }
+  if(dim(df)[1] == 0 ) return( structure(data.frame(Weight = numeric(0), Freq = integer(0)), binsize = binsize))
   cuts <- seq(0, max(df[weight.col], na.rm = TRUE) + binsize, binsize)
   labs <- head(cuts + binsize/2, -1)
   res <- data.frame(Weight = cut(df[[weight.col]], breaks = cuts, labels = labs), Freq = df[[freq.col]])
   res <- rbind(res, data.frame(Weight = labs, Freq = 0))
   res <- aggregate(Freq ~ Weight, data = res, FUN = sum )
   res$Weight <- as.numeric(as.character(res$Weight))
-  res$Freq <- round(as.numeric(as.character(res$Freq)), digits = 0)
+  res$Freq <- as.integer(round(as.numeric(as.character(res$Freq)), digits = 0))
+  rl <- rle(res$Freq)
+  res <- head(res, nrow(res) - if(tail(rl$values, 1) == 0) tail(rl$lengths, 1) else 0)
   if (! keepZeros) {
     res <- res[df$Freq > 0, ]
   }
@@ -345,15 +353,40 @@ changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
   res
 }
 
+#' @export
+changeBinsize3 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq", verbose = options()$verbose) {
+  if(is(df, "list")) { 
+    return(lapply (df, changeBinsize2, binsize = binsize, keepZeros = keepZeros, 
+                   weight.col = weight.col, freq.col = freq.col, verbose = verbose)) 
+  }
+  if(dim(df)[1] == 0 ) return( structure(data.frame(Weight = numeric(0), Freq = integer(0)), binsize = binsize))
+  res <- df %>% 
+    group_by_(WeightClass = ~cut(weight.col, breaks = seq(0, max(weight.col) + binsize, by = binsize) )) %>% 
+    summarise_(Freq = ~sum(freq.col)) %>% 
+    mutate_(Weight = ~WeightClass %>% 
+             sapply( . %>% as.character %>% getmid)) %>% 
+    select(Weight, Freq, WeightClass) %>% 
+    `attr<-`("binsize", binsize)
+  if (! keepZeros) {
+    res <- res[df$Freq > 0, ]
+  }
+  if(verbose) cat("Done")
+  res
+}
+
+
 ##' @export
 ##' @title Find newest file in folder matching pattern
 ##' @description Given a folder and a pattern, rerurns the file that was modified latest.
+##'
 ##' @param path character, relative or absolute path
-##' @param patterm an optional \code{\link{regex}}. Only file names which match the regular expression will be returned. Passed to \code{\link{dir}}
-##' @seealso \code{dir}
+##' @param pattern the pattern to search for, used by \code{link{dir}}
+##'
+##' @seealso \code{\link{dir}}
 findLatest <- function(path = ".", pattern = "") {
   files <- dir(path, pattern, ignore.case = TRUE, full.names = TRUE)
-  
+  if(length(files) == 0) return(NULL)
+  if(length(files) == 1) return(files)
   df <- lapply(files, function(f){
     data.frame(fn = f, mtime = file.info(f)$mtime, stringsAsFactors = FALSE)
   })

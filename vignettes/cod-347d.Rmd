@@ -1,0 +1,83 @@
+---
+title: "Using s6model to assess the status of North Sea cod (cod-347d)"
+author: "Alexandros Kokkalis `r Sys.Date()`"
+date: ""#"`r Sys.Date()`"
+output: 
+#  rmarkdown::html_vignette:
+#    fig_caption: yes
+  pdf_document:
+    toc: true
+    highlight: default
+bibliography: bib.bibtex
+vignette: >
+  %\VignetteIndexEntry{Using s6model to assess the status of North Sea cod (cod-347d)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Introduction
+The usage of `s6model` R-package is illustrated using the North Sea cod (_Gadus morhua_) as an example. The status of this data-rich stock is assessed using only fisheries independent information, i.e. size frequency distributions from scientific surveys. Data from the North Sea International Bottom Trawl Survey (NS-IBTS) are downloaded from the [DATRAS](http://datras.ices.dk) database. Further, total yearly landings and the results from the official assessment are also obtained from ICES.
+
+The North Sea cod (_Gadus morhua_) is assessed in this example using only survey data from the NS-IBTS survey. The data can be downloaded from the [DATRAS](http://datras.ices.dk) database. 
+
+## Downloading and pre-processing of the data
+
+The data are downloaded using the `DATRAS` package which can be installed using:
+```{r, eval=FALSE, echo = TRUE}
+install.packages('DATRAS',repos='http://www.rforge.net/',type='source')
+```
+
+The package contains functions to download, read and subset survey data. Shape files for ICES regions can be downloaded from [ICES spatial facility](http://geo.ices.dk/).
+
+```{r, echo = TRUE, eval = FALSE}
+library(DATRAS)
+## Download the survey data for the years 1991 to 2014
+downloadExchange("NS-IBTS", 1991:2014)
+## Read in all data
+nsibts <- readExchangeDir()
+## Select only cod
+nscod <- subset(nsibts, Species == "Gadus morhua")
+```
+
+Select only the relevant areas for the North Sea Baltic cod
+```{r, echo=TRUE, eval = FALSE}
+## Add area information
+nscod <- addSpatialData(nscod, shape = "ices_areas.shp")
+nscod <- subset(nscod, ICES_area %in% c("IIIa", "IVa", "IVb", "IVc", "VIId"))
+```
+
+Then using the `s6model` package we can extract the yearly weight frequencies using the function `getDFYears`. This function extracts the length distributions from an object of class `DATRASraw`, fits the weight length relationship, transforms the length to weight and returns a `list` of `data.frames`, one for each year. The bin size is set to 100 g (`binsize` argument) and the weight-length relationship is fitted using weight and length data in the survey for each year (`estWL` argument).
+```{r, echo = TRUE, eval = FALSE}
+library(s6model)
+nscoddat <- getDfYears(nscod, binsize = 100, estWL = TRUE)
+```
+
+Now the data are in a format that can be used to assess the stock status. The data are provided with the package (saved as `nscoddat`).
+
+## Assessment of the stock
+
+Now the data are in the correct format the assessment can be done using the `makeAssessment` function. It has many arguments and only a subset of them are presented here. There are default values for most of them, so that a preliminary assessment can be done using `makeAssessment(dat)`, where `dat` has the data in the correct format. The results are saved after a successful run of the function so that they can accessed at a later point to make plots and reports.
+
+Since it is an assessment using only survey data, we are using `isSurvey = TRUE` and we make the assumption that all sizes are selected by the gear by setting the relative selectivity parameter ($\eta_S$, argument `eta_S`) of the gear very small. The results are not saved (`fnout = NULL`). The default values for mean and sd of physiological mortality from @Kokkalis2016 are used.
+```{r assessment, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
+library(s6model)
+yrs <- s6model:::getYears(names(nscoddat))
+w <- ices.cod[["cod-347d"]]$Year %in% yrs
+land <- ices.cod[["cod-347d"]]$Landings[w]
+res <- makeAssessment(nscoddat, fnout = NULL, isSurvey = TRUE, eta_S = 1e-3, yield = land, u = 10,
+                      a = 0.22, a.sd = 0.7, nsample = 20, binsize = 10)
+```
+
+
+## Reporting the results
+
+The results of the assessment of $F/F_{msy}$ are plotted using `plot` function. The y-axis is in log-scale and its limits are set.
+```{r plotting, echo = TRUE, eval = TRUE, cache = TRUE, dependson="assessment"}
+par(mar = c(3.1, 3.1, 0.1, 0.1))
+s6model:::plot.s6modelResults(res, ylim = c(1/15,15), log = "y")
+addIces("cod-347d", col = 1)
+plot(res, what = "ssb", mult = 1/1000, ylim = c(0,130), addhline = FALSE)
+addIces("cod-347d", mult = 1/1000, what = "SSB")
+```
+
+

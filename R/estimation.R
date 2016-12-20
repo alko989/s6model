@@ -36,15 +36,15 @@
 #' @export minimizeme
 #' @rdname minimizeme
 minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSurvey=FALSE) {
-    params <- parameters(c(names, fixed.names), c(theta, fixed.vals))  
-    if(is(data, "data.frame")) {
-        return(with(getParams(params,isSurvey),
-                    sum( - data$Freq * log(pdfN.approx(data$Weight)) )))
-    } else if(is(data, "numeric")) {
-        return(with(getParams(params,isSurvey), sum(-log(pdfN.approx(data)))))
-    } else {
-        stop("data appears not to be numeric vector or data.frame")
-    }
+  params <- parameters(c(names, fixed.names), c(theta, fixed.vals))  
+  if(is(data, "data.frame")) {
+    return(with(getParams(params,isSurvey),
+                sum( - data$Freq * log(pdfN.approx(data$Weight)) )))
+  } else if(is(data, "numeric")) {
+    return(with(getParams(params,isSurvey), sum(-log(pdfN.approx(data)))))
+  } else {
+    stop("data appears not to be numeric vector or data.frame")
+  }
 }
 
 
@@ -56,21 +56,22 @@ minimizeme <- function(theta, data, names, fixed.names=c(), fixed.vals=c(), isSu
 #' \code{estimateMultidata} uses both sources
 #' 
 #' 
-#' @param names String vector. The parameters to be estimated.
-#' @param data Numeric vector, or \code{data.frame} with columns Weight and Freq, or \code{list} with a numeric vector named `sample` or a \code{data.frame} named `df`.
+#' @param names string vector, the parameters to be estimated.
+#' @param data numeric vector, or \code{data.frame} with columns Weight and Freq, or \code{list} with a numeric vector named `sample` or a \code{data.frame} named `df`.
 #' Weight of individual fish (vector) or frequencies per weight class \code{data.frame}.
-#' @param start Numeric vector. Initial values of the parameters.
+#' @param start numeric vector, initial values of the parameters.
 #' @param lower The lower bound for the parameter estimation.
 #' @param upper The upper bound for the parameter estimation.
 #' @param fixed.names String vector. Names of constants.
 #' @param fixed.vals Numeric vector. Transformed values of constants.
 #' @param fixed.transformed Logical. If FALSE the constants are not transformed.
-#' @param plotFit Boolean. If TRUE a plot is produced with the fited pdf and the
+#' @param plotFit logical, if TRUE a plot is produced with the fited pdf and the
 #' kernel density estimate of the data.
-#' @param isSurvey Boolean. If TRUE the data are assumed to be from a survey.
-#' @param verbose Boolean. If TRUE the estimated confidence intervals are printed.
+#' @param isSurvey logical, if TRUE the data are assumed to be from a survey.
+#' @param verbose logical, if TRUE the estimated confidence intervals are printed.
+#' @param useTMB logical, if TRUE TMB is used for parameter estimation
 #' @param ... Additional named arguments passed to plotFit
-#' @return A Parameters object, containing the estimated parameters.
+#' @return \code{link{Parameters}} object, containing the estimated parameters.
 #' @note If data is a list containing both sample and df, the \code{data.frame} df will be used.
 #' @author alko
 #' @keywords optimize
@@ -93,11 +94,11 @@ estimateParam <-
     p <- parameters()
 
     if(is(data, "list")) {
-        if("df" %in% names(data)) {
-            data <- data$df
-        } else if ("sample" %in% names(data)) {
-            data <- data$sample
-        } else stop("`data` is a list not containing an element named sample or df.")
+      if("df" %in% names(data)) {
+        data <- data$df
+      } else if ("sample" %in% names(data)) {
+        data <- data$sample
+      } else stop("`data` is a list not containing an element named sample or df.")
     }
 
     start[which(names == "Winf")] <- 
@@ -106,8 +107,8 @@ estimateParam <-
     scales <- sapply(names, function(n) get(paste0("getscale", n))(p))
 
     if( ! fixed.transformed) {
-        fixed.scales <- sapply(fixed.names, function(n) get(paste0("getscale", n))(p))
-        fixed.vals <- log(fixed.vals / fixed.scales)
+      fixed.scales <- sapply(fixed.names, function(n) get(paste0("getscale", n))(p))
+      fixed.vals <- log(fixed.vals / fixed.scales)
     }
     
     useapply <- if(require(parallel)) mclapply else lapply
@@ -121,11 +122,11 @@ estimateParam <-
     
     res <- estim$par
     h <- hessian(minimizeme, estim$par, data=data,
-                           names=names, fixed.names=fixed.names,
-                           fixed.vals=fixed.vals,isSurvey=isSurvey)
+                 names=names, fixed.names=fixed.names,
+                 fixed.vals=fixed.vals,isSurvey=isSurvey)
     s <- jacobian(minimizeme, estim$par, data=data,
-                            names=names, fixed.names=fixed.names,
-                            fixed.vals=fixed.vals,isSurvey=isSurvey)
+                  names=names, fixed.names=fixed.names,
+                  fixed.vals=fixed.vals,isSurvey=isSurvey)
     vcm <- try(solve(h))
     
     ci <- matrix(rep(NA, length(names)*3),ncol=3, dimnames = list(names, c("Estimate","Lower", "Upper")))
@@ -142,17 +143,17 @@ estimateParam <-
     return(structure(p, par=res, hessian=h, jacobian=s, st.er=st.er, ci=ci, 
                      objective=estim$objective, convergence=estim$convergence, 
                      nlminbMessage=estim$message, call=match.call(), version=getVersion()))
-}
+  }
 
 ##' @param surdata Same as data. Survey data.
 ##' @param comdata Same as data. Commercial data.
 ##' @rdname minimizeme
 minimizemeMultidata <- function(theta, surdata, comdata, names, fixed.names=c(), fixed.vals=c())
-  {
-    params <- parameters(c(names, fixed.names), c(theta, fixed.vals))
-    return(with(getParams(params,isSurvey=TRUE), sum(-log(pdfN.approx(surdata)))) +
+{
+  params <- parameters(c(names, fixed.names), c(theta, fixed.vals))
+  return(with(getParams(params,isSurvey=TRUE), sum(-log(pdfN.approx(surdata)))) +
            with(getParams(params,isSurvey=FALSE), sum(-log(pdfN.approx(comdata)))))
-  }
+}
 ##' @param surdata Same as data. Survey data.
 ##' @param comdata Same as data. Commercial data.
 ##' @rdname estimateParam
@@ -184,61 +185,145 @@ estimateMultidata <-
 
 ##' @export
 estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, 
-                         eta_m=0.25, a=0.27, Winf = NULL, sigma=NULL,
-                         sdloga = 0.89, winf.ubound = 2, DLL="s6model", 
-                         verbose=FALSE, map=list(loga=factor(NA), x=factor(NA)), 
-                         random=c(), isSurvey = FALSE, eta_S = 0.01, usePois = TRUE,
-                         totalYield = 0.000001, ...) {
-  if(! require(TMB)) stop("TMB is not installed! Please install and try again.")
+                         eta_m=0.25, a=0.22, Winf = NULL, sigma=NULL, u = 10,
+                         sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
+                         verbose=FALSE, map=list(loga=factor(NA)), 
+                         random=c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
+                         totalYield = NULL, perturbStartingVals = FALSE, ...) {
+  if (is.null(df)) return(NULL)
+  if (! require(TMB)) stop("TMB is not installed! Please install and try again.")
+  isTS <- is(df, "list")
+  if (isTS) {
+    if(is.null(totalYield)) {totalYield <- rep(0.01234567, length(df))}
+    length(totalYield) == length(df) || stop("Please provide the yield for all years")
+    yrs <- names(df)
+    df <- df2matrix(df)
+    nyrs <- ncol(df)
+    DLL <- "s6modelts"
+  } else {
+    if (is.null(totalYield)) {totalYield <- 0.01234567}
+    yrs <- 1
+    nyrs <- 1
+    DLL <- "s6model"
+  }
   tryer <- try({
     binsize <- attr(df,"binsize")
     if(is.null(Winf))  {
-      Winf <- max(df$Weight) + 2 * binsize
+      if(isTS) {
+        Winf <- (nrow(df) + 2) * binsize
+      } else {
+        Winf <- max(df$Weight) + 2 * binsize
+      }
     } else {
       map$logWinf  <- factor(NA)
     }
-    if(is.null(sigma) || is.na(sigma))  {
-      sigma <- if(usePois) sum(df$Freq) else 0.0001
+    if(is.null(eta_S))  {
+      if(isTS) {
+        eta_S <- which(apply(df, 1, function(x) sum(x) != 0))[[1]] * binsize / Winf
+      } else {
+        eta_S <- which(df$Freq != 0)[1] * binsize / Winf
+      }
     } else {
-      map$logSigma  <- factor(NA)
+      map$logeta_S  <- factor(NA)
     }
     if(! isSurvey) {
       map$logeta_S <- factor(NA)
+    }    
+    if(is.null(sigma) || is.na(sigma))  {
+      if(isTS) {
+        sigma <- if(usePois) colSums(df) else rep(0.0001, nyrs)
+      } else {
+        sigma <- if(usePois) sum(df$Freq) else 0.0001
+      }
+    } else {
+      map$logSigma  <- rep(factor(NA), nyrs)
     }
-    data <- list(binsize=binsize, nwc=dim(df)[1], freq=df$Freq, n=n, epsilon_a=epsilon_a,
+    if(is.null(Wfs) || is.na(Wfs))  {
+      if(isTS) {
+        Wfs <- apply(df, 2, function(x) round((which.max(x) + which(x > 0)[1]) / 2) * binsize - binsize / 2)
+      } else {
+        Wfs <- df$Weight[round((which.max(df$Freq) + which(df$Freq > 0)[1]) / 2)] - binsize / 2## min(df$Weight[df$Freq > 0])
+      }
+    } else {
+      map$logWfs  <- rep(factor(NA), nyrs)
+    }
+    if(is.null(u))  {
+      u <- 10
+    } else {
+      map$logu  <- factor(NA)
+    }
+    if(isTS) {
+      freq <- df
+      nwc <- attr(df, "nwc")
+      logFm <- rep(log(0.5), nyrs)
+    } else {
+      freq <- df$Freq
+      nwc <- dim(df)[1]
+      logFm <- log(0.5)
+  }
+    data <- list(binsize=binsize, nwc=nwc, freq=freq, n=n, epsilon_a=epsilon_a,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
-                 sdloga = sdloga, isSurvey = as.integer(isSurvey), usePois = as.integer(usePois),
-                 totalYield = totalYield)
-    pars <- list(loga=log(a), x=0, logFm = log(0.5), logWinf = log(Winf),
-                 logWfs = log(min(df$Weight[df$Freq > 0])), logSigma=log(sigma), logeta_S = log(eta_S))
-    estnames <- names(pars[! names(pars) %in% c(names(map), random)])
-    upper <- rep(Inf, length(estnames))
-    upper[which(estnames == "logWinf")] <- log(Winf * winf.ubound)
-    obj <- MakeADFun(data = data, parameters = pars, DLL = DLL, map=map, random=random, ...)
+                 sdloga = sdloga, isSurvey = as.integer(isSurvey),
+                 usePois = as.integer(usePois), totalYield = totalYield)
+    pars <- list(loga = log(a), logFm = logFm, logWinf = log(Winf),
+                 logWfs = log(Wfs), logSigma = log(sigma),logeta_S = log(eta_S), 
+                 logu = log(u))
+    obj <- MakeADFun(data = data, parameters = pars,  map=map, random=random, DLL = DLL)
+    upper <- rep(Inf, length(obj$par))
+    upper[which(names(obj$par) == "logWinf")] <- log(Winf * winf.ubound)
     obj$env$tracemgc <- verbose
     obj$env$inner.control$trace <- verbose
     obj$env$silent <- ! verbose
     if(! verbose) {
-      newtonOption(trace=0)
+      newtonOption(obj=obj, trace=0)
       config(trace.optimize = 0, DLL=DLL)
     }
     opt <- nlminb(obj$par, obj$fn, obj$gr, upper = upper)
     sdr <- sdreport(obj)
-    nms <- c("Fm","Winf","Wfs", "a", "eta_S")
+    parnms <- c("Fm","Winf","Wfs", "a", "eta_S")
     vals <- sdr$value
-    sds <- setNames(sdr$sd, names(vals))
-    estpars <- parameters(c(nms, "n", "epsilon_a", "epsilon_r", "A", "eta_m"),
-                          as.numeric(c(vals[nms], n, epsilon_a, epsilon_r, A, eta_m)),
-                          transformed=FALSE)
-    Fmsy <- calcFmsy(estpars)
+    nms <- names(vals)
+    sds <- setNames(sdr$sd, nms)
+    estpars <- sapply(seq(nyrs), function(i) {
+      vls <- sapply(parnms, function(x) {
+        match <- vals[grepl(paste0("^", x, "$"), nms)]
+        if(length(match) == 1) match else match[i]
+      })
+      parameters(c(parnms, "n", "epsilon_a", "epsilon_r", "A", "eta_m"),
+                 as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m)),
+                 transformed=FALSE)
+    })
+    Fmsy <- sapply(estpars, calcFmsy)
+    SSBrel <- sapply(estpars, function(x) getParams(x)$B) / 
+              mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$B, estpars, Fmsy, SIMPLIFY = TRUE)
+    Bexplrel <- sapply(estpars, function(x) getParams(x)$Bexpl) / 
+      mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$Bexpl, estpars, Fmsy, SIMPLIFY = TRUE)
+    if(nyrs == 1) {
+      estpars <- estpars[[1]]
+      Fmsy <- Fmsy[[1]]
+    }
     opt$convergence
   }, silent = !verbose)
   if(class(tryer) == "try-error") {
     return(tryer)
   }
-  structure(data.frame(Fm=vals["Fm"], Fm_sd = sds["Fm"], Winf=vals["Winf"], Winf_sd=sds["Winf"],
-                       Fmsy = Fmsy, Wfs = vals["Wfs"], Wfs_sd = sds["Wfs"], FFmsy = vals["Fm"]/Fmsy, 
-                       a = vals["a"], eta_S = vals["eta_S"], sigma = vals["sigma"], R = vals["R"], 
-                       Y = vals["Y"], ssb = vals["ssb"], ssb_sd = sds["ssb"], row.names=NULL),
+  nw <- function(x) grepl(paste0("^", x, "$"), nms)
+  structure(data.frame(Fm=vals[nw("Fm")], Fm_sd = sds[nw("Fm")],
+                       Winf=rep(vals[nw("Winf")], nyrs), Winf_sd=rep(sds[nw("Winf")], nyrs),
+                       Fmsy = Fmsy, FFmsy = vals[nw("Fm")]/Fmsy, 
+                       Wfs = vals[nw("Wfs")], Wfs_sd = sds[nw("Wfs")],
+                       a = rep(vals[nw("a")], nyrs), eta_S = vals[nw("eta_S")],
+                       sigma = vals[nw("sigma")], sigma_sd = sds[nw("sigma")],
+                       u = vals[nw("u")], u_sd = sds[nw("u")],
+                       R = vals[nw("R")], R_sd = sds[nw("R")],
+                       Rrel = vals[nw("Rrel")], Rrel_sd = sds[nw("Rrel")],
+                       Rp = vals[nw("Rp")], Rp_sd = sds[nw("Rp")],
+                       rmax = vals[nw("rmax")], rmax_sd = sds[nw("rmax")],
+                       Y = vals[nw("Y")], Y_sd = sds[nw("Y")],
+                       ssb = vals[nw("ssb")], ssb_sd = sds[nw("ssb")],
+                       Bexpl = vals[nw("Bexpl")], Bexpl_sd = sds[nw("Bexpl")],
+                       ssbrel = SSBrel, Bexplrel = Bexplrel,
+                       row.names=yrs),
             obj=obj, opt=opt, sdr = sdr, estpars=estpars)
 }
+
