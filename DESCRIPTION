@@ -21,5 +21,6 @@ Suggests:
     testthat,
     TMB,
     knitr,
-    rmarkdown
+    rmarkdown,
+    dplyr
 RoxygenNote: 5.0.1
