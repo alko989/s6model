@@ -1,6 +1,6 @@
 ## s6model
 
-Stable version: [![Build Status](https://travis-ci.org/alko989/s6model.svg?branch=poormansts)](https://travis-ci.org/alko989/s6model?branch=poormansts)
+Stable version: [![Build Status](https://travis-ci.org/alko989/s6model.svg?branch=master)](https://travis-ci.org/alko989/s6model?branch=master)
 [![codecov.io](https://codecov.io/github/alko989/s6model/coverage.svg?branch=poormansts)](https://codecov.io/github/alko989/s6model?branch=poormansts)
 
 Development version: [![Build Status](https://travis-ci.org/alko989/s6model.svg?branch=dev)](https://travis-ci.org/alko989/s6model?branch=dev)
@@ -18,7 +18,7 @@ Using [devtools](http://cran.r-project.org/web/packages/devtools/index.html):
 ``` 
 library(devtools)
 ## Stable version
-install_github("alko989/s6model", ref = "poormansts")
+install_github("alko989/s6model")
 ## Development version
 install_github("alko989/s6model", ref = "dev")
 ```
