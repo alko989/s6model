@@ -1,7 +1,7 @@
 ## s6model
 
 Stable version: [![Build Status](https://travis-ci.org/alko989/s6model.svg?branch=master)](https://travis-ci.org/alko989/s6model?branch=master)
-[![codecov.io](https://codecov.io/github/alko989/s6model/coverage.svg?branch=poormansts)](https://codecov.io/github/alko989/s6model?branch=poormansts)
+[![codecov.io](https://codecov.io/github/alko989/s6model/coverage.svg?branch=master)](https://codecov.io/github/alko989/s6model?branch=master)
 
 Development version: [![Build Status](https://travis-ci.org/alko989/s6model.svg?branch=dev)](https://travis-ci.org/alko989/s6model?branch=dev)
 [![codecov.io](https://codecov.io/github/alko989/s6model/coverage.svg?branch=dev)](https://codecov.io/github/alko989/s6model?branch=dev)
