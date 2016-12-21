@@ -107,7 +107,9 @@ s6params <- function(pars = list(), base = new("s6params")) {
     }
   }
   if(mats > 0) {
-    res@logeta_m <- log(vals[mats]) - res@logWinf
+    res@logeta_m <- log(pars[[mats]]) - res@logWinf
+    if(any(nms %in% c("logeta_m", "eta_m"))) 
+      warning("The maturation size is defined both in absolute (matSize) and in relative (eta_m) terms. Only matSize is used.")
   }
   if (wfs > 0) {
     res@logWfs <- if (grepl("^log", nms[wfs])) {
@@ -154,15 +156,14 @@ meanParameters <- function(l, ...) {
   }
   if(is(l, "s6params")) return(l)
   p <- as.list(s6params())
-  do.call(s6params, 
-          list(names = names(p), 
-               vals = sapply(seq(p), function(i) {
-                 allvals <- sapply(l, function(xx) {
-                   if(is.null(xx)) return(NA)
-                   c(as.list(xx)[[i]])  
-                 })
-                 mean(allvals, na.rm = TRUE)
-               }), transformed = FALSE))
+  p$eta_F <- NULL
+  s6params(setNames(sapply(names(p), function(i) {
+    allvals <- sapply(l, function(xx) {
+      if(is.null(xx)) return(NA)
+      c(as.list(xx)[[i]])  
+    })
+    mean(allvals, na.rm = TRUE)
+  }), names(p)))
 }
 
 ##' Takes a \code{s6params} object and changes its asymptotic weight
