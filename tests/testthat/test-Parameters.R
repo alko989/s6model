@@ -23,6 +23,10 @@ test_that("A s6params object is correctly initialized", {
 
     expect_equal(s6params(c(Winf = 23456, eta_F = 1234/23456)),
                  s6params(c(Winf = 23456, Wfs   = 1234)))
+    expect_equal(s6params(c(Winf = 23456, logeta_F = log(0.12345))),
+                 s6params(c(Winf = 23456,    eta_F =     0.12345)))
+    pM <- s6params(c(M = 100))
+    expect_equal(pM@M, 100)
     
     expect_warning(s6params(c(Winf = 1000, Wfs = 1000)))
     expect_warning(s6params(c(Winf = 1000, Wfs = 1001)))
@@ -54,4 +58,23 @@ test_that("Initialization only using Winf sets Wfs/eta_F correctly", {
     p <- s6params(c(Winf = 3000))
     expect_equal(p@logWinf, log(3000))
     expect_equal(p@logWfs, log(3000 * 0.05))
+})
+
+test_that("Maturation size initialization works", {
+  p <- s6params(c(matSize = 1000, Winf = 10000))
+  expect_equal(p@logeta_m, log(1000/10000))
+  expect_warning(p2 <- s6params(c(matSize = 1000, Winf = 10000, eta_m = 0.99)))
+  expect_equal(p, p2)
+})
+
+test_that("Mean parameters works correctly", {
+  a <- c(0.1, 0.2, 0.3, 0.456789)
+  mean_a_true <- mean(a)
+  expect_equal(meanParameters(lapply(a, function(x) s6params(c(a = x))))@loga, log(mean_a_true))
+  Winf <- c(12345, 234567, 345678, 456789)
+  mean_Winf_true <- mean(Winf)
+  expect_equal(meanParameters(lapply(Winf, function(x) s6params(c(Winf = x))))@logWinf, log(mean_Winf_true))
+  p_meanoftwo <- meanParameters(mapply(function(x, y) s6params(c(Winf = x, a = y)), Winf, a))
+  expect_equal(p_meanoftwo@logWinf, log(mean_Winf_true))
+  expect_equal(p_meanoftwo@loga, log(mean_a_true))
 })
