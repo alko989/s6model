@@ -309,7 +309,7 @@ setMethod("difference", c("s6params", "s6params"), function(base, comp) {
   res <- res[,which(!is.na(res[1,])), drop = FALSE]
   rownames(res) <- c("base", "comp", "difference", "percent.difference")
   colnames(res) <- gsub("log", "", colnames(res))
-  if(dim(res)[2] == 0) return(TRUE)
+  if(dim(res)[2] == 0) return(FALSE)
   round(res, 4)
 })
 

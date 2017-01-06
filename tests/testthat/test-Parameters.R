@@ -19,7 +19,7 @@ test_that("A s6params object is correctly initialized", {
     
     p.transformed <- s6params(pars =    c(loga = log(0.11), logA = log(3.91), logWinf = log(2345), logWfs = log(654)))
     p.nottransformed <- s6params(pars = c(a    =     0.11,     A =     3.91,     Winf =     2345,     Wfs =     654))
-    expect_true(difference(p.transformed, p.nottransformed))
+    expect_false(difference(p.transformed, p.nottransformed))
 
     expect_equal(s6params(c(Winf = 23456, eta_F = 1234/23456)),
                  s6params(c(Winf = 23456, Wfs   = 1234)))
@@ -77,4 +77,15 @@ test_that("Mean parameters works correctly", {
   p_meanoftwo <- meanParameters(mapply(function(x, y) s6params(c(Winf = x, a = y)), Winf, a))
   expect_equal(p_meanoftwo@logWinf, log(mean_Winf_true))
   expect_equal(p_meanoftwo@loga, log(mean_a_true))
+  
+  expect_warning(null <- meanParameters(NULL))
+  expect_null(null)
+  
+  expect_equal(meanParameters(s6params(c(a=0.123456))), s6params(c(a=0.123456)))
+  expect_equal(meanParameters(list(s6params(c(a=0.123456)))), s6params(c(a=0.123456)))
+})
+
+test_that("Difference method works correctly", {
+  expect_false(difference(s6params(), s6params()))
+  expect_false(difference(s6params(c(logWinf = log(20000))), s6params(c(Winf=20000))))
 })
