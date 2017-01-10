@@ -27,12 +27,12 @@
 #' @export
 #'
 #' @examples
-estimate <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, 
-                         eta_m=0.25, a=0.22, Winf = NULL, sigma=NULL, u = 10,
-                         sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
-                         verbose = FALSE, map = list(loga = factor(NA)), 
-                         random = c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
-                         totalYield = NULL, ...) {
+estimate <- function(df, n = 0.75, epsilon_a = 0.8, epsilon_r = 0.1, A=4.47, 
+                     eta_m=0.25, a=0.22, Winf = NULL, sigma=NULL, u = 10,
+                     sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
+                     verbose = FALSE, map = list(loga = factor(NA)), 
+                     random = c(), isSurvey = FALSE, eta_S = NULL, 
+                     usePois = TRUE, totalYield = NULL, ...) {
   if (is.null(df)) return(NULL)
   isTS <- is(df, "list")
   if (isTS) {
@@ -41,12 +41,10 @@ estimate <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     yrs <- names(df)
     df <- df2matrix(df)
     nyrs <- ncol(df)
-    DLL <- "s6modelts"
   } else {
     if (is.null(totalYield)) totalYield <- 0.01234567
     yrs <- 1
     nyrs <- 1
-    DLL <- "s6model"
   }
   tryer <- try({
     binsize <- attr(df,"binsize")
@@ -110,7 +108,7 @@ estimate <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     pars <- list(loga = log(a), logFm = logFm, logWinf = log(Winf),
                  logWfs = log(Wfs), logSigma = log(sigma),logeta_S = log(eta_S), 
                  logu = log(u))
-    obj <- MakeADFun(data = data, parameters = pars,  map=map, random=random, DLL = DLL)
+    obj <- MakeADFun(data = data, parameters = pars,  map=map, random=random, DLL = "s6model")
     upper <- rep(Inf, length(obj$par))
     upper[which(names(obj$par) == "logWinf")] <- log(Winf * winf.ubound)
     obj$env$tracemgc <- verbose
@@ -118,7 +116,7 @@ estimate <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     obj$env$silent <- ! verbose
     if(! verbose) {
       newtonOption(obj=obj, trace=0)
-      config(trace.optimize = 0, DLL=DLL)
+      config(trace.optimize = 0, DLL="s6model")
     }
     opt <- nlminb(obj$par, obj$fn, obj$gr, upper = upper)
     sdr <- sdreport(obj)

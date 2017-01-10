@@ -4,7 +4,8 @@ Type objective_function<Type>::operator() ()
 {
   DATA_INTEGER(binsize);
   DATA_INTEGER(nwc);
-  DATA_VECTOR(freq);
+  DATA_MATRIX(freq);
+  int nyrs = freq.transpose().col(1).size();
   DATA_SCALAR(n);
   DATA_SCALAR(epsilon_a);
   DATA_SCALAR(epsilon_r);
@@ -14,71 +15,87 @@ Type objective_function<Type>::operator() ()
   DATA_SCALAR(sdloga);
   DATA_INTEGER(isSurvey);
   DATA_INTEGER(usePois);
-  DATA_SCALAR(totalYield);
+  DATA_VECTOR(totalYield);
   PARAMETER(loga);
-  PARAMETER(logFm);
+  PARAMETER_VECTOR(logFm);
   PARAMETER(logWinf);
-  PARAMETER(logWfs);
-  PARAMETER(logSigma);
+  PARAMETER_VECTOR(logWfs);
+  PARAMETER_VECTOR(logSigma);
   PARAMETER(logeta_S);
   PARAMETER(logu);
   Type u = exp(logu);
-  Type sigma = exp(logSigma);
-  Type Fm = exp(logFm);
+//  PARAMETER(logsdFm);
+//  PARAMETER(logsdWfs);
+  vector<Type> Fm = exp(logFm);
   Type Winf = exp(logWinf);
-  Type Wfs = exp(logWfs);
-  Type a = exp(loga);
+  vector<Type> Wfs = exp(logWfs);
   Type eta_S = exp(logeta_S);
-  vector<Type> Nvec(nwc);
-  vector<Type> Weight(nwc);
-  vector<Type> residuals(nwc);
-  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha, ssb, rmax, R, Rp;
+  vector<Type> sigma = exp(logSigma);
+  matrix<Type> residuals(nwc,nyrs);
+  matrix<Type> Weight(nwc,nyrs);
+  matrix<Type> Nvec(nwc,nyrs);
+  Type a = exp(loga);
+//  Type sdFm = exp(logsdFm);
+//  Type sdWfs = exp(logsdWfs);
+  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha;
+  vector<Type> ssb(nyrs);
+  vector<Type> Bexpl(nyrs);
+  vector<Type> rmax(nyrs);
+  vector<Type> R(nyrs);
+  vector<Type> Rrel(nyrs);
+  vector<Type> Y(nyrs);
+  vector<Type> Rp(nyrs);
   wr = 0.001;
-  cumsum=0.0;
-  nc = 0.0;
-  ssb = 0.0;
-  Type Y = 0.0;
-  for(int j=0; j<nwc; j++) {
-    w = binsize * (j + 0.5);
-    Weight(j) = w;
-    psi_m = 1 / (1 + pow(w / (Winf * eta_m), -10));
-    psi_F = 1 / (1 + pow(w / (Wfs), -u));
-    psi_S = 1 / (1 + pow(w / (Winf * eta_S), -u));
-    g = A * pow(w, n) * (1 - pow(w / Winf, 1 - n) * (epsilon_a + (1 - epsilon_a) * psi_m));
-    m = a * A * pow(w, n-1);
-    cumsum += (m + Fm *  psi_F) / g * binsize; 
-    N = exp(-cumsum) / g;
-    ssb += psi_m  * N * w * binsize;
-    Nvec(j) = N * (isSurvey == 0 ? psi_F : psi_S);
-    Y +=  Fm * N * psi_F * w * binsize;
-    nc += Nvec(j); // * binsize;
-  }
-  Type Rrel = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb);
-  Y = Y * Rrel;
-  rmax = totalYield / Y;
-  ssb = ssb * Rrel * rmax;
-  R = Rrel * rmax;
-  alpha = epsilon_r * (1 - epsilon_a) * A * pow(Winf, n-1) / wr;
-  Rp = alpha * ssb;
-  Type nll=0.0;
-  for(int i=0; i<nwc; i++) {
-    if(usePois) {
-      if(freq(i) > 0) {
-        //        Type mean = Nvec(i) / nc * ff;
-        //        Type size = pow(mean, 2) / (pow(sigma, 2) - mean);
-        //        Type prob = size / (size + mean);
-        //        nll -= dnbinom(freq(i), size, prob, true);
-        nll -= dpois(freq(i), Nvec(i) / nc * sigma, true);
-        residuals(i) = qnorm(ppois(freq(i), Nvec(i) / nc * sigma));
-      }
-    } else {
-      if(freq(i) > 0) {
-        nll -= dnorm(log(freq(i) / freq.sum()), log(Nvec(i) / nc), sigma, true);
-        residuals(i) = freq(i) / freq.sum() - Nvec(i) / nc;
+  Type nll = 0.0;
+  
+  for(int yr = 0; yr < nyrs; ++yr) {
+     cumsum=0.0;
+     nc = 0.0;
+     ssb(yr) = 0.0;
+     Bexpl(yr) = 0.0;
+     Y(yr) = 0.0;
+     Rrel(yr) = 0.0;
+    for(int j=0; j<nwc; j++) {
+      w = Weight(j, yr) = binsize * (j + 0.5);
+      psi_m = 1 / (1 + pow(w / (Winf * eta_m), -10));
+      psi_F = 1 / (1 + pow(w / (Wfs(yr)), -u));
+      psi_S = 1 / (1 + pow(w / (Winf * eta_S), -u));
+      g = A * pow(w, n) * (1 - pow(w / Winf, 1 - n) * (epsilon_a + (1 - epsilon_a) * psi_m));
+      m = a * A * pow(w, n-1);
+      cumsum += (m + Fm(yr) *  psi_F) / g * binsize; 
+      N = exp(-cumsum) / g;
+      ssb(yr) += psi_m  * N * w * binsize;
+      Bexpl(yr) += psi_F  * N * w * binsize;
+      Nvec(j, yr) = N * (isSurvey ? psi_S : psi_F);
+      Y(yr) +=  Fm(yr) * N * psi_F * w * binsize;
+      nc += Nvec(j, yr);
+    }
+    Rrel(yr) = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb(yr));
+    Y(yr) = Y(yr) * Rrel(yr);
+    rmax(yr) = totalYield(yr) / Y(yr);
+    ssb(yr) *=  Rrel(yr) * rmax(yr);
+    Bexpl(yr) *=  Rrel(yr) * rmax(yr);
+    R(yr) = Rrel(yr) * rmax(yr);
+    alpha = epsilon_r * (1 - epsilon_a) * A * pow(Winf, n-1) / wr;
+    Rp(yr)  = alpha * ssb(yr);
+    for(int i=0; i<nwc; i++) {
+      if(usePois) {
+        if(freq(i, yr) > 0) 
+        {
+          nll -= dpois(freq(i, yr), Nvec(i,yr) / nc * sigma(yr), true);
+          residuals(i, yr) = qnorm(ppois(freq(i, yr), Nvec(i,yr) / nc * sigma(yr))); // freq(i, yr) - Nvec(i) / nc * sigma(yr);
+        }
+      } else {
+        nll -= dnorm(freq(i, yr) / freq.sum(), Nvec(i,yr) / nc, sigma(yr), true);
+        residuals(i,yr) = freq(i, yr) / freq.sum() - Nvec(i,yr) / nc;
       }
     }
   }
   nll -= dnorm(loga, meanloga, sdloga, true);
+//  for(int i=0; i<Fm.size()-1; ++i){
+//    nll -= dnorm(Fm(i+1), Fm(i), sdFm, true);
+//    nll -= dnorm(Wfs(i+1), Wfs(i), sdWfs, true);
+//  }
 
   ADREPORT(Fm);
   ADREPORT(Winf);
@@ -88,17 +105,19 @@ Type objective_function<Type>::operator() ()
   ADREPORT(sigma);
   ADREPORT(Y);
   ADREPORT(ssb);
+  ADREPORT(Bexpl);
   ADREPORT(R);
   ADREPORT(u);
   ADREPORT(Rrel);
   ADREPORT(Rp);
   ADREPORT(rmax);
+  // ADREPORT(sdFm);
+  // ADREPORT(sdWfs);
   
   REPORT(residuals);
   REPORT(Weight);
   REPORT(freq);
   REPORT(Nvec);
-
   return nll;
 }
 

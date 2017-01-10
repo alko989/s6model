@@ -1,13 +1,10 @@
-all: calcFmsy.dll s6model.dll s6modelts.dll
+all: calcFmsy.dll s6model.dll
 
 calcFmsy.dll: calcFmsy.cpp
 	Rscript --vanilla -e "TMB::compile('calcFmsy.cpp')"
 
 s6model.dll: s6model.cpp
 	Rscript --vanilla -e "TMB::compile('s6model.cpp')"
-
-s6modelts.dll: s6modelts.cpp
-	Rscript --vanilla -e "TMB::compile('s6modelts.cpp')"
 
 clean:
 	rm -rf *o
