@@ -36,7 +36,7 @@ setClass("s6params",
            logA="numeric",             # Growth parameter
            logn="numeric",             # Exponent of consumtion
            logeta_F="numeric",         # 50% ratainment weight, commercial gear
-           # (related to Winf) **Deprecated**
+                                       # (related to Winf) **Deprecated**
            logeta_m ="numeric",        # Maturation weight (relative to Winf)
            logeta_S="numeric",         # 50% retainment weight, survey gear
            loga ="numeric",            # Natural mortality
@@ -44,7 +44,9 @@ setClass("s6params",
            logepsilon_r ="numeric",    # Efficiancy of reproduction
            logWfs = "numeric",         # Starting weight of fishing
            logu = "numeric",
-           M = "numeric"),
+           M = "numeric",
+           wl.a = "numeric",
+           wl.b = "numeric"),
          prototype(
            logWinf = log(10000),
            logFm = log(0.25),
@@ -58,7 +60,9 @@ setClass("s6params",
            logepsilon_r = log(0.1),
            logWfs = log(500),
            logu=log(10),
-           M = 1000)
+           M = 1000,
+           wl.a = 0.01,
+           wl.b = 3)
          )
 
 #' @param pars named list, parameter values. If the name starts with log the values are expected to be log transformed
@@ -92,7 +96,7 @@ s6params <- function(pars = list(), base = new("s6params")) {
   mats <- wfs <- etaf <- 0
   for(i in seq(along = nms)) {
     nm <- nms[i]
-    if(nm %in% c("M")) {
+    if(nm %in% c("M", "wl.a", "wl.b")) {
       slot(res, nm) <- pars[[i]]
     } else if (nm == "matSize") {
       mats <- i
@@ -237,6 +241,9 @@ setMethod("show", "s6params",
                 "|", formatEntry("  eta_S = ", exp(object@logeta_S), width = width),
                 "|", formatEntry("  Wfs = ", exp(object@logWfs), width = width),
                 "|", formatEntry("  u = ", exp(object@logu), width = width),"|\n",
+                "|", formatEntry("  wl.a = ", exp(object@wl.a), width = width),
+                "|", formatEntry("  wl.b = ", exp(object@wl.b), width = width), 
+                "|", formatEntry("", width = width),"|\n",
                 sep="")
             cat("|", rep("_", width), "|", rep("_", width), "|", rep("_", width), "|\n", sep="")
             cat("\n")
@@ -276,6 +283,8 @@ as.list.s6params <- function(x, ...) {
   })
   res <- setNames(res, sub(slotNames("s6params"), pattern = "log", replacement = ""))
   res$M <- slot(x, "M")
+  res$wl.a <- slot(x, "wl.a")
+  res$wl.b <- slot(x, "wl.b")
   res
 }
 

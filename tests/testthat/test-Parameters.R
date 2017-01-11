@@ -67,6 +67,12 @@ test_that("Maturation size initialization works", {
   expect_equal(p, p2)
 })
 
+test_that("Weight-length relationship parameters are initialised correctly", {
+  p <- s6params(c(wl.a = 0.05, wl.b = 3.2))
+  expect_equal( p@wl.a,  0.05)
+  expect_equal(              p@wl.b,  3.2)
+}) 
+
 test_that("Mean parameters works correctly", {
   a <- c(0.1, 0.2, 0.3, 0.456789)
   mean_a_true <- mean(a)
