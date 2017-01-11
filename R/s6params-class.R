@@ -241,8 +241,8 @@ setMethod("show", "s6params",
                 "|", formatEntry("  eta_S = ", exp(object@logeta_S), width = width),
                 "|", formatEntry("  Wfs = ", exp(object@logWfs), width = width),
                 "|", formatEntry("  u = ", exp(object@logu), width = width),"|\n",
-                "|", formatEntry("  wl.a = ", exp(object@wl.a), width = width),
-                "|", formatEntry("  wl.b = ", exp(object@wl.b), width = width), 
+                "|", formatEntry("  wl.a = ", object@wl.a, width = width),
+                "|", formatEntry("  wl.b = ", object@wl.b, width = width), 
                 "|", formatEntry("", width = width),"|\n",
                 sep="")
             cat("|", rep("_", width), "|", rep("_", width), "|", rep("_", width), "|\n", sep="")
