@@ -225,7 +225,7 @@ calcFmsy <- function(params=NULL) {
 ##' Change the bin size of a weight frequency data.frame
 ##' 
 ##' 
-##' @param df data.frame with colums 'Weight' and 'Freq'
+##' @param df s6input object
 ##' @param binsize numeric, the bin size in grams
 ##' @param weight.col The weight column name
 ##' @param freq.col The frequency column name
@@ -235,15 +235,17 @@ calcFmsy <- function(params=NULL) {
 ##' 
 ##' @examples 
 ##' ## Simulate a data set with bin size equal to 100 gr
-##' dat <- simulate(s6params(), binsize=100)
+##' dat <- simulate(s6params(), binsize = 100)
 ##' 
 ##' ## Change the bin size to 200 gr
 ##' dat <- changeBinsize(dat, binsize = 200)
 ##' @return data.frame with weight frequencies binned with bin size \code{binsize}
 changeBinsize <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq") {
-  if(is(df, "list")) { 
-    return(lapply (df, changeBinsize, binsize = binsize, keepZeros = keepZeros, 
-                   weight.col = weight.col, freq.col = freq.col)) 
+  if(is(df, "s6input")) { 
+    wf <- lapply(df@wf, changeBinsize, binsize = binsize, keepZeros = keepZeros, 
+                 weight.col = weight.col, freq.col = freq.col)
+    df@wf <- wf
+    return(df)
   }
   if(dim(df)[1] == 0 ) return( structure(data.frame(Weight = numeric(0), Freq = integer(0)), binsize = binsize))
   if(requireNamespace("dplyr", quietly = TRUE)) {

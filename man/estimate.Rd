@@ -2,58 +2,54 @@
 % Please edit documentation in R/estimation.R
 \name{estimate}
 \alias{estimate}
-\title{Title}
+\title{Estimate fishing mortality and stock status}
 \usage{
-estimate(df, n = 0.75, epsilon_a = 0.8, epsilon_r = 0.1, A = 4.47,
-  eta_m = 0.25, a = 0.22, Winf = NULL, sigma = NULL, u = 10,
-  sdloga = 0.7, winf.ubound = 2, Wfs = NULL, verbose = FALSE,
-  map = list(loga = factor(NA)), random = c(), isSurvey = FALSE,
-  eta_S = NULL, usePois = TRUE, totalYield = NULL, ...)
+estimate(inp, params = s6params(...), winf.ubound = 2, est.Winf = TRUE,
+  est.Wfs = TRUE, est.etaS = inp$isSurvey, est.a = FALSE,
+  est.sigma = TRUE, est.u = FALSE, verbose = FALSE, random = c(),
+  make.guess = TRUE, usePois = TRUE, sdloga = 0.7, ...)
 }
 \arguments{
-\item{df}{}
+\item{inp}{\code{\link{s6input}} object containing the input data}
 
-\item{n}{}
+\item{params}{\code{\link{s6params}} object containing the model parameters}
 
-\item{epsilon_a}{}
+\item{winf.ubound}{numeric, upper bound for Winf}
 
-\item{epsilon_r}{}
+\item{est.Winf}{logical, the est.* arguments are used to estimate (TRUE) or fix (FALSE) model parameters.}
 
-\item{A}{}
+\item{est.Wfs}{logical}
 
-\item{eta_m}{}
+\item{est.etaS}{logical}
 
-\item{a}{}
+\item{est.a}{logical}
 
-\item{Winf}{}
+\item{est.sigma}{logical}
 
-\item{sigma}{}
+\item{est.u}{logical}
 
-\item{u}{}
+\item{verbose}{logical, if \code{TRUE} print TMB output}
 
-\item{sdloga}{}
+\item{random}{character vector, select which parameters should be random effects}
 
-\item{winf.ubound}{}
+\item{make.guess}{logical, if \code{TRUE} a guess is used to initialise parameter values, otherwise the values from params is used.}
 
-\item{Wfs}{}
+\item{usePois}{logical, if \code{TRUE} (default) the Poisson estimation is used, otherwise a Gaussian estimation is used.}
 
-\item{verbose}{}
+\item{sdloga}{numeric, the standard deviation of the prior of physiological mortality (a).}
 
-\item{map}{}
-
-\item{random}{}
-
-\item{isSurvey}{}
-
-\item{eta_S}{}
-
-\item{usePois}{}
-
-\item{totalYield}{}
-
-\item{...}{}
+\item{...}{named arguments passed to s6params}
+}
+\value{
+A data.frame with all parameter estimates and derived quantities and their uncertainty.
 }
 \description{
-Title
+Function that takes weight frequency distributions and estimates 
+the stock status (F/Fmsy), the asymptotic weight and the 50\% retainmen size.
+}
+\details{
+The upper bound of Winf is set using \code{winf.ubound}. The 
+bound then is equal to the maximum observed weight in the data times 
+\code{winf.ubound}.
 }
 

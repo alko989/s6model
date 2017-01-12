@@ -24,3 +24,15 @@ Suggests:
     rmarkdown,
     dplyr
 RoxygenNote: 5.0.1
+Collate:
+    'assessment.R'
+    'datras.R'
+    'estimation.R'
+    'ices.cod.R'
+    'model.R'
+    'residuals.R'
+    's6params-class.R'
+    's6input-class.R'
+    's6model.R'
+    'version.R'
+    'zzz.R'

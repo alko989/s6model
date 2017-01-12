@@ -15,7 +15,7 @@ Type objective_function<Type>::operator() ()
   DATA_SCALAR(sdloga);
   DATA_INTEGER(isSurvey);
   DATA_INTEGER(usePois);
-  DATA_VECTOR(totalYield);
+  DATA_VECTOR(Catch);
   PARAMETER(loga);
   PARAMETER_VECTOR(logFm);
   PARAMETER(logWinf);
@@ -72,7 +72,7 @@ Type objective_function<Type>::operator() ()
     }
     Rrel(yr) = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb(yr));
     Y(yr) = Y(yr) * Rrel(yr);
-    rmax(yr) = totalYield(yr) / Y(yr);
+    rmax(yr) = Catch(yr) / Y(yr);
     ssb(yr) *=  Rrel(yr) * rmax(yr);
     Bexpl(yr) *=  Rrel(yr) * rmax(yr);
     R(yr) = Rrel(yr) * rmax(yr);

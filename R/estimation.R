@@ -1,116 +1,95 @@
 
-#' Title
+#' Estimate fishing mortality and stock status
+#' 
+#' @description Function that takes weight frequency distributions and estimates 
+#' the stock status (F/Fmsy), the asymptotic weight and the 50\% retainmen size.
 #'
-#' @param df 
-#' @param n 
-#' @param epsilon_a 
-#' @param epsilon_r 
-#' @param A 
-#' @param eta_m 
-#' @param a 
-#' @param Winf 
-#' @param sigma 
-#' @param u 
-#' @param sdloga 
-#' @param winf.ubound 
-#' @param Wfs 
-#' @param verbose 
-#' @param map 
-#' @param random 
-#' @param isSurvey 
-#' @param eta_S 
-#' @param usePois 
-#' @param totalYield 
-#' @param ... 
+#' @param inp \code{\link{s6input}} object containing the input data
+#' @param params \code{\link{s6params}} object containing the model parameters
+#' @param winf.ubound numeric, upper bound for Winf
+#' @param est.Winf logical, the est.* arguments are used to estimate (TRUE) or fix (FALSE) model parameters.
+#' @param est.Wfs logical
+#' @param est.etaS logical
+#' @param est.a logical
+#' @param est.sigma logical
+#' @param est.u logical
+#' @param verbose logical, if \code{TRUE} print TMB output
+#' @param random character vector, select which parameters should be random effects
+#' @param make.guess logical, if \code{TRUE} a guess is used to initialise parameter values, otherwise the values from params is used.
+#' @param usePois logical, if \code{TRUE} (default) the Poisson estimation is used, otherwise a Gaussian estimation is used.
+#' @param sdloga numeric, the standard deviation of the prior of physiological mortality (a).
+#' @param ... named arguments passed to s6params
 #'
-#' @return
+#' @details The upper bound of Winf is set using \code{winf.ubound}. The 
+#' bound then is equal to the maximum observed weight in the data times 
+#' \code{winf.ubound}.
+#'
+#' @return A data.frame with all parameter estimates and derived quantities and their uncertainty.
 #' @export
 #'
-#' @examples
-estimate <- function(df, n = 0.75, epsilon_a = 0.8, epsilon_r = 0.1, A=4.47, 
-                     eta_m=0.25, a=0.22, Winf = NULL, sigma=NULL, u = 10,
-                     sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
-                     verbose = FALSE, map = list(loga = factor(NA)), 
-                     random = c(), isSurvey = FALSE, eta_S = NULL, 
-                     usePois = TRUE, totalYield = NULL, ...) {
-  if (is.null(df)) return(NULL)
-  isTS <- is(df, "list")
-  if (isTS) {
-    if (is.null(totalYield)) totalYield <- rep(0.01234567, length(df))
-    length(totalYield) == length(df) || stop("Please provide the yield for all years")
-    yrs <- names(df)
-    df <- df2matrix(df)
-    nyrs <- ncol(df)
-  } else {
-    if (is.null(totalYield)) totalYield <- 0.01234567
-    yrs <- 1
-    nyrs <- 1
-  }
+estimate <- function(inp, params = s6params(...),
+                     winf.ubound = 2,
+                     est.Winf = TRUE, est.Wfs = TRUE, est.etaS = inp$isSurvey, 
+                     est.a = FALSE, est.sigma = TRUE, est.u = FALSE,
+                     verbose = FALSE, random = c(), make.guess = TRUE,
+                     usePois = TRUE, sdloga = 0.7, ...) {
+  if (is.null(inp)) return(NULL)
+  if ( ! is(inp, "s6input")) stop(sprintf("Function `estimate` expects a `s6input` object, a %s was provided.", is(inp)))
+  dat <- df2matrix(inp@wf)
+  binsize <- attr(dat,"binsize")
+  nyrs <- ncol(dat)
+  map <- list()
+  p <- as.list(params)
   tryer <- try({
-    binsize <- attr(df,"binsize")
-    if(is.null(Winf))  {
-      if(isTS) {
-        Winf <- (nrow(df) + 2) * binsize
-      } else {
-        Winf <- max(df$Weight) + 2 * binsize
+    if (! est.a) {
+      map$loga <- factor(NA)
+    }
+    if (est.Winf) {
+      if (make.guess) {
+        p$Winf <- (nrow(dat) + 2) * binsize
       }
     } else {
       map$logWinf  <- factor(NA)
     }
-    if(is.null(eta_S))  {
-      if(isTS) {
-        eta_S <- which(apply(df, 1, function(x) sum(x) != 0))[[1]] * binsize / Winf
-      } else {
-        eta_S <- which(df$Freq != 0)[1] * binsize / Winf
+    if ((est.etaS) | isSurvey)  {
+      if (make.guess) {
+        p$eta_S <- which(apply(dat, 1, function(x) sum(x) != 0))[[1]] * binsize / p$Winf
       }
     } else {
       map$logeta_S  <- factor(NA)
     }
-    if(! isSurvey) {
-      map$logeta_S <- factor(NA)
-    }    
-    if(is.null(sigma) || is.na(sigma))  {
-      if(isTS) {
-        sigma <- if(usePois) colSums(df) else rep(0.0001, nyrs)
-      } else {
-        sigma <- if(usePois) sum(df$Freq) else 0.0001
-      }
+    if (est.sigma) {
+      sigma <- if(usePois) colSums(dat) else rep(0.0001, nyrs)
     } else {
       map$logSigma  <- rep(factor(NA), nyrs)
     }
-    if(is.null(Wfs) || is.na(Wfs))  {
-      if(isTS) {
-        Wfs <- apply(df, 2, function(x) round((which.max(x) + which(x > 0)[1]) / 2) * binsize - binsize / 2)
-      } else {
-        Wfs <- df$Weight[round((which.max(df$Freq) + which(df$Freq > 0)[1]) / 2)] - binsize / 2## min(df$Weight[df$Freq > 0])
+    if (est.Wfs)  {
+      if (make.guess) {
+        p$Wfs <- apply(dat, 2, function(x) round((which.max(x) + which(x > 0)[1]) / 2) * binsize - binsize / 2)
       }
     } else {
       map$logWfs  <- rep(factor(NA), nyrs)
     }
-    if(is.null(u))  {
-      u <- 10
+    if (est.u)  {
+      if (make.guess) {
+        p$u <- 10
+      }
     } else {
       map$logu  <- factor(NA)
     }
-    if(isTS) {
-      freq <- df
-      nwc <- attr(df, "nwc")
-      logFm <- rep(log(0.5), nyrs)
-    } else {
-      freq <- df$Freq
-      nwc <- dim(df)[1]
-      logFm <- log(0.5)
-  }
-    data <- list(binsize=binsize, nwc=nwc, freq=freq, n=n, epsilon_a=epsilon_a,
-                 epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
+    nwc <- attr(dat, "nwc")
+    logFm <- rep(log(0.5), nyrs)
+    data <- list(binsize=binsize, nwc=nwc, freq=dat, n=p$n, epsilon_a=p$epsilon_a,
+                 epsilon_r=p$epsilon_r, A=p$A, eta_m=p$eta_m, meanloga = log(p$a), 
                  sdloga = sdloga, isSurvey = as.integer(isSurvey),
-                 usePois = as.integer(usePois), totalYield = totalYield)
-    pars <- list(loga = log(a), logFm = logFm, logWinf = log(Winf),
-                 logWfs = log(Wfs), logSigma = log(sigma),logeta_S = log(eta_S), 
-                 logu = log(u))
-    obj <- MakeADFun(data = data, parameters = pars,  map=map, random=random, DLL = "s6model")
+                 usePois = as.integer(usePois), Catch = inp@catch)
+    pars <- list(loga = log(p$a), logFm = logFm, logWinf = log(p$Winf),
+                 logWfs = log(p$Wfs), logSigma = log(sigma), logeta_S = log(p$eta_S), 
+                 logu = log(p$u))
+    obj <- MakeADFun(data = data, parameters = pars, map=map, 
+                     random=random, DLL = "s6model")
     upper <- rep(Inf, length(obj$par))
-    upper[which(names(obj$par) == "logWinf")] <- log(Winf * winf.ubound)
+    upper[names(obj$par) == "logWinf"] <- log(p$Winf * winf.ubound)
     obj$env$tracemgc <- verbose
     obj$env$inner.control$trace <- verbose
     obj$env$silent <- ! verbose
@@ -127,9 +106,11 @@ estimate <- function(df, n = 0.75, epsilon_a = 0.8, epsilon_r = 0.1, A=4.47,
     estpars <- sapply(seq(nyrs), function(i) {
       vls <- sapply(parnms, function(x) {
         match <- vals[grepl(paste0("^", x, "$"), nms)]
-        if(length(match) == 1) match else match[i]
-      })
-      s6params(setNames(as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m)), c(parnms, "n", "epsilon_a", "epsilon_r", "A", "eta_m")))
+        res <- if(length(match) == 1) match else match[i]
+        res
+      }, USE.NAMES = FALSE)
+      ##s6params(setNames(as.numeric(c(vls, p$n, p$epsilon_a, p$epsilon_r, p$A, p$eta_m)), c(parnms, "n", "epsilon_a", "epsilon_r", "A", "eta_m")))
+      s6params(c(vls, p[c("n", "epsilon_a", "epsilon_r", "A", "eta_m")]))
     })
     Fmsy <- sapply(estpars, calcFmsy)
     SSBrel <- sapply(estpars, function(x) getParams(x)$B) / 
@@ -159,7 +140,7 @@ estimate <- function(df, n = 0.75, epsilon_a = 0.8, epsilon_r = 0.1, A=4.47,
                        Y = vals[nw("Y")], Y_sd = sds[nw("Y")],
                        ssb = vals[nw("ssb")], ssb_sd = sds[nw("ssb")],
                        ssbrel = SSBrel,
-                       row.names=yrs),
+                       row.names=inp@years),
             obj=obj, opt=opt, sdr = sdr, estpars=estpars)
 }
 

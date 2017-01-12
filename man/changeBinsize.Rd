@@ -8,7 +8,7 @@ changeBinsize(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight",
   freq.col = "Freq")
 }
 \arguments{
-\item{df}{data.frame with colums 'Weight' and 'Freq'}
+\item{df}{s6input object}
 
 \item{binsize}{numeric, the bin size in grams}
 
@@ -26,7 +26,7 @@ Change the bin size of a weight frequency data.frame
 }
 \examples{
 ## Simulate a data set with bin size equal to 100 gr
-dat <- simulate(s6params(), binsize=100)
+dat <- simulate(s6params(), binsize = 100)
 
 ## Change the bin size to 200 gr
 dat <- changeBinsize(dat, binsize = 200)
