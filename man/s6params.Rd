@@ -68,30 +68,45 @@ mean parameters of a list of \code{s6params} objects.
 
 Calculate the mean value of
 }
+\section{Slots}{
+
+\describe{
+\item{\code{logWinf}}{numeric, asymptotic weight}
+
+\item{\code{logFm}}{numeric, fishing mortality}
+
+\item{\code{logA}}{numeric, growth parameter}
+
+\item{\code{logn}}{numeric, exponent of consumption}
+
+\item{\code{logeta_F}}{numeric, 50\% retention size, relative to asymptotic weight}
+
+\item{\code{logeta_m}}{numeric, 50\% maturation size, relative to asymptotic weight}
+
+\item{\code{logeta_S}}{numeric, 50\% retention size (survey), relative to asymptotic weight}
+
+\item{\code{loga}}{numeric, physiological mortality}
+
+\item{\code{logepsilon_a}}{numeric, allocation to activity}
+
+\item{\code{logepsilon_r}}{numeric, recruitment efficiency}
+
+\item{\code{logWfs}}{numeric, 50\% retention size}
+
+\item{\code{logu}}{numeric, selectivity parameter}
+
+\item{\code{M}}{numeric, number of internal weight classes}
+
+\item{\code{wl.a,}}{numeric, weight lenght relationship multiplier}
+
+\item{\code{wl.b}}{numeric, weight lenght relationship exponent}
+}}
 \note{
 Additional arguments are passed to \code{\link{plot.default}} 
 (from plot) and to \code{\link{lines}} (from lines). From all other 
 functions the extra arguments are ignored.
 
 In \code{simulate}, all zero bins after the last non-zero bin are droped; even if \code{keepZeros} is TRUE.
-}
-\section{Slots}{
-
-\describe{
-  \item{\code{logWinf}:}{Numeric scalar, asymptotic weight}
-  \item{\code{logFm}:}{Numeric scalar, fishing mortality}
-  \item{\code{logA}:}{Numeric scalar, growth parameter}
-  \item{\code{logn}:}{Numeric scalar, exponent of consumption}
-  \item{\code{logeta_F}:}{Numeric scalar, 50\% retention size, relative to asymptotic weight}
-  \item{\code{logeta_m}:}{Numeric scalar, 50\% maturation size, relative to asymptotic weight}
-  \item{\code{logeta_S}:}{Numeric scalar, 50\% retention size (survey), relative to asymptotic weight}
-  \item{\code{loga}:}{Numeric scalar, physiological mortality}
-  \item{\code{logepsilon_a}:}{Numeric scalar, allocation to activity}
-  \item{\code{logepsilon_r}:}{Numeric scalar, recruitment efficiency}
-  \item{\code{logWfs}:}{Numeric scalar, 50\% retention size}
-  \item{\code{logu}:}{Numeric scalar, selectivity parameter, width o}
-  \item{\code{M}:}{Numeric scalar, number of internal weight classes}
-}
 }
 \examples{
 

@@ -6,22 +6,22 @@
 #' data, return a named list of all parameters (\code{as.list}) and get the 
 #' mean parameters of a list of \code{s6params} objects.
 #'
-#' @section Slots:
-#' \describe{
-#'   \item{\code{logWinf}:}{Numeric scalar, asymptotic weight}
-#'   \item{\code{logFm}:}{Numeric scalar, fishing mortality}
-#'   \item{\code{logA}:}{Numeric scalar, growth parameter}
-#'   \item{\code{logn}:}{Numeric scalar, exponent of consumption}
-#'   \item{\code{logeta_F}:}{Numeric scalar, 50\% retention size, relative to asymptotic weight}
-#'   \item{\code{logeta_m}:}{Numeric scalar, 50\% maturation size, relative to asymptotic weight}
-#'   \item{\code{logeta_S}:}{Numeric scalar, 50\% retention size (survey), relative to asymptotic weight}
-#'   \item{\code{loga}:}{Numeric scalar, physiological mortality}
-#'   \item{\code{logepsilon_a}:}{Numeric scalar, allocation to activity}
-#'   \item{\code{logepsilon_r}:}{Numeric scalar, recruitment efficiency}
-#'   \item{\code{logWfs}:}{Numeric scalar, 50\% retention size}
-#'   \item{\code{logu}:}{Numeric scalar, selectivity parameter, width o}
-#'   \item{\code{M}:}{Numeric scalar, number of internal weight classes}
-#' }
+#' @slot logWinf numeric, asymptotic weight
+#' @slot logFm numeric, fishing mortality
+#' @slot logA numeric, growth parameter
+#' @slot logn numeric, exponent of consumption
+#' @slot logeta_F numeric, 50\% retention size, relative to asymptotic weight
+#' @slot logeta_m numeric, 50\% maturation size, relative to asymptotic weight
+#' @slot logeta_S numeric, 50\% retention size (survey), relative to asymptotic weight
+#' @slot loga numeric, physiological mortality
+#' @slot logepsilon_a numeric, allocation to activity
+#' @slot logepsilon_r numeric, recruitment efficiency
+#' @slot logWfs numeric, 50\% retention size
+#' @slot logu numeric, selectivity parameter
+#' @slot M numeric, number of internal weight classes
+#' @slot wl.a, numeric, weight lenght relationship multiplier
+#' @slot wl.b numeric, weight lenght relationship exponent
+#'
 #' @author alko
 #' 
 #' @exportClass s6params
@@ -29,8 +29,7 @@
 #' @aliases s6params-class
 #' @rdname s6params
 #' @export
-setClass("s6params",
-         representation(
+setClass("s6params", slots = c(
            logWinf="numeric",          # Asymptotic weight
            logFm="numeric",            # Fishing mortality
            logA="numeric",             # Growth parameter
@@ -47,7 +46,7 @@ setClass("s6params",
            M = "numeric",
            wl.a = "numeric",
            wl.b = "numeric"),
-         prototype(
+         prototype = prototype(
            logWinf = log(10000),
            logFm = log(0.25),
            logA = log(4.47),
@@ -474,7 +473,8 @@ setMethod("plotMortality", c("s6params"),
 ##' @rdname s6params
 simulate.s6params <- function(object, nsim = 1000, seed = NULL, binsize = 100, 
                                 keepZeros = TRUE, ndataset = 1, ...) {
-  if ( ! is.null(seed)) set.seed(seed)
+  if (is.null(seed)) seed <- as.integer(rnorm(1, mean = 1e5, sd = 1e4))
+  set.seed(seed) 
   p <- getParams(object)
   l <- seq(binsize / 2, p$Winf - binsize / 2, binsize)
   u <- seq(binsize + binsize / 2, p$Winf + binsize / 2, binsize)
@@ -488,11 +488,9 @@ simulate.s6params <- function(object, nsim = 1000, seed = NULL, binsize = 100,
     df <- structure(df, binsize = binsize)
     rl <- rle(df$Freq)
     df <- head(df, nrow(df) - if(tail(rl$values, 1) == 0) tail(rl$lengths, 1) else 0)
-    class(df) <-c("s6input", "data.frame")  
     df
   })
-  if(ndataset == 1) return(res[[1]])
-  res
+  s6input(wf = res, surWF = list(), isSimulated = TRUE, trueParams = object, catch = rep(1, ndataset), years = seq(ndataset))
 }
 
 ##' @export
@@ -504,3 +502,4 @@ plot.s6input <- function(x, ...) {
 hist.s6input <- function(x, ..., main = "", xlab = "Weight") {
   hist(rep(x$Weight, x$Freq), xlab = xlab,  main = main, ...)
 }
+
