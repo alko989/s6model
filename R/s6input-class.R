@@ -13,6 +13,7 @@
 #' @slot catch numeric. 
 #' @slot years numeric. 
 #' @slot stockname chacharacter. 
+#' @slot stockcode character.
 #' @slot speciesname character. 
 #'
 #' @author alko
@@ -23,8 +24,6 @@
 #' @rdname s6input
 #' @include s6params-class.R
 #' @export
-#'
-#' @examples
 s6input <- setClass("s6input",
                     slots = c(
                       wf = "list",
@@ -35,6 +34,7 @@ s6input <- setClass("s6input",
                       catch = "numeric",
                       years = "numeric",
                       stockname = "character",
+                      stockcode = "character",
                       speciesname = "character"
                     ),
                     prototype = c(
@@ -46,6 +46,7 @@ s6input <- setClass("s6input",
                       catch = c(),
                       years = c(),
                       stockname = "generic stock",
+                      stockcode = "-",
                       speciesname = "-"
                     )
 )

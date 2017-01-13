@@ -5,7 +5,7 @@
 \title{Estimate fishing mortality and stock status}
 \usage{
 estimate(inp, params = s6params(...), winf.ubound = 2, est.Winf = TRUE,
-  est.Wfs = TRUE, est.etaS = inp$isSurvey, est.a = FALSE,
+  est.Wfs = TRUE, est.etaS = inp@isSurvey, est.a = FALSE,
   est.sigma = TRUE, est.u = FALSE, verbose = FALSE, random = c(),
   make.guess = TRUE, usePois = TRUE, sdloga = 0.7, ...)
 }

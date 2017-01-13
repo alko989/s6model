@@ -29,13 +29,13 @@
 #'
 estimate <- function(inp, params = s6params(...),
                      winf.ubound = 2,
-                     est.Winf = TRUE, est.Wfs = TRUE, est.etaS = inp$isSurvey, 
+                     est.Winf = TRUE, est.Wfs = TRUE, est.etaS = inp@isSurvey, 
                      est.a = FALSE, est.sigma = TRUE, est.u = FALSE,
                      verbose = FALSE, random = c(), make.guess = TRUE,
                      usePois = TRUE, sdloga = 0.7, ...) {
   if (is.null(inp)) return(NULL)
   if ( ! is(inp, "s6input")) stop(sprintf("Function `estimate` expects a `s6input` object, a %s was provided.", is(inp)))
-  dat <- df2matrix(inp@wf)
+  dat <- df2matrix(if(inp@isSurvey) inp@surWF else inp@wf)
   binsize <- attr(dat,"binsize")
   nyrs <- ncol(dat)
   map <- list()
@@ -51,7 +51,7 @@ estimate <- function(inp, params = s6params(...),
     } else {
       map$logWinf  <- factor(NA)
     }
-    if ((est.etaS) | isSurvey)  {
+    if (est.etaS & inp@isSurvey)  {
       if (make.guess) {
         p$eta_S <- which(apply(dat, 1, function(x) sum(x) != 0))[[1]] * binsize / p$Winf
       }
@@ -81,7 +81,7 @@ estimate <- function(inp, params = s6params(...),
     logFm <- rep(log(0.5), nyrs)
     data <- list(binsize=binsize, nwc=nwc, freq=dat, n=p$n, epsilon_a=p$epsilon_a,
                  epsilon_r=p$epsilon_r, A=p$A, eta_m=p$eta_m, meanloga = log(p$a), 
-                 sdloga = sdloga, isSurvey = as.integer(isSurvey),
+                 sdloga = sdloga, isSurvey = as.integer(inp@isSurvey),
                  usePois = as.integer(usePois), Catch = inp@catch)
     pars <- list(loga = log(p$a), logFm = logFm, logWinf = log(p$Winf),
                  logWfs = log(p$Wfs), logSigma = log(sigma), logeta_S = log(p$eta_S), 

@@ -44,6 +44,8 @@ Plot the weight distribution
 
 \item{\code{stockname}}{chacharacter.}
 
+\item{\code{stockcode}}{character.}
+
 \item{\code{speciesname}}{character.}
 }}
 \examples{

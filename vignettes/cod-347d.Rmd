@@ -58,14 +58,16 @@ Now the data are in a format that can be used to assess the stock status. The da
 
 Now the data are in the correct format the assessment can be done using the `makeAssessment` function. It has many arguments and only a subset of them are presented here. There are default values for most of them, so that a preliminary assessment can be done using `makeAssessment(dat)`, where `dat` has the data in the correct format. The results are saved after a successful run of the function so that they can accessed at a later point to make plots and reports.
 
-Since it is an assessment using only survey data, we are using `isSurvey = TRUE` and we make the assumption that all sizes are selected by the gear by setting the relative selectivity parameter ($\eta_S$, argument `eta_S`) of the gear very small. The results are not saved (`fnout = NULL`). The default values for mean and sd of physiological mortality from @Kokkalis2016 are used.
+Since it is an assessment using only survey data, we are using `isSurvey = TRUE` and we make the assumption that all sizes are selected by the gear by setting the relative selectivity parameter ($\eta_S$, argument `eta_S`) of the gear very small. The results are not saved (`fnout = NULL`). The default values for mean and standard deviaton of physiological mortality from @Kokkalis2016 are used.
 ```{r assessment, echo=TRUE, message=FALSE, warning=FALSE, cache=TRUE}
 library(s6model)
+data("nscoddat"); data("ices.cod")
 yrs <- s6model:::getYears(names(nscoddat))
 w <- ices.cod[["cod-347d"]]$Year %in% yrs
 land <- ices.cod[["cod-347d"]]$Landings[w]
-res <- makeAssessment(nscoddat, fnout = NULL, isSurvey = TRUE, eta_S = 1e-3, yield = land, u = 10,
-                      a = 0.22, a.sd = 0.7, nsample = 20, binsize = 500)
+inp <- s6model:::s6input(wf = list(), surWF = nscoddat, catch = land, isSurvey = TRUE, years = yrs,
+                         stockname = "North Sea cod", speciesname = "Gadus morhua", stockcode = "cod-347d")
+res <- estimate(inp, pars = c(eta_S = 0.001), est.etaS = FALSE)
 ```
 
 
@@ -74,10 +76,11 @@ res <- makeAssessment(nscoddat, fnout = NULL, isSurvey = TRUE, eta_S = 1e-3, yie
 The results of the assessment of $F/F_{msy}$ are plotted using `plot` function. The y-axis is in log-scale and its limits are set.
 ```{r plotting, echo = TRUE, eval = TRUE, cache = TRUE, dependson="assessment"}
 par(mar = c(3.1, 3.1, 0.1, 0.1))
-s6model:::plot.s6modelResults(res, ylim = c(1/15,15), log = "y")
-addIces("cod-347d", col = "lightgrey")
-plot(res, what = "ssb", ylim = c(1, 150), mult = 1000)
-addIces("cod-347d", mult = 1/1000, what = "SSB")
+plot(inp@years, res$FFmsy, ylim = c(1/11,11), log = "y", type = "l", lwd = 3)
+abline(h = 1, lty = 2, lwd = 2)
+addIces("cod-347d", col = "darkgrey", lwd = 3)
+plot(inp@years, res$ssb, type = "l", lwd = 3)
+addIces("cod-347d", what = "SSB", lwd = 3)
 ```
 
 
