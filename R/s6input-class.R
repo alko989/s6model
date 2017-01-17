@@ -23,7 +23,7 @@
 #' @aliases s6input-class
 #' @rdname s6input
 #' @include s6params-class.R
-#' @export
+#' @export s6input
 s6input <- setClass("s6input",
                     slots = c(
                       wf = "list",
@@ -68,3 +68,26 @@ s6input <- setClass("s6input",
 hist.s6input <- function(x, ...) {
   hist(with(x@wf[[1]], rep(Weight, Freq)), main = "", xlab = "Weight", ylab = "Frequency", ...)
 }
+
+#' @rdname s6input
+#' @export
+setMethod('[', signature(x="s6input"), definition=function(x,i){
+  res <- x
+  if(x@isSurvey) {
+    x@surWF <- x@surWF[i]  
+  } else {
+    x@wf <- x@wf[i]
+  }
+  x@catch <- x@catch[i]
+  x@years <- x@years[i]
+  x
+})
+
+#' @rdname s6input
+#' @export
+seq.s6input <- function(x) {
+  seq_along(x@years)
+}
+
+
+
