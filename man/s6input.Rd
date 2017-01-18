@@ -4,6 +4,7 @@
 \name{s6input}
 \alias{[,s6input,ANY,ANY,ANY-method}
 \alias{hist.s6input}
+\alias{length.s6input}
 \alias{s6input}
 \alias{s6input-class}
 \alias{seq.s6input}
@@ -14,6 +15,8 @@
 \S4method{[}{s6input,ANY,ANY,ANY}(x, i)
 
 \method{seq}{s6input}(x)
+
+\method{length}{s6input}(x)
 }
 \arguments{
 \item{x}{a s6input object}

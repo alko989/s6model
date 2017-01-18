@@ -89,5 +89,9 @@ seq.s6input <- function(x) {
   seq_along(x@years)
 }
 
-
+#' @rdname s6input
+#' @export
+length.s6input <- function(x) {
+  length(x@years)
+}
 

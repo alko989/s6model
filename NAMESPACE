@@ -2,6 +2,7 @@
 
 S3method(as.list,s6params)
 S3method(hist,s6input)
+S3method(length,s6input)
 S3method(lines,s6params)
 S3method(plot,s6input)
 S3method(plot,s6modelResults)
