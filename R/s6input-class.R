@@ -23,33 +23,80 @@
 #' @aliases s6input-class
 #' @rdname s6input
 #' @include s6params-class.R
-#' @export s6input
-s6input <- setClass("s6input",
-                    slots = c(
-                      wf = "list",
-                      surWF = "list", ## this not used at the moment
-                      isSimulated = "logical",
-                      trueParams = "s6params",
-                      isSurvey = "logical",
-                      catch = "numeric",
-                      years = "numeric",
-                      stockname = "character",
-                      stockcode = "character",
-                      speciesname = "character"
-                    ),
-                    prototype = c(
-                      comWF = list(),
-                      surWF = list(),
-                      isSimulated = FALSE,
-                      trueParams = s6params(),
-                      isSurvey = FALSE,
-                      catch = c(),
-                      years = c(),
-                      stockname = "generic stock",
-                      stockcode = "-",
-                      speciesname = "-"
-                    )
+#' @export
+setClass("s6input",
+         slots = c(
+           wf = "list",
+           surWF = "list", ## this not used at the moment
+           isSimulated = "logical",
+           trueParams = "s6params",
+           isSurvey = "logical",
+           catch = "numeric",
+           years = "numeric",
+           stockname = "character",
+           stockcode = "character",
+           speciesname = "character"
+         ),
+         prototype = c(
+           wf = list(),
+           surWF = list(),
+           isSimulated = FALSE,
+           trueParams = s6params(),
+           isSurvey = FALSE,
+           catch = c(),
+           years = c(),
+           stockname = "generic stock",
+           stockcode = "-",
+           speciesname = "-"
+         )
 )
+
+
+#' @param wf list of data frames with commercial weight frequencies
+#' @param surWF list of data frames with scientific survey weight frequencies
+#' @param isSimulated logical, are the data simulated?
+#' @param trueParams s6params object, the parameters used in the simulation (is used only if isSimulated)
+#' @param isSurvey logical, if TRUE the surWF is used and wf is ignored and vice versa
+#' @param catch vectors of total catch in tonnes
+#' @param years vector of years
+#' @param stockname character, the stock name, e.g. North Sea cod
+#' @param stockcode character, the stock code, e.g. cod-347d
+#' @param speciesname character, the species latin name, e.g. "Gadus morhua"
+#'
+#' @return A s6input object
+#' @export
+#' @rdname s6input
+#' @include s6params-class.R
+s6input <- function(wf = list(),
+                    surWF = list(),
+                    isSimulated = FALSE,
+                    trueParams = s6params(),
+                    isSurvey = FALSE,
+                    catch = numeric(0),
+                    years = numeric(0),
+                    stockname = "generic stock",
+                    stockcode = "-",
+                    speciesname = "-") {
+  if (isSurvey) {
+    if (length(surWF) != length(catch)) {
+      stop("The catch vector has different length from the weight frequency time series")
+    }
+    if (length(surWF) != length(years)) {
+      stop("The years vector has different length from the weight frequency time series")
+    }
+  } else {
+    if (length(wf) != length(catch)) {
+      stop("The catch vector has different length from the weight frequency time series")
+    }
+    if (length(wf) != length(years)) {
+      stop("The years vector has different length from the weight frequency time series")
+    }
+  }
+  
+  new("s6input", wf = wf, surWF = surWF, isSimulated = isSimulated, 
+      trueParams = trueParams, isSurvey = isSurvey, catch = catch, years = years,
+      stockname = stockname, stockcode = stockcode, speciesname = speciesname)
+}
 
 #' Plot the weight distribution
 #'

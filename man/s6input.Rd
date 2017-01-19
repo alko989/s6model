@@ -10,6 +10,11 @@
 \alias{seq.s6input}
 \title{The s6input class and constructor}
 \usage{
+s6input(wf = list(), surWF = list(), isSimulated = FALSE,
+  trueParams = s6params(), isSurvey = FALSE, catch = numeric(0),
+  years = numeric(0), stockname = "generic stock", stockcode = "-",
+  speciesname = "-")
+
 \method{hist}{s6input}(x, ...)
 
 \S4method{[}{s6input,ANY,ANY,ANY}(x, i)
@@ -19,11 +24,33 @@
 \method{length}{s6input}(x)
 }
 \arguments{
+\item{wf}{list of data frames with commercial weight frequencies}
+
+\item{surWF}{list of data frames with scientific survey weight frequencies}
+
+\item{isSimulated}{logical, are the data simulated?}
+
+\item{trueParams}{s6params object, the parameters used in the simulation (is used only if isSimulated)}
+
+\item{isSurvey}{logical, if TRUE the surWF is used and wf is ignored and vice versa}
+
+\item{catch}{vectors of total catch in tonnes}
+
+\item{years}{vector of years}
+
+\item{stockname}{character, the stock name, e.g. North Sea cod}
+
+\item{stockcode}{character, the stock code, e.g. cod-347d}
+
+\item{speciesname}{character, the species latin name, e.g. "Gadus morhua"}
+
 \item{x}{a s6input object}
 
 \item{...}{additional paramters to \code{\link{hist}}}
 }
 \value{
+A s6input object
+
 Nothing, it is just used for to plot the
 }
 \description{

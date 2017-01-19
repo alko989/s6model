@@ -490,7 +490,8 @@ simulate.s6params <- function(object, nsim = 1000, seed = NULL, binsize = 100,
     df <- head(df, nrow(df) - if(tail(rl$values, 1) == 0) tail(rl$lengths, 1) else 0)
     df
   })
-  s6input(wf = res, surWF = list(), isSimulated = TRUE, trueParams = object, catch = rep(1, ndataset), years = seq(ndataset))
+  s6input(wf = res, surWF = list(), isSimulated = TRUE, trueParams = object, 
+          catch = rep(1, ndataset), ...)
 }
 
 ##' @export
