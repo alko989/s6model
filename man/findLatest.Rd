@@ -17,4 +17,3 @@ Given a folder and a pattern, rerurns the file that was modified latest.
 \seealso{
 \code{\link{dir}}
 }
-

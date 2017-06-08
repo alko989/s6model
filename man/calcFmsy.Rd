@@ -18,4 +18,3 @@ Calculates the Fmsy reference point
 \author{
 alko
 }
-

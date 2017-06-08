@@ -43,4 +43,3 @@ s6model:::fitWL(df, colname.weight = "we", colname.length = "le")
 ## b: 3.128   (sim: 3.123)
 
 }
-

@@ -29,4 +29,3 @@ Plots lines of asessment results, e.g. F, SSB, etc. to existing plots
 \note{
 If no active plot exists produces an error
 }
-

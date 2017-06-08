@@ -15,4 +15,3 @@ list with residuals and the results of the t-test, acf and Shapiro-Wilks test
 \description{
 Make a report about the (quasi-)residuals
 }
-

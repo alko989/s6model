@@ -47,4 +47,3 @@ attributes(nscod)
 \code{\link{addIces}} for adding ICES assessment results to plots
 }
 \keyword{datasets}
-

@@ -31,6 +31,7 @@ Type objective_function<Type>::operator() ()
   vector<Type> Wfs = exp(logWfs);
   Type eta_S = exp(logeta_S);
   vector<Type> sigma = exp(logSigma);
+  vector<Type> mvec(nwc);
   matrix<Type> residuals(nwc,nyrs);
   matrix<Type> Weight(nwc,nyrs);
   matrix<Type> Nvec(nwc,nyrs);
@@ -61,8 +62,9 @@ Type objective_function<Type>::operator() ()
       psi_F = 1 / (1 + pow(w / (Wfs(yr)), -u));
       psi_S = 1 / (1 + pow(w / (Winf * eta_S), -u));
       g = A * pow(w, n) * (1 - pow(w / Winf, 1 - n) * (epsilon_a + (1 - epsilon_a) * psi_m));
-      m = a * A * pow(w, n-1);
+      m = a * A * pow(w, n-1); // exp(-(w / Winf)) + 0.4 * (1 - w / Winf); 
       cumsum += (m + Fm(yr) *  psi_F) / g * binsize; 
+      mvec(j) = m;
       N = exp(-cumsum) / g;
       ssb(yr) += psi_m  * N * w * binsize;
       Bexpl(yr) += psi_F  * N * w * binsize;
@@ -118,6 +120,7 @@ Type objective_function<Type>::operator() ()
   REPORT(Weight);
   REPORT(freq);
   REPORT(Nvec);
+  REPORT(mvec);
   return nll;
 }
 
