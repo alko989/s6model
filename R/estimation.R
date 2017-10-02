@@ -279,7 +279,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
       config(trace.optimize = 0, DLL=DLL)
     }
     opt <- nlminb(obj$par, obj$fn, obj$gr, upper = upper)
-    sdr <- sdreport(obj)
+    sdr <- sdreport(obj, getJointPrecision = FALSE, getReportCovariance = FALSE)
     parnms <- c("Fm","Winf","Wfs", "a", "eta_S")
     vals <- sdr$value
     nms <- names(vals)
