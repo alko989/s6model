@@ -32,4 +32,3 @@ or save it in an RDS file
 \author{
 alko
 }
-

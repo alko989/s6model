@@ -30,4 +30,3 @@ The weight-length relationship has the form $W = aL^b$
 \author{
 alko
 }
-

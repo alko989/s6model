@@ -62,4 +62,3 @@ mtext(paste("Estimated Fm = ", round(est.Fm, 2)), at=est.Fm)
 alko
 }
 \keyword{optimize}
-

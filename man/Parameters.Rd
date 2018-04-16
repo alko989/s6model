@@ -4,11 +4,11 @@
 \name{Parameters}
 \alias{Parameters}
 \alias{Parameters-class}
-\alias{as.list.Parameters}
-\alias{lines.Parameters}
-\alias{meanParameters}
 \alias{parameters}
+\alias{meanParameters}
 \alias{plot.Parameters}
+\alias{lines.Parameters}
+\alias{as.list.Parameters}
 \alias{simulate.Parameters}
 \title{The Parameters class and constructor}
 \usage{
@@ -91,6 +91,7 @@ Additional arguments are passed to \code{\link{plot.default}} (from plot) and to
   \item{\code{scaleu}:}{Numeric scalar.}
 }
 }
+
 \examples{
 
 ## Without any arguments gives a Parameters object with default values
@@ -117,4 +118,3 @@ alko
 alko
 }
 \keyword{constructor}
-

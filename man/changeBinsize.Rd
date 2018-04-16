@@ -26,4 +26,3 @@ dat <- simulateData3(binsize=100)
 ## Change the bin size to 200 gr
 dat <- changeBinsize(dat$df, binsize = 200)
 }
-

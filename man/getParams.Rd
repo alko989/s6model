@@ -41,11 +41,10 @@ corresponding functions like pdf and cdf.
  getParams()
 
 }
-\author{
-alko
-}
 \seealso{
 \code{\link{parameters}}
 }
+\author{
+alko
+}
 \keyword{misc}
-

@@ -2,11 +2,11 @@
 % Please edit documentation in R/assessment.R
 \docType{class}
 \name{s6modelResults}
-\alias{plot.s6modelResults}
-\alias{print.s6modelResults}
-\alias{residuals.s6modelResults}
 \alias{s6modelResults}
 \alias{s6modelResults-class}
+\alias{print.s6modelResults}
+\alias{residuals.s6modelResults}
+\alias{plot.s6modelResults}
 \title{s6modelResults class}
 \usage{
 \method{print}{s6modelResults}(x, ...)
@@ -24,4 +24,3 @@
 \description{
 Class s6modelResults
 }
-
