@@ -118,7 +118,7 @@ getCI <- function (inputData, ests, a.mean, a.sd, same.as = TRUE, nsample, winf.
     }
     Winf <- if(is.null(ests[[i]])) NULL else getWinf(ests[[i]])
     results <- aplfun(as, function(a) {
-      estimate_TMB(inputData[[i]], a = a, Winf = Winf, totalYield = yield[i],
+      estimate_TMB(list(inputData[[i]]), a = a, Winf = Winf, totalYield = yield[i],
                    u = u, ...)
     })
     reps <- results
@@ -214,13 +214,13 @@ df2matrix <- function(df){
 #' }
 #' 
 #' @export
-makeAssessment <- 
-  function(inputData, yield = NULL, a.mean = 0.22, a.sd = 0.7, nsample = 100, 
-           same.as = TRUE, u = 10, sigma = NULL, binsize = NULL, 
-           winf.ubound = 2, equalWinf = TRUE, probs = seq(0, 1, 0.01), 
-           seed = as.integer(rnorm(1, 1000, 100)), dirout = "results",
-           fnout = format(Sys.time(),"results_%Y%m%d_%H%M.RData"), ...) {
+makeAssessment <- function(inputData, yield = NULL, a.mean = 0.22, a.sd = 0.7, nsample = 100, 
+                           same.as = TRUE, u = 10, sigma = NULL, binsize = NULL, 
+                           winf.ubound = 2, equalWinf = TRUE, probs = seq(0, 1, 0.01), 
+                           seed = as.integer(rnorm(1, 1000, 100)), dirout = "results",
+                           fnout = format(Sys.time(),"results_%Y%m%d_%H%M.RData"), ...) {
   set.seed(seed)
+  if(is.null(names(inputData))) names(inputData) = paste0("x", seq_along(inputData)) 
   haveYield <- TRUE
   if(is.null(yield)) {
     yield <- rep(1, length(inputData))
@@ -296,7 +296,6 @@ residuals.s6modelResults <- function(object, ...) {
   rprt$residuals[w]
 }
 
-
 makeShading <- function(x, ylow, yhigh, col = grey(0.8), alpha = 1, ...) {
   xs <- c(x, rev(x))
   ys <- c(ylow, rev(yhigh))
@@ -306,35 +305,35 @@ makeShading <- function(x, ylow, yhigh, col = grey(0.8), alpha = 1, ...) {
   polygon(xs[notna], ys[notna], col = col, border = NA)
 }
 
-addConfidenceShading <- 
-  function(x, y, ..., probs = c(0.025, 0.975), exclude = 0, 
-           what = "FFmsy", grey.intensity = 1.5, col.ci = 1, alpha = 1,
-           addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2) {
-    if(is(y, "s6modelResults")) {
-      r <- attr(y, "Results")
-      w <- sapply(r, function(rr) {
-        if(is(rr, "try-error")) return(rep(NA, 2))
-        sdr <- attr(rr, "sdr")
-        id <- which(names(sdr$value) == ifelse(what == "FFmsy", "Fm", what))
-        c(sdr$value[id] + qnorm(probs) * sdr$sd[id])
-      })
-      if(what == "FFmsy") {
-        w <- sweep(w, 2, y$Fm / y$FFmsy, "/")
-      }
-      makeShading(x, w[1,], w[2, ],  col = col.ci, alpha = alpha)
-    } else if (is(y, "data.frame")){
-      d <- nrow(y) - 1
-      for(i in seq(1 + exclude, d / 2)) {
-        gr <- max(min(1, (1 - i / ((d - (2 * exclude))) / grey.intensity )), 0)
-        makeShading(x, y[i, ], y[d - i, ], col=grey(gr), alpha = alpha)
-      }
-      if(addMedian) {
-        lines(x, y[d/2 + 1, ], col = col.median, lty = lty.median, lwd=lwd.median)
-      }
-    } else {
-      stop("Only data.frame or s6modelResults are accepted as input to addConfidenceShading")
+addConfidenceShading <- function(x, y, ..., probs = c(0.025, 0.975), exclude = 0, 
+                                 what = "FFmsy", col.ci.intensity = 0.1, col.ci = 1, alpha = 1,
+                                 addMedian = FALSE, col.median = "white", lty.median = 2, lwd.median = 2) {
+  if(is(y, "s6modelResults")) {
+    r <- attr(y, "Results")
+    w <- sapply(r, function(rr) {
+      if(is(rr, "try-error")) return(rep(NA, 2))
+      sdr <- attr(rr, "sdr")
+      id <- which(names(sdr$value) == ifelse(what == "FFmsy", "Fm", what))
+      c(sdr$value[id] + qnorm(probs) * sdr$sd[id])
+    })
+    if(what == "FFmsy") {
+      w <- sweep(w, 2, y$Fm / y$FFmsy, "/")
     }
+    makeShading(x, w[1,], w[2, ],  col = col.ci, alpha = alpha)
+  } else if (is(y, "data.frame")){
+    d <- nrow(y) - 1
+    for(i in seq(1 + exclude, d / 2)) {
+      gr <- max(min(1, (1 - i / ((d - (2 * exclude))) * col.ci.intensity )), 0)
+      # makeShading(x, y[i, ], y[d - i, ], col=grey(gr), alpha = alpha)
+      makeShading(x, y[i, ], y[d - i, ], col= col.ci, alpha = 1 - gr )
+    }
+    if(addMedian) {
+      lines(x, y[d/2 + 1, ], col = col.median, lty = lty.median, lwd=lwd.median)
+    }
+  } else {
+    stop("Only data.frame or s6modelResults are accepted as input to addConfidenceShading")  
   }
+}
 
 getYears <- function(x) {
   as.numeric(regmatches(x, regexpr("[0-9]+", x)))
@@ -362,8 +361,8 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
                                 addhline = 1, col.hline = 1, lty.hline = 2,
                                 addMedian = TRUE, col.median = "white", lty.median = 2, lwd.median = 2,
                                 cex.ver = 0.7, version = FALSE, xaxs = "i", yaxs = "i",
-                                ci = c("bootstrap", "estimated", "none"), grey.intensity = 1.5,
-                                exclude = 0, mult = 1, add = FALSE, alpha = 1) {
+                                ci = c("bootstrap", "estimated", "none"), col.ci.intensity = 0.1,
+                                exclude = 0, mult = 1, add = FALSE, alpha = 1, col.ci = 1) {
   ci <- match.arg(ci)
   ys <- x[[what]] / mult
   CI <- attr(x, "CI")
@@ -416,10 +415,10 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
   title(xlab = xlab, ylab=ylab, line=2)
   if(ci == "bootstrap") {
     if( ! is.null(cidf)) {
-      addConfidenceShading(xs, cidf, grey.intensity = grey.intensity, 
+      addConfidenceShading(xs, cidf, col.ci.intensity = col.ci.intensity, 
                            addMedian = addMedian, col.median = col.median, 
                            lty.median = lty.median, lwd.median = lwd.median,
-                           exclude = exclude, alpha = alpha)
+                           exclude = exclude, alpha = alpha, col.ci = col.ci)
     }
   } else if(ci == "estimated") {
     addConfidenceShading(xs, x, what = what)  

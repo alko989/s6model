@@ -16,7 +16,7 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(isSurvey);
   DATA_INTEGER(usePois);
   DATA_VECTOR(totalYield);
-  DATA_INTEGER(selType);
+  DATA_INTEGER(selType);   // selType: 1 = sigmoid, 2 = double normal, 3 = gillnet
   DATA_VECTOR(sel3params);
   PARAMETER(loga);
   PARAMETER_VECTOR(logFm);
@@ -26,12 +26,15 @@ Type objective_function<Type>::operator() ()
   PARAMETER(logeta_S);
   PARAMETER(logu);
   PARAMETER(logsigmaa);
-  Type G1 = sel3params(0);
-  Type G2 = sel3params(1);
-  Type mesh = sel3params(2);
-  Type OP = sel3params(3);
-  Type wla = sel3params(4);
-  Type wlb = sel3params(5);
+  Type G1, G2, mesh, OP, wla, wlb;
+  if(selType == 3) {
+    G1 = sel3params(0);
+    G2 = sel3params(1);
+    mesh = sel3params(2);
+    OP = sel3params(3);
+    wla = sel3params(4);
+    wlb = sel3params(5);  
+  }
   Type sigmaa = exp(logsigmaa);
   Type sigmab = 0.001;
   Type u = exp(logu);
@@ -58,6 +61,8 @@ Type objective_function<Type>::operator() ()
   vector<Type> Rp(nyrs);
   wr = 0.001;
   Type nll = 0.0;
+  
+  // Rcout << "Data read in complete" << std::endl;
   
   for(int yr = 0; yr < nyrs; ++yr) {
     cumsum=0.0;
