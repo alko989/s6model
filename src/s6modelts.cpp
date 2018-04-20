@@ -48,6 +48,7 @@ Type objective_function<Type>::operator() ()
   matrix<Type> residuals(nwc,nyrs);
   matrix<Type> Weight(nwc,nyrs);
   matrix<Type> Nvec(nwc,nyrs);
+  matrix<Type> psiFvec(nwc,nyrs);
   Type a = exp(loga);
   //  Type sdFm = exp(logsdFm);
   //  Type sdWfs = exp(logsdWfs);
@@ -94,6 +95,7 @@ Type objective_function<Type>::operator() ()
       ssb(yr) += psi_m  * N * w * binsize;
       Bexpl(yr) += psi_F  * N * w * binsize;
       Nvec(j, yr) = N * (isSurvey ? psi_S : psi_F);
+      psiFvec(j,yr) = psi_F;
       Y(yr) +=  Fm(yr) * N * psi_F * w * binsize;
       nc += Nvec(j, yr);
     }
@@ -149,6 +151,7 @@ Type objective_function<Type>::operator() ()
   REPORT(Weight);
   REPORT(freq);
   REPORT(Nvec);
+  REPORT(psiFvec)
   return nll;
 }
 
