@@ -301,7 +301,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                  as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m, selType)),
                  transformed=FALSE)
     })
-    Fmsy <- sapply(estpars, calcFmsy)
+    Fmsy <- sapply(estpars, calcFmsy, sel3params = sel3params)
     SSBrel <- sapply(estpars, function(x) getParams(x)$B) / 
       mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$B, estpars, Fmsy, SIMPLIFY = TRUE)
     Bexplrel <- sapply(estpars, function(x) getParams(x)$Bexpl) / 

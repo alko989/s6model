@@ -300,7 +300,7 @@ getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
 ##' @return numeric F that leads to MSY
 ##' @author alko
 ##' @export
-calcFmsy <- function(params=NULL) {
+calcFmsy <- function(params=NULL, sel3params = c(1,1,1,1,1,1)) {
   if(!require(TMB)) stop("TMB package not installed.")
   if(is.null(params)) return (NULL)
   if(is(params, "Parameters")) {
@@ -309,7 +309,7 @@ calcFmsy <- function(params=NULL) {
   if( ! is(params,"list"))
     stop("params is of class ", class(params))
   def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.27, 
-              M=1000, u = 10, selType = 1, sigmab = 0.001, sigmab = 2)
+              M=1000, u = 10, selType = 1, sigmab = 0.001, sigmab = 2, sel3params = sel3params)
   def <- replace(def, names(params), unlist(params))
   obj <- MakeADFun(def, list(logF = log(0.2)), DLL="calcFmsy")
   obj$env$tracemgc <- FALSE

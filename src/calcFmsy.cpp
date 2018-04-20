@@ -15,6 +15,16 @@ Type objective_function<Type>::operator() ()
   DATA_INTEGER(selType);
   DATA_SCALAR(sigmab);
   DATA_SCALAR(sigmaa);
+  DATA_VECTOR(sel3params);
+  Type G1, G2, mesh, OP, wla, wlb;
+  if(selType == 3) {
+    G1 = sel3params(0);
+    G2 = sel3params(1);
+    mesh = sel3params(2);
+    OP = sel3params(3);
+    wla = sel3params(4);
+    wlb = sel3params(5);  
+  }
   PARAMETER(logF);
   Type Fmsy = exp(logF);
   ADREPORT(Fmsy);
@@ -51,7 +61,7 @@ Type objective_function<Type>::operator() ()
         psi_F(i) = exp( - pow( ((ww(i) - Wfs)/ Winf), 2) / (2 * pow(sigmaa, 2)));
       }
     } else if (selType == 3) {
-      psi_F(i) = exp(- pow((pow(ww(i) / 0.006, 1/3.21)*0.58 -3.51) /(2*10.1) - 1.22, 2) / (2 * pow( sigmaa, 2)));
+      psi_F(i) = exp(- pow((pow(ww(i) / wla, 1 / wlb) * G1 + G2) /(2 * mesh) - OP, 2) / (2 * pow( sigmaa, 2)));
     }
     
     m(i) = a * A * pow(ww(i), n - 1) + Fmsy * psi_F(i);

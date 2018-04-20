@@ -4,7 +4,7 @@
 \alias{calcFmsy}
 \title{Calculates the Fmsy reference point}
 \usage{
-calcFmsy(params = NULL)
+calcFmsy(params = NULL, sel3params = c(1, 1, 1, 1, 1, 1))
 }
 \arguments{
 \item{params}{An object of class \code{Parameters}}
