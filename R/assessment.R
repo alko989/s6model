@@ -439,3 +439,31 @@ plot.s6modelResults <- function(x, ..., what = "FFmsy", use.rownames = TRUE,
   }
   box()
 }
+
+#' Plot the selectivity curve(s) from a fitted object
+#'
+#' @param res A fitted s6modelResults object
+#'
+#' @return Invisible NULL
+#' @export
+#'
+#' @examples
+#' set.seed(1234)
+#' wfs <- c(1234, 2345, 4567)
+#' f <- 0.2 + cumsum(rnorm(10, 0, 0.01))
+#' s <- c(rep(wfs[1], 3), rep(wfs[3], 4), rep(wfs[2], 3))
+#' 
+#' dat <- setNames(mapply(function(ff, ss) simulate(parameters(c("Wfs", "Fm"), c(ss, ff), FALSE), binsize = 100), f, s, SIMPLIFY = FALSE),
+#'                 2000:2009)
+#' res <- makeAssessment(dat, fnout = NULL, nsample = 1)
+#' 
+#' plotSelectivity(res)
+#' abline(v = wfs, lty = 2)
+#' mtext(wfs, 3, at = wfs, las = 2)
+plotSelectivity <- function(res) {
+  n <- nrow(res)
+  cols <- colorRampPalette(c(rgb(0,0,0,0.6), rgb(0,0,1,0.6)), alpha = TRUE)(n)
+  with(attr(attr(res, "Results"), "obj")$report(), matplot(Weight, psiFvec, type = "l", col = cols, lwd = 3, ylab = "Selectivity"))
+  legend("bottomright",legend = rownames(res), lty = seq(n), col = cols, lwd = 2, seg.len = 4)
+  invisible(NULL)
+}
