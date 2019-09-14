@@ -16,7 +16,7 @@ Data-poor stock assessment using the s6model
 Using [devtools](http://cran.r-project.org/web/packages/devtools/index.html):
 
 ``` 
-library(devtools)
+library(remotes)
 ## Stable version
 install_github("alko989/s6model")
 ## Development version
