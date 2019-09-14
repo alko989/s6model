@@ -1,4 +1,4 @@
-## s6model
+## Single species, size structured, steady state (s6) fish stock assessment model
 
 Stable version: [![Build Status](https://travis-ci.org/alko989/s6model.svg?branch=master)](https://travis-ci.org/alko989/s6model?branch=master)
 [![codecov.io](https://codecov.io/github/alko989/s6model/coverage.svg?branch=master)](https://codecov.io/github/alko989/s6model?branch=master)
