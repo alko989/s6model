@@ -12,10 +12,13 @@ Data-poor stock assessment using the s6model
 
 
 ### Installation
+`s6` depends on the Template Model Builder ([TMB](https://tmb-project.org))
 
-Using [devtools](http://cran.r-project.org/web/packages/devtools/index.html):
+Using `remotes' package:
 
 ``` 
+## install.packages('remotes')
+install.packages('TMB')
 library(remotes)
 ## Stable version
 install_github("alko989/s6model")
