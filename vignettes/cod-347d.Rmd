@@ -24,7 +24,7 @@ The North Sea cod (_Gadus morhua_) is assessed in this example using only survey
 
 The data are downloaded using the `DATRAS` package which can be installed using:
 ```{r, eval=FALSE, echo = TRUE}
-install.packages('DATRAS',repos='http://www.rforge.net/',type='source')
+devtools::install_github("DTUAqua/DATRAS/DATRAS")
 ```
 
 The package contains functions to download, read and subset survey data. Shape files for ICES regions can be downloaded from [ICES spatial facility](http://geo.ices.dk/).
@@ -32,7 +32,7 @@ The package contains functions to download, read and subset survey data. Shape f
 ```{r, echo = TRUE, eval = FALSE}
 library(DATRAS)
 ## Download the survey data for the years 1991 to 2014
-downloadExchange("NS-IBTS", 1991:2014)
+downloadExchange("NS-IBTS", 2000:2014) # Make sure the directory doesn't have other DATRAS files, else an error occurs
 ## Read in all data
 nsibts <- readExchangeDir()
 ## Select only cod
@@ -42,7 +42,8 @@ nscod <- subset(nsibts, Species == "Gadus morhua")
 Select only the relevant areas for the North Sea Baltic cod
 ```{r, echo=TRUE, eval = FALSE}
 ## Add area information
-nscod <- addSpatialData(nscod, shape = "ices_areas.shp")
+nscod <- addSpatialData(nscod, shape = "C:/Users/berth/Google Drive/PhD/Projects/Project 1/Data/ICES_areas/ICES_Areas_20160601_cut_dense_3857.shp") # addSpatialData needs to be updated.
+
 nscod <- subset(nscod, ICES_area %in% c("IIIa", "IVa", "IVb", "IVc", "VIId"))
 ```
 
