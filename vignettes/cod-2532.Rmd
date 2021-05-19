@@ -20,7 +20,7 @@ The Eastern Baltic cod (_Gadus morhua_) is assessed in this example using only s
 
 The data are downloaded using the `DATRAS` package which can be installed using:
 ```{r, eval=FALSE, echo = TRUE}
-install.packages('DATRAS',repos='http://www.rforge.net/',type='source')
+devtools::install_github("DTUAqua/DATRAS/DATRAS")
 ```
 
 The package contains functions to download, read and subset survey data. Shape files for ICES regions can be downloaded from [ICES spatial facility](http://geo.ices.dk/).
