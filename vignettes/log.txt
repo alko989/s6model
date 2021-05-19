@@ -1,0 +1,150 @@
+*   Trying 217.63.104.7:80...
+* Connected to datras.ices.dk (217.63.104.7) port 80 (#0)
+> POST /Data_products/Download/Download_Data_public.aspx HTTP/1.1
+Host: datras.ices.dk
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.2 (KHTML, like Gecko) Chrome/5.0.342.3 Safari/533.2
+Accept: */*
+Referer: http://datras.ices.dk/Data_products/Download/Download_Data_public.aspx
+Cookie: ASP.NET_SessionId=f2u0siimgshwhunagtq4n5bo
+Content-Length: 5880
+Content-Type: multipart/form-data; boundary=------------------------78a9369e59b4e089
+
+* We are completely uploaded and fine
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Cache-Control: private
+< Content-Type: text/html; charset=utf-8
+< Server: Microsoft-IIS/10.0
+< X-AspNet-Version: 4.0.30319
+< X-Powered-By: ASP.NET
+< Date: Wed, 19 May 2021 12:07:25 GMT
+< Content-Length: 77694
+< 
+* Connection #0 to host datras.ices.dk left intact
+* Found bundle for host datras.ices.dk: 0x256e7c209b0 [serially]
+* Can not multiplex, even if we wanted to!
+* Re-using existing connection! (#0) with host datras.ices.dk
+* Connected to datras.ices.dk (217.63.104.7) port 80 (#0)
+> POST /Data_products/Download/Download_Data_public.aspx HTTP/1.1
+Host: datras.ices.dk
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.2 (KHTML, like Gecko) Chrome/5.0.342.3 Safari/533.2
+Accept: */*
+Referer: http://datras.ices.dk/Data_products/Download/Download_Data_public.aspx
+Cookie: ASP.NET_SessionId=f2u0siimgshwhunagtq4n5bo
+Content-Length: 12444
+Content-Type: multipart/form-data; boundary=------------------------aa96b6638b3aab47
+
+* We are completely uploaded and fine
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Cache-Control: private
+< Content-Type: text/html; charset=utf-8
+< Server: Microsoft-IIS/10.0
+< X-AspNet-Version: 4.0.30319
+< X-Powered-By: ASP.NET
+< Date: Wed, 19 May 2021 12:07:25 GMT
+< Content-Length: 81582
+< 
+* Connection #0 to host datras.ices.dk left intact
+* Found bundle for host datras.ices.dk: 0x256e7c209b0 [serially]
+* Can not multiplex, even if we wanted to!
+* Re-using existing connection! (#0) with host datras.ices.dk
+* Connected to datras.ices.dk (217.63.104.7) port 80 (#0)
+> POST /Data_products/Download/Download_Data_public.aspx HTTP/1.1
+Host: datras.ices.dk
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.2 (KHTML, like Gecko) Chrome/5.0.342.3 Safari/533.2
+Accept: */*
+Referer: http://datras.ices.dk/Data_products/Download/Download_Data_public.aspx
+Cookie: ASP.NET_SessionId=f2u0siimgshwhunagtq4n5bo
+Content-Length: 13430
+Content-Type: multipart/form-data; boundary=------------------------02035021f16a3e03
+
+* We are completely uploaded and fine
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Cache-Control: private
+< Content-Type: text/html; charset=utf-8
+< Server: Microsoft-IIS/10.0
+< X-AspNet-Version: 4.0.30319
+< X-Powered-By: ASP.NET
+< Date: Wed, 19 May 2021 12:07:25 GMT
+< Content-Length: 81988
+< 
+* Connection #0 to host datras.ices.dk left intact
+* Found bundle for host datras.ices.dk: 0x256e7c209b0 [serially]
+* Can not multiplex, even if we wanted to!
+* Re-using existing connection! (#0) with host datras.ices.dk
+* Connected to datras.ices.dk (217.63.104.7) port 80 (#0)
+> POST /Data_products/Download/Download_Data_public.aspx HTTP/1.1
+Host: datras.ices.dk
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.2 (KHTML, like Gecko) Chrome/5.0.342.3 Safari/533.2
+Accept: */*
+Referer: http://datras.ices.dk/Data_products/Download/Download_Data_public.aspx
+Cookie: ASP.NET_SessionId=f2u0siimgshwhunagtq4n5bo
+Content-Length: 13674
+Content-Type: multipart/form-data; boundary=------------------------602c2a3a169e9e1e
+
+* We are completely uploaded and fine
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Cache-Control: private
+< Content-Type: text/html; charset=utf-8
+< Server: Microsoft-IIS/10.0
+< X-AspNet-Version: 4.0.30319
+< X-Powered-By: ASP.NET
+< Date: Wed, 19 May 2021 12:07:25 GMT
+< Content-Length: 81988
+< 
+* Connection #0 to host datras.ices.dk left intact
+* Found bundle for host datras.ices.dk: 0x256e7c209b0 [serially]
+* Can not multiplex, even if we wanted to!
+* Re-using existing connection! (#0) with host datras.ices.dk
+* Connected to datras.ices.dk (217.63.104.7) port 80 (#0)
+> POST /Data_products/Download/Download_Data_public.aspx HTTP/1.1
+Host: datras.ices.dk
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.2 (KHTML, like Gecko) Chrome/5.0.342.3 Safari/533.2
+Accept: */*
+Referer: http://datras.ices.dk/Data_products/Download/Download_Data_public.aspx
+Cookie: ASP.NET_SessionId=f2u0siimgshwhunagtq4n5bo
+Content-Length: 13671
+Content-Type: multipart/form-data; boundary=------------------------52d8499813175d5c
+
+* We are completely uploaded and fine
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 302 Found
+< Cache-Control: private
+< Content-Type: text/html; charset=utf-8
+< Location: /Data_products/Download/Handler.ashx
+< Server: Microsoft-IIS/10.0
+< X-AspNet-Version: 4.0.30319
+< X-Powered-By: ASP.NET
+< Date: Wed, 19 May 2021 12:07:28 GMT
+< Content-Length: 153
+< 
+* Ignoring the response-body
+* Connection #0 to host datras.ices.dk left intact
+* Issue another request to this URL: 'http://datras.ices.dk/Data_products/Download/Handler.ashx'
+* Switch from POST to GET
+* Found bundle for host datras.ices.dk: 0x256e7c209b0 [serially]
+* Can not multiplex, even if we wanted to!
+* Re-using existing connection! (#0) with host datras.ices.dk
+* Connected to datras.ices.dk (217.63.104.7) port 80 (#0)
+> GET /Data_products/Download/Handler.ashx HTTP/1.1
+Host: datras.ices.dk
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.2 (KHTML, like Gecko) Chrome/5.0.342.3 Safari/533.2
+Accept: */*
+Referer: http://datras.ices.dk/Data_products/Download/Download_Data_public.aspx
+Cookie: ASP.NET_SessionId=f2u0siimgshwhunagtq4n5bo
+
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Cache-Control: private
+< Transfer-Encoding: chunked
+< Content-Type: application/zip
+< Server: Microsoft-IIS/10.0
+< X-AspNet-Version: 4.0.30319
+< content-disposition: attachment; filename=Exchange Data_2021-05-19 14_07_25.zip
+< X-Powered-By: ASP.NET
+< Date: Wed, 19 May 2021 12:07:30 GMT
+< 
+* Connection #0 to host datras.ices.dk left intact
