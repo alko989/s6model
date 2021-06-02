@@ -37,11 +37,11 @@ downloadExchange("NS-IBTS", 2000:2014) # Make sure the directory doesn't have ot
 nsibts <- readExchangeDir()
 ## Select only cod
 nscod <- subset(nsibts, Species == "Gadus morhua")
+
 ```
 
 Select only the relevant areas for the North Sea Baltic cod
 ```{r, echo=TRUE, eval = FALSE}
-
 addSpatialData <- function(d,shape,select=NULL,...){
   require(maptools) # Here you define packages
   if(is.character(shape)){
@@ -85,15 +85,6 @@ d = nscod
 
 ## Add area information
 nscod <- addSpatialData(nscod, shape = "C:/Users/berth/Google Drive/PhD/Projects/Project 1/Data/ICES_areas/ICES_Areas_20160601_cut_dense_3857.shp", select = NULL) # addSpatialData needs to be updated.
-
-
-
-
-
-
-
-
-
 
 
 nscod <- subset(nscod, ICES_area %in% c("IIIa", "IVa", "IVb", "IVc", "VIId"))

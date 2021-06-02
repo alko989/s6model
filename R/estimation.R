@@ -189,7 +189,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                          sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
                          verbose=FALSE, map=list(loga=factor(NA)), 
                          random=c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
-                         totalYield = NULL, perturbStartingVals = FALSE, ...) {
+                         totalYield = NULL, perturbStartingVals = FALSE, Fm = NULL, ...) {
   if (is.null(df)) return(NULL)
   if (! require(TMB)) stop("TMB is not installed! Please install and try again.")
   isTS <- is(df, "list")
@@ -255,11 +255,21 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     if(isTS) {
       freq <- df
       nwc <- attr(df, "nwc")
-      logFm <- rep(log(0.5), nyrs)
+      if(!is.null(Fm)){
+        map$logFm  <- factor(NA)
+        logFm <- rep(log(Fm),nyrs)
+      } else {
+        logFm <- rep(log(0.5), nyrs)
+      }
     } else {
       freq <- df$Freq
       nwc <- dim(df)[1]
-      logFm <- log(0.5)
+      if(!is.null(Fm)){
+        map$logFm  <- factor(NA)
+        logFm <- log(Fm)
+      } else {
+        logFm <- log(0.5)
+      }
   }
     data <- list(binsize=binsize, nwc=nwc, freq=freq, n=n, epsilon_a=epsilon_a,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
