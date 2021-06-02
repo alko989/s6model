@@ -80,6 +80,7 @@ addSpatialData <- function(d,shape,select=NULL,...){
   d
 }
 
+# Remove absolute connection to PC
 shape = "C:/Users/berth/Google Drive/PhD/Projects/Project 1/Data/ICES_areas/ICES_Areas_20160601_cut_dense_3857.shp"
 d = nscod
 
