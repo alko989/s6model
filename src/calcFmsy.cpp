@@ -40,7 +40,7 @@ Type objective_function<Type>::operator() ()
     delta(i) = ww(i) - ww(i-1);
     psi_m(i) = 1 / (1 + pow(ww(i)/(eta_m * Winf),-10));
     psi_F(i) = 1 / (1 + pow(ww(i)/(Wfs),-u));
-    m(i) = a * A * pow(ww(i), n - 1) + Fmsy * psi_F(i);
+    m(i) = a * A * pow(ww(i), n - 1) + Fmsy * psi_F(i); // exp(-(ww(i)/Winf)) + 0.4 * (1 - ww(i) / Winf) + Fmsy * psi_F(i);
     g(i) = A * pow(ww(i),n) * (1 - pow(ww(i)/Winf, 1-n) * (epsilon_a + (1-epsilon_a)*psi_m(i)));
     cumsum += (m(i-1))/g(i-1) * delta(i);
     N(i)=exp(-cumsum)/g(i);

@@ -13,4 +13,3 @@ Kokkalis, A., Nielsen, A., Thygesen U. H. and K. H. Andersen. (In review) Reliab
 
 Andersen, K. H., & Beyer, J. E. (2013). Size structure, not metabolic scaling rules, determines fisheries reference points. Fish and Fisheries. doi:10.1111/faf.12042
 }
-

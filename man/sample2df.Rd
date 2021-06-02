@@ -22,4 +22,3 @@ Takes a vector containing individual catch weights and returns a data.frame with
 \author{
 alko
 }
-

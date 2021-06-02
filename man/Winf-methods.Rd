@@ -2,13 +2,13 @@
 % Please edit documentation in R/Parameters-class.R
 \docType{methods}
 \name{Winf<-}
-\alias{Winf,Parameters-method}
 \alias{Winf<-}
-\alias{Winf<-,Parameters-method}
-\alias{Winf<--methods,}
 \alias{Winfsetter}
+\alias{Winf<--methods,}
+\alias{Winf<-,Parameters-method}
 \alias{getWinf}
 \alias{getWinf,Parameters-method}
+\alias{Winf,Parameters-method}
 \title{Takes a Parameters object and changes its asymptotic weight}
 \usage{
 Winf(object) <- value
@@ -34,4 +34,3 @@ The asymptotic weight is changed, along with the relative and absolute sizes of 
 \author{
 alko
 }
-

@@ -26,4 +26,3 @@ Difference between two \code{Parameters} objects
 \author{
 alko
 }
-

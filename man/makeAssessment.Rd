@@ -63,4 +63,3 @@ Makes assessment of a fish stock given weight frequency data for several years
 \item{sigma paramter} for more information see the cited paper.
 }
 }
-

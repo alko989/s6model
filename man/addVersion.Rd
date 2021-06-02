@@ -37,11 +37,10 @@ hist(simulateData3()$sample)
 addVersion()
 
 }
-\author{
-alko
-}
 \seealso{
 "Color specification" in the documentation of \code{\link{par}}
 }
+\author{
+alko
+}
 \keyword{aplot}
-

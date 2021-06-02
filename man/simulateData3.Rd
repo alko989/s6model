@@ -35,4 +35,3 @@ Simulate a data set of individual catch weight or
 \author{
 alko
 }
-

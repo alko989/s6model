@@ -2,12 +2,12 @@
 % Please edit documentation in R/Parameters-class.R
 \docType{methods}
 \name{plotFit-methods}
+\alias{plotFit-methods}
 \alias{plotFit}
-\alias{plotFit,Parameters,data.frame,logical-method}
+\alias{plotFit,Parameters,numeric,missing-method}
 \alias{plotFit,Parameters,data.frame,missing-method}
 \alias{plotFit,Parameters,numeric,logical-method}
-\alias{plotFit,Parameters,numeric,missing-method}
-\alias{plotFit-methods}
+\alias{plotFit,Parameters,data.frame,logical-method}
 \title{plotFit}
 \usage{
 plotFit(object, data, add, ...)
@@ -35,4 +35,3 @@ invisible \code{NULL}
 \description{
 Visualizing fit of s6model
 }
-

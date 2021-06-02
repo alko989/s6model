@@ -31,4 +31,3 @@ For selected years get yearly weight frequencies from DATRAS object
 \author{
 alko
 }
-
