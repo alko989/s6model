@@ -32,62 +32,16 @@ The package contains functions to download, read and subset survey data. Shape f
 ```{r, echo = TRUE, eval = FALSE}
 library(DATRAS)
 ## Download the survey data for the years 1991 to 2014
-downloadExchange("NS-IBTS", 2000:2014) # Make sure the directory doesn't have other DATRAS files, else an error occurs
+downloadExchange("NS-IBTS", 1991:2014)
 ## Read in all data
 nsibts <- readExchangeDir()
 ## Select only cod
 nscod <- subset(nsibts, Species == "Gadus morhua")
-
 ```
 
 Select only the relevant areas for the North Sea Baltic cod
 ```{r, echo=TRUE, eval = FALSE}
-addSpatialData <- function(d,shape,select=NULL,...){
-  require(maptools) # Here you define packages
-  if(is.character(shape)){
-    if(file.exists(shape)){
-      # shape <- sf::st_read(shape) # Function deprecated
-      # 
-      shape <- rgdal::readOGR(shape)
-    }
-  }
-  i <- complete.cases(d[[2]][c("lon","lat")]) # Check where there are complete lon and lat cases
-  tmp <- d[[2]][i,,drop=FALSE]
-  coordinates(tmp) <- ~lon+lat # use those coordinates 
- 
-  # Set all in same format
-  CRS.new <-  proj4string(shape) 
-  
-  proj4string(tmp) <- CRS.new 
-  proj4string(shape) <- CRS.new
-  
-  xtra <- over(tmp, shape)
-  
-  if(any(!i)){
-    warning(paste(sum(!i),"incomplete lon/lat pairs will get NA as spatial data."))
-    j <- 1:nrow(d[[2]])
-    j[i] <- 1:sum(i)
-    j[!i] <- NA
-    xtra <- xtra[j,,drop=FALSE]
-  }  
-  if(!is.null(select))xtra <- xtra[select]
-  nm <- names(xtra)
-  if(length(intnm <- intersect(names(d[[2]]),nm))){
-    print(intnm)
-    stop("Some selected names from shapefile are already in DATRASraw")
-  }
-  d[[2]] <- cbind(d[[2]],xtra)
-  d
-}
-
-# Remove absolute connection to PC
-shape = "C:/Users/berth/Google Drive/PhD/Projects/Project 1/Data/ICES_areas/ICES_Areas_20160601_cut_dense_3857.shp"
-d = nscod
-
-## Add area information
-nscod <- addSpatialData(nscod, shape = "C:/Users/berth/Google Drive/PhD/Projects/Project 1/Data/ICES_areas/ICES_Areas_20160601_cut_dense_3857.shp", select = NULL) # addSpatialData needs to be updated.
-
-
+nscod <- addSpatialData(nscod, shape = 'ices_areas.shp')
 nscod <- subset(nscod, ICES_area %in% c("IIIa", "IVa", "IVb", "IVc", "VIId"))
 ```
 
