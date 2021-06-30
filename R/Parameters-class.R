@@ -456,7 +456,7 @@ setMethod("plotGrowth", c("Parameters"),
             mtext(side=4, at=ylim.min * 2, text="% mature individuals", line=1.2, col="grey28")
             pow <- 1:3
             ticksat <- as.vector(sapply(pow, function(p) (2:10)*10^p))
-            axis(2, 10^pow, tcl=0.5, labels=NA)
+            axis(2, 10^pow, tcl=0.5)
             mtext(10^pow, 2, 0.5, at=10^pow)
             axis(2, ticksat, labels=NA, tcl=0.25, lwd=0, lwd.ticks=1)
             title(ylab="Growth rate (g/y)", line=1.4)
