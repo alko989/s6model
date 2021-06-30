@@ -22,10 +22,10 @@ plotResiduals <- function(rr) {
   plot(exp[w], obs[w],pch = 20, cex = 0.7, ylab = "Observed count", xlab = "Expected count")
   mx <- max(obs[w], exp[w]) * 1.1
   lower.quantile <- function(x)qpois(.025,x)
-  plot(lower.quantile,0,mx,add=TRUE,col="grey",n=1e4)
+  plot(lower.quantile,0,mx,add=TRUE,col="grey28",n=1e4)
   upper.quantile <- function(x)qpois(.975,x)
-  plot(upper.quantile,0,mx,add=TRUE,col="grey",n=1e4)
-  abline(0,1, col = "grey")
+  plot(upper.quantile,0,mx,add=TRUE,col="grey28",n=1e4)
+  abline(0,1, col = "grey28")
   perc.in <- round(sum(exp[w] >= lower.quantile(obs[w]) & exp[w] <= upper.quantile(obs[w])) / length(w) * 100, 2)
   
   # Pseudo residuals for poisson (see Zuchinni book)
