@@ -420,8 +420,8 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
               lines(p$w, p$pdfN.approx(p$w), col="grey28", ...)
             }
             points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
-                    cex=3, col="grey28") #pch=".",
-            lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
+                   pch=16, cex=1, col="#7E6148B2") #
+            # lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
             ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
             lines(p$w, p$pdfN.approx(p$w), lwd = 2, ...) #col="blue", 
             legend("topright", NULL, c("Fitted Probability Density Function (PDF)"),
@@ -450,16 +450,16 @@ setMethod("plotGrowth", c("Parameters"),
             plot(p$w / p$Winf, p$g, type="n", 
                  xlab="",  log="xy", ylab="",
                  xlim=c(0.01, 1), ylim=c( ylim.min- ylim.min*0.01, ylim.max + ylim.max*0.6), yaxt="n",xaxt="n", ...)
-            # Plot the selectivitycurve as a polygon. 
+            # Plot the selectivity curve as a polygon. 
             polygon(c(p$w/p$Winf, 1 ), c(p$psi_m, 0) * ylim.min * 100 + ylim.min, border="lightgrey",col="lightgrey") #ylim.min * 3 + ylim.min
             title(xlab=expression(w/W[infinity]))
             lines(p$w / p$Winf, p$g, lwd=3)
             # Plot eta_m (maybe include Wfs here?)
             abline(v=p$eta_m, lty=2, lwd=1.5)
             #  Plot selectivity axis
-            axis(4, at=c(ylim.min, ylim.max + ylim.max*0.6), labels=NA, col.axis="grey28")
+            axis(4, at=c(ylim.min, ylim.max + ylim.max*0.6), labels=NA, col.axis="#7E6148B2")
             mtext(c(0,100),at=c(ylim.min,  ylim.max), side=4, line=0.5) # ylim.min * 4  + ylim.max*0.6
-            mtext(side=4, text="% mature individuals", line=1.2, col="grey28") # at=ylim.min * 2
+            mtext(side=4, text="% mature individuals", line=1.2, col="#7E6148B2") # at=ylim.min * 2
             # Create logarithmic x axis
             pow <- 1:3
             ticksat <- as.vector(sapply(pow, function(p) (2:10)*10^p))
@@ -493,7 +493,8 @@ setMethod("plotMortality", c("Parameters"),
                  xlab = "",  log = "x", ylab = "",xaxt = "n", yaxt = "n", ... )
             title(xlab=expression(w/W[infinity]))
             title(ylab=expression(Mortality~(y^{-1})), line = 1.4)
-            lines(p$w / p$Winf, p$psi_F * p$Fm, lwd = 3, lty = "dotted")
+            # Plot fishing mortality
+            lines(p$w / p$Winf, p$psi_F * p$Fm, lwd = 3, lty = "dotted", col="#7E6148B2")
             lines(p$w / p$Winf, p$m - p$psi_F * p$Fm, lty = 2, lwd = 3)
             lines(p$w / p$Winf, p$m, lty = 1, lwd = 3)
             pow <- -2:0
@@ -504,6 +505,10 @@ setMethod("plotMortality", c("Parameters"),
             ys <- round(seq(0, coords[4], length.out = 4), 2)
             axis(2, labels = NA, at = ys, tcl = 0.5)
             mtext(ys, side=2, line = 0.5, at = ys)
+            # Include legend
+            legend("topright", NULL, c("Natural mortality","Fishing mortality"),
+                   lty=1, lwd=2, seg.len=5, bty = "n") #, "Data kernel density" ,"red" col=c("blue"),
+            
             invisible(NULL)
           })
 
