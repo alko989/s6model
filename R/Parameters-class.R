@@ -395,12 +395,12 @@ setMethod("plotFit", c("Parameters", "numeric", "logical"),
           function(object, data, add,...) {
             p <- getParams(object)
             if(add == FALSE) {
-              plot(p$w, p$pdfN.approx(p$w), type="l", col="blue",
-                   main="Fitted pdf and histogram of the simulated data",
+              plot(p$w, p$pdfN.approx(p$w), type="l", 
+                   # main="Fitted pdf and histogram of the simulated data",col="blue",
                    xlab="Weight (g)",
                    ylab="Probability")
             } else {
-              lines(p$w, p$pdfN.approx(p$w), col="blue", ...)
+              lines(p$w, p$pdfN.approx(p$w), col="grey28", ...)
             }
             hist(data, freq=FALSE, add=TRUE, breaks="FD")
             invisible(NULL)
@@ -413,19 +413,19 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
             p <- getParams(object)
             if(add == FALSE) {
               plot(p$w, p$pdfN.approx(p$w), type="l",
-                   main="Fitted pdf and histogram of the simulated data",
+                   # main="Fitted pdf and histogram of the simulated data",
                    xlab="Weight (g)",
                    ylab="Probability")
             } else {
-              lines(p$w, p$pdfN.approx(p$w), col="blue", ...)
+              lines(p$w, p$pdfN.approx(p$w), col="grey28", ...)
             }
             points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
-                   pch=".", cex=3)
+                    cex=3, col="grey28") #pch=".",
             lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
             ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
-            lines(p$w, p$pdfN.approx(p$w), col="blue", lwd = 2, ...)
-            legend("topright", NULL, c("fitted PDF", "Data kernel density"), col=c("blue","red"),
-                   lty=1, lwd=2, seg.len=5)
+            lines(p$w, p$pdfN.approx(p$w), lwd = 2, ...) #col="blue", 
+            legend("topright", NULL, c("Fitted Probability Density Function (PDF)"),
+                   lty=1, lwd=2, seg.len=5, bty = "n") #, "Data kernel density" ,"red" col=c("blue"),
             invisible(NULL)
           })
 
@@ -443,20 +443,27 @@ setGeneric("plotGrowth", function(object, ...) {standardGeneric("plotGrowth")})
 setMethod("plotGrowth", c("Parameters"),
           function(object, ...) {
             p <- getParams(object)
+            # Set y axis from 1 to 100
             ylim.min <- max(p$g) / 100
             ylim.max <- max(p$g)
+            #  plot the growth function. x limits are 0.1 to 1, y limits are a little extended
             plot(p$w / p$Winf, p$g, type="n", 
                  xlab="",  log="xy", ylab="",
                  xlim=c(0.01, 1), ylim=c( ylim.min- ylim.min*0.01, ylim.max + ylim.max*0.6), yaxt="n",xaxt="n", ...)
-            polygon(c(p$w/p$Winf, 1 ), c(p$psi_m, 0) * ylim.min * 3 + ylim.min, border="lightgrey",col="lightgrey")
+            # Plot the selectivitycurve as a polygon. 
+            polygon(c(p$w/p$Winf, 1 ), c(p$psi_m, 0) * ylim.min * 100 + ylim.min, border="lightgrey",col="lightgrey") #ylim.min * 3 + ylim.min
+            title(xlab=expression(w/W[infinity]))
             lines(p$w / p$Winf, p$g, lwd=3)
+            # Plot eta_m (maybe include Wfs here?)
             abline(v=p$eta_m, lty=2, lwd=1.5)
-            axis(4, at=c(ylim.min, ylim.min * 4), labels=NA, col.axis="grey28")
-            mtext(c(0,100),at=c(ylim.min, ylim.min * 4), side=4, line=0.5)
-            mtext(side=4, at=ylim.min * 2, text="% mature individuals", line=1.2, col="grey28")
+            #  Plot selectivity axis
+            axis(4, at=c(ylim.min, ylim.max + ylim.max*0.6), labels=NA, col.axis="grey28")
+            mtext(c(0,100),at=c(ylim.min,  ylim.max), side=4, line=0.5) # ylim.min * 4  + ylim.max*0.6
+            mtext(side=4, text="% mature individuals", line=1.2, col="grey28") # at=ylim.min * 2
+            # Create logarithmic x axis
             pow <- 1:3
             ticksat <- as.vector(sapply(pow, function(p) (2:10)*10^p))
-            axis(2, 10^pow, tcl=0.5)
+            axis(2, 10^pow, tcl=0.5, labels = NA)
             mtext(10^pow, 2, 0.5, at=10^pow)
             axis(2, ticksat, labels=NA, tcl=0.25, lwd=0, lwd.ticks=1)
             title(ylab="Growth rate (g/y)", line=1.4)
@@ -464,6 +471,8 @@ setMethod("plotGrowth", c("Parameters"),
             ticksat <- as.vector(sapply(pow, function(p) (2:10)*10^p))
             axis(1, 10^pow, tcl=0.5, labels=NA)
             axis(1, ticksat, labels=NA, tcl=0.25, lwd=0, lwd.ticks=1)
+            # Include legend with lines and relevant growth parameters
+            
             invisible(NULL)
           })
 
