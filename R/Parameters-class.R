@@ -420,11 +420,11 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
               lines(p$w, p$pdfN.approx(p$w), col="grey28", ...)
             }
             points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
-                   pch=16, cex=1, col="#7E6148B2") #
+                   pch=16,cex=1, col="#7E6148B2")
             # lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
             ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
             lines(p$w, p$pdfN.approx(p$w), lwd = 2, ...) #col="blue", 
-            legend("topright", NULL, c("Fitted Probability Density Function (PDF)"),
+            legend("topright", NULL, c("Fitted Probability Density Function (PDF) TEST"),
                    lty=1, lwd=2, seg.len=5, bty = "n") #, "Data kernel density" ,"red" col=c("blue"),
             invisible(NULL)
           })
