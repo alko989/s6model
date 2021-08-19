@@ -28,7 +28,7 @@ getVersion <- function(pkg=packageName()) {
 #' @examples
 #' 
 #' hist(simulateData3()$sample)
-#' addVersion()
+#' ## addVersion()
 #' 
 #' @export
 addVersion <- function(v = NULL, cex=0.5, col="#12345655", lengthSHA = 6, description = NULL) {
