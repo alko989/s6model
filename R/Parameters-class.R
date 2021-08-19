@@ -413,19 +413,19 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
             p <- getParams(object)
             if(add == FALSE) {
               plot(p$w, p$pdfN.approx(p$w), type="l",
-                   # main="Fitted pdf and histogram of the simulated data",
+                   main="Fitted pdf and histogram of the simulated data",
                    xlab="Weight (g)",
                    ylab="Probability")
             } else {
-              lines(p$w, p$pdfN.approx(p$w), col="grey28", ...)
+              lines(p$w, p$pdfN.approx(p$w), col="#7E6148B2", ...)
             }
             points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
                    pch=16,cex=1, col="#7E6148B2")
             # lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
             ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
-            lines(p$w, p$pdfN.approx(p$w), lwd = 2, ...) #col="blue", 
+            lines(p$w, p$pdfN.approx(p$w),  lwd = 2, ...) #,col="blue"
             legend("topright", NULL, c("Fitted Probability Density Function (PDF) TEST"),
-                   lty=1, lwd=2, seg.len=5, bty = "n") #, "Data kernel density" ,"red" col=c("blue"),
+                   lty=1, lwd=2, seg.len=5, bty = "n") # , "Data kernel density"col=c("blue","red"), 
             invisible(NULL)
           })
 
@@ -451,15 +451,15 @@ setMethod("plotGrowth", c("Parameters"),
                  xlab="",  log="xy", ylab="",
                  xlim=c(0.01, 1), ylim=c( ylim.min- ylim.min*0.01, ylim.max + ylim.max*0.6), yaxt="n",xaxt="n", ...)
             # Plot the selectivity curve as a polygon. 
-            polygon(c(p$w/p$Winf, 1 ), c(p$psi_m, 0) * ylim.min * 100 + ylim.min, border="lightgrey",col="lightgrey") #ylim.min * 3 + ylim.min
+            polygon(c(p$w/p$Winf, 1 ), c(p$psi_m, 0) * ylim.min * 3 + ylim.min, border="lightgrey",col="lightgrey") #ylim.min * 3 + ylim.min
             title(xlab=expression(w/W[infinity]))
             lines(p$w / p$Winf, p$g, lwd=3)
             # Plot eta_m (maybe include Wfs here?)
             abline(v=p$eta_m, lty=2, lwd=1.5)
             #  Plot selectivity axis
-            axis(4, at=c(ylim.min, ylim.max + ylim.max*0.6), labels=NA, col.axis="#7E6148B2")
-            mtext(c(0,100),at=c(ylim.min,  ylim.max), side=4, line=0.5) # ylim.min * 4  + ylim.max*0.6
-            mtext(side=4, text="% mature individuals", line=1.2, col="#7E6148B2") # at=ylim.min * 2
+            axis(4, at=c(ylim.min, ylim.min * 4), labels=NA, col.axis="#7E6148B2")
+            mtext(c(0,100),at=c(ylim.min, ylim.min * 4), side=4, line=0.5) # ylim.min * 4  + ylim.max*0.6
+            mtext(side=4, at=ylim.min * 2, text="% mature individuals", line=1.2, col="#7E6148B2") # at=ylim.min * 2
             # Create logarithmic x axis
             pow <- 1:3
             ticksat <- as.vector(sapply(pow, function(p) (2:10)*10^p))
