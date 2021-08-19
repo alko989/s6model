@@ -2,7 +2,7 @@
 #' @useDynLib s6modelts
 #' @useDynLib calcFmsy
 .onAttach <- function(lib, pkg) {
-   packageStartupMessage("Loading ", getVersion(),"\n")  
+   # packageStartupMessage("Loading ", s6model:::getVersion(),"\n")  
  }
 
 .onUnload <- function (lib) {
