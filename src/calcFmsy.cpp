@@ -10,18 +10,18 @@ Type objective_function<Type>::operator() ()
   DATA_SCALAR(a);
   DATA_SCALAR(Winf);
   DATA_SCALAR(Wfs);
-  DATA_INTEGER(M);
+  DATA_INTEGER(md); //From Ken's paper notation
   DATA_SCALAR(u);
   PARAMETER(logF);
   Type Fmsy = exp(logF);
   ADREPORT(Fmsy);
-  vector<Type> g(M);
-  vector<Type> m(M);
-  vector<Type> psi_F(M);
-  vector<Type> psi_m(M);
-  vector<Type> N(M);
-  vector<Type> ww(M);
-  vector<Type> delta(M);
+  vector<Type> g(md);
+  vector<Type> m(md);
+  vector<Type> psi_F(md);
+  vector<Type> psi_m(md);
+  vector<Type> N(md);
+  vector<Type> ww(md);
+  vector<Type> delta(md);
   Type cumsum;
   Type w_r;
   Type B;
@@ -35,8 +35,8 @@ Type objective_function<Type>::operator() ()
   N(0)=1/g(0); 
   psi_m(0) = 0;
 
-  for(int i=1; i<M; i++) {
-    ww(i) = exp(log(w_r) + i * (log(Winf) - log(w_r)) / (M - 1.0));
+  for(int i=1; i<md; i++) {
+    ww(i) = exp(log(w_r) + i * (log(Winf) - log(w_r)) / (md - 1.0));
     delta(i) = ww(i) - ww(i-1);
     psi_m(i) = 1 / (1 + pow(ww(i)/(eta_m * Winf),-10));
     psi_F(i) = 1 / (1 + pow(ww(i)/(Wfs),-u));
@@ -46,7 +46,7 @@ Type objective_function<Type>::operator() ()
     N(i)=exp(-cumsum)/g(i);
     
   } 
-  delta(M-1) = 0;
+  delta(md-1) = 0;
   B = (psi_m * N * ww * delta).sum();
   Rrel = 1 - (pow(Winf,1-n) * w_r / (epsilon_r * (1 - epsilon_a) * A * B));
   Y =  Fmsy * Rrel * (psi_F * N * ww * delta).sum();
