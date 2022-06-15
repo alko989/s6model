@@ -26,13 +26,13 @@ Type objective_function<Type>::operator() ()
   Type sigma = exp(logSigma);
   Type Fm = exp(logFm);
   Type Winf = exp(logWinf);
-  Type Wfs = exp(logWfs);
+  Type Wfs = exp(logWfs); // Why Wss not included?
   Type a = exp(loga);
   Type eta_S = exp(logeta_S);
   vector<Type> Nvec(nwc);
   vector<Type> Weight(nwc);
   vector<Type> residuals(nwc);
-  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha, ssb, Bexpl, rmax, R, Rp;
+  Type cumsum, nc, w, psi_m, psi_F, psi_S, g, m, N, wr, alpha, ssb, Bexpl, rmax, R, Rp, K, M;
   wr = 0.001;
   cumsum=0.0;
   nc = 0.0;
@@ -82,6 +82,10 @@ Type objective_function<Type>::operator() ()
     }
   }
   nll -= dnorm(loga, meanloga, sdloga, true);
+  
+  // Calculate M here
+  K = A / (3 * pow(Winf, 1-n));
+  M = a * (3 * K * pow(eta_m, n-1)); // Derive K from capital A and a : Do this in separate function
 
   ADREPORT(Fm);
   ADREPORT(Winf);
@@ -97,7 +101,8 @@ Type objective_function<Type>::operator() ()
   ADREPORT(Rp);
   ADREPORT(rmax);
   ADREPORT(Bexpl);
-  
+  ADREPORT(M);
+
   REPORT(residuals);
   REPORT(Weight);
   REPORT(freq);
