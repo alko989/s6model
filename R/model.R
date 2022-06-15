@@ -46,11 +46,11 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
   if(!(isTRUE(all.equal(p@logeta_F, log(eta_F / p@scaleeta_F))))) warning("Wfs and eta_F do not match! Wfs was used and eta_F was returned correctly")
   p@logeta_F <- log(eta_F / p@scaleeta_F)
   u <-exp(p@logu) * p@scaleu
-  M <- p@M
+  md <- p@md
   
   w_r <- w_egg<- 0.001
-  Delta <- (log(Winf) - log(w_r)) / (M - 1)
-  w <- exp(log(w_r) + (1:M - 1) * Delta)
+  Delta <- (log(Winf) - log(w_r)) / (md - 1)
+  w <- exp(log(w_r) + (1:md - 1) * Delta)
   
   delta <- diff(w)
   
@@ -60,12 +60,12 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
   
   psi_m <- (1 + (w / (eta_m * Winf))^-10 )^-1
   m <- a * A * w^(n - 1) +  Fm * psi_F
-  m[M] <- Inf
+  m[md] <- Inf
   g <- A*w^n *(1 - (w/Winf)^(1-n) * (epsilon_a + (1 - epsilon_a) * psi_m))
   
   N <- exp(- cumsum((m / g)[-1] * delta)) / g[-1]
   N <- c(1/g[1], N)
-  N[M] <- 0
+  N[md] <- 0
   if(isSurvey)
   {
     fishing <- psi_S * N
@@ -79,14 +79,14 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
     pdfN.approx <- approxfun(w, pdfN, yleft=0, yright=.Machine$double.xmin)
     cdf <-approxfun(w, cumsum(pdfN * c(delta,0)), yleft=0, yright=1)
   }
-  B <- sum((psi_m  * N * w)[-M] * delta)
-  Bexpl <- sum((psi_F  * N * w)[-M] * delta)
+  B <- sum((psi_m  * N * w)[-md] * delta)
+  Bexpl <- sum((psi_F  * N * w)[-md] * delta)
   Rrel <- 1 - (Winf^(1-n) * w_egg/(epsilon_r * (1 - epsilon_a) * A * B))## * (w_r/w_egg)^(a-1)
   Rp <- epsilon_r * (1 - epsilon_a) * A * Winf ^ (n-1) / w_egg * B
-  Y <- Fm * Rrel * sum((psi_F * N * w)[-M] * delta)
+  Y <- Fm * Rrel * sum((psi_F * N * w)[-md] * delta)
   wF <- which.min(abs(Wfs - w)) ## Find the closest weight to Wfs
   
-  YR <- Y * 1 / (N[wF] * Rrel * g[wF])# Fm * sum((psi_F * N * w)[-M] * delta)
+  YR <- Y * 1 / (N[wF] * Rrel * g[wF])# Fm * sum((psi_F * N * w)[-md] * delta)
   
   if(calcBRPs) {
     Fmsy <- optimise(f=getParams, interval=c(0,10), maximum=TRUE, p=p, optim.fmsy=TRUE)$maximum
@@ -297,8 +297,8 @@ calcFmsy <- function(params=NULL) {
   }
   if( ! is(params,"list"))
     stop("params is of class ", class(params))
-  def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.27, M=1000, u = 10)
-  def <- replace(def, names(params), unlist(params))
+  def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.27, md=1000, u = 10)
+  def <- replace(def, names(params), unlist(params)) # Replaces defaults that are given
   obj <- MakeADFun(def, list(logF = log(0.2)), DLL="calcFmsy")
   obj$env$tracemgc <- FALSE
   obj$env$silent <- TRUE; newtonOption(obj=obj,trace=0); config(trace.optimize = 0,DLL="calcFmsy")
