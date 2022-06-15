@@ -11,7 +11,7 @@ plotResiduals <- function(rr) {
   obs <- rprt$freq
   exp <- rprt$Nvec / sum(rprt$Nvec) * rr$sigma
   w <- which(obs > 0)
-  plot(rprt$Weight[w], obs[w], pch = 20, ylim = range(obs[w], exp[w]), log = "xy")
+  plot(rprt$Weight[w], obs[w], pch = 20, ylim = range(obs[w], exp[w]), log = "xy", col = 'lightgrey',xlab = 'Weight (g)', ylab = 'Observed count') # sub = 'Size distribution', 
   lines(rprt$Weight[w], exp[w])
   D <- 2 * ( obs[w] * log(obs[w] / exp[w]) - (obs[w] - exp[w]))
   chi.sq <- (obs[w]-exp[w])^2/exp[w]
@@ -19,13 +19,13 @@ plotResiduals <- function(rr) {
   1 - pchisq(sum(chi.sq), degf)
   1 - pchisq(sum(D), degf)
   
-  plot(exp[w], obs[w],pch = 20, cex = 0.7, ylab = "Observed count", xlab = "Expected count")
+  plot(exp[w], obs[w],pch = 20, cex = 0.7, ylab = "Observed count", xlab = "Expected count") #, sub = 'Observed vs. expected count'
   mx <- max(obs[w], exp[w]) * 1.1
   lower.quantile <- function(x)qpois(.025,x)
-  plot(lower.quantile,0,mx,add=TRUE,col="grey28",n=1e4)
+  plot(lower.quantile,0,mx,add=TRUE,col="lightgrey",n=1e4)
   upper.quantile <- function(x)qpois(.975,x)
-  plot(upper.quantile,0,mx,add=TRUE,col="grey28",n=1e4)
-  abline(0,1, col = "grey28")
+  plot(upper.quantile,0,mx,add=TRUE,col="lightgrey",n=1e4)
+  abline(0,1, col = "lightgrey")
   perc.in <- round(sum(exp[w] >= lower.quantile(obs[w]) & exp[w] <= upper.quantile(obs[w])) / length(w) * 100, 2)
   
   # Pseudo residuals for poisson (see Zuchinni book)
@@ -33,9 +33,9 @@ plotResiduals <- function(rr) {
   qrsd <- qnorm(rsd)
   qrsd <- qrsd[is.finite(qrsd)]
   if (length(qrsd) < length(rsd)) cat("Some of the residuals are not finite (", length(rsd) - length(qrsd)," out of ", length(rsd), ")", sep ="")
-  plot(qrsd)
-  qqnorm(qrsd)
-  qqline(qrsd)
+  plot(qrsd, ylab = 'Pseudo-residuals') #  sub = 'Residuals',
+  qqnorm(qrsd, main = NULL)
+  qqline(qrsd, col= 'lightgrey')
   
   ## Normality test (Ho: normaly distributed, p > 0.05 => fail to reject)
   st <- shapiro.test(qrsd)
@@ -44,7 +44,7 @@ plotResiduals <- function(rr) {
   tt <- t.test(qrsd)
   isBiased <- tt$p.value < 0.05
   ## Check for correlations
-  ac <- acf(qrsd)
+  ac <- acf(qrsd) #, main = 'Autocorrelation'
   ci.acf <- qnorm((1 + 0.95) / 2) / sqrt(length(qrsd))
   sigAc <- any(unlist(ac$acf)[-1] > ci.acf | unlist(ac$acf)[-1] < -ci.acf)
   
