@@ -65,11 +65,11 @@ Type objective_function<Type>::operator() ()
       m = a * A * pow(w, n-1); // exp(-(w / Winf)) + 0.4 * (1 - w / Winf); 
       cumsum += (m + Fm(yr) *  psi_F) / g * binsize; 
       mvec(j) = m;
-      N = exp(-cumsum) / g;
-      ssb(yr) += psi_m  * N * w * binsize;
+      N = exp(-cumsum) / g; // is here N/R
+      ssb(yr) += psi_m  * N * w * binsize; // is here B/R
       Bexpl(yr) += psi_F  * N * w * binsize;
       Nvec(j, yr) = N * (isSurvey ? psi_S : psi_F);
-      Y(yr) +=  Fm(yr) * N * psi_F * w * binsize;
+      Y(yr) +=  Fm(yr) * psi_F * N * w * binsize; 
       nc += Nvec(j, yr);
     }
     Rrel(yr) = 1 - (pow(Winf, 1-n) * wr) / (epsilon_r * (1 - epsilon_a) * A * ssb(yr));
