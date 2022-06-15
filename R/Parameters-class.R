@@ -169,7 +169,7 @@ parameters <- function(names= c(), vals = c(), transformed=TRUE, base=new("Param
     }
   }
   for(i in seq(along=names))
-    if(names[i] %in% c("md")) {
+    if(names[i] %in% c("md", "M")) {
       eval(parse(text=paste("res@", names[i]," <- ", vals[i], sep="" )))
     } else if (names[i] == "matSize") {
       mats <- i
@@ -416,6 +416,7 @@ setMethod("plotFit", c("Parameters", "numeric", "logical"),
 ##' @aliases plotFit,Parameters,data.frame,logical-method
 setMethod("plotFit", c("Parameters", "data.frame", "logical"),
           function(object, data, add, ...) {
+            data[data$Freq > 0, ] # Only plot observations > 0
             p <- getParams(object)
             if(add == FALSE) {
               plot(p$w, p$pdfN.approx(p$w), type="l",
@@ -423,13 +424,13 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
                    xlab="Weight (g)",
                    ylab="Probability")
             } else {
-              lines(p$w, p$pdfN.approx(p$w), col="#7E6148B2", ...)
+              lines(p$w, p$pdfN.approx(p$w), col="black", ...)
             }
             points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
-                   pch=16,cex=1, col="#7E6148B2")
+                   pch=16,cex=0.5, col="orange") #"#7E6148B2"
             points(data$Weight, data$Freq,
-                   pch=16,cex=1, col="#7E6148B2") # Check those changes!! Currently figure is not working properly
-            lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
+                   pch=16,cex=0.5, col="orange") # Check those changes!! Currently figure is not working properly
+            # lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
             ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
             lines(p$w, p$pdfN.approx(p$w),  lwd = 2, ...) #,col="blue"
             legend("topright", NULL, c("Fitted Probability Density Function (PDF)"),
