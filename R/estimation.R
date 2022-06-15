@@ -185,13 +185,13 @@ estimateMultidata <-
 
 ##' @export
 estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, 
-                         eta_m=0.25, a=0.22, Winf = NULL, sigma=NULL, u = 10,
+                         eta_m=0.25, a=0.22, Winf = NULL, sigma=NULL, u = NULL,
                          sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
-                         verbose=FALSE, map=list(loga=factor(NA)), 
+                         verbose=FALSE, map=list(), 
                          random=c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
                          totalYield = NULL, perturbStartingVals = FALSE, Fm = NULL, ...) {
   if (is.null(df)) return(NULL)
-  if (! require(TMB)) stop("TMB is not installed! Please install and try again.")
+  if (! require(TMB)) stop("TMB is not installed! Please install and try again.") 
   isTS <- is(df, "list")
   if (isTS) {
     if(is.null(totalYield)) {totalYield <- rep(0.01234567, length(df))}
@@ -219,8 +219,9 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     }
     if(is.null(eta_S))  {
       if(isTS) {
-        eta_S <- which(apply(df, 1, function(x) sum(x) != 0))[[1]] * binsize / Winf
-      } else {
+        eta_S <- which(apply(df, 1, function(x) sum(x) != 0))[[1]] * binsize / Winf # Look at frequencies that are not 0, take the first, multiply by binsize to get actual size /Winf (look at definition) 
+      
+        } else {
         eta_S <- which(df$Freq != 0)[1] * binsize / Winf
       }
     } else {
@@ -247,11 +248,23 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     } else {
       map$logWfs  <- rep(factor(NA), nyrs)
     }
-    if(is.null(u))  {
-      u <- 10
+    # Calculate width of selectivity curve u
+    if(isTS) {
+      if(!is.null(u))  {
+        map$logu  <- factor(NA) # It's not estimated
+        logu <- rep(log(u),nyrs) # Arbitrary initial value
+      } else {
+        logu  <- rep(log(10),nyrs)
+      }
     } else {
-      map$logu  <- factor(NA)
+      if(!is.null(u))  {
+        map$logu  <- factor(NA) # It's not estimated
+        logu <- log(u) # Arbitrary initial value
+      } else {
+        logu  <- log(10)
+      }
     }
+    # Calculate Fishing mortality Fm
     if(isTS) {
       freq <- df
       nwc <- attr(df, "nwc")
@@ -270,14 +283,14 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
       } else {
         logFm <- log(0.5)
       }
-  }
+    }
     data <- list(binsize=binsize, nwc=nwc, freq=freq, n=n, epsilon_a=epsilon_a,
                  epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
                  sdloga = sdloga, isSurvey = as.integer(isSurvey),
                  usePois = as.integer(usePois), totalYield = totalYield)
     pars <- list(loga = log(a), logFm = logFm, logWinf = log(Winf),
                  logWfs = log(Wfs), logSigma = log(sigma),logeta_S = log(eta_S), 
-                 logu = log(u))
+                 logu = logu)
     obj <- MakeADFun(data = data, parameters = pars,  map=map, random=random, DLL = DLL)
     upper <- rep(Inf, length(obj$par))
     upper[which(names(obj$par) == "logWinf")] <- log(Winf * winf.ubound)
@@ -290,7 +303,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     }
     opt <- nlminb(obj$par, obj$fn, obj$gr, upper = upper)
     sdr <- sdreport(obj, getJointPrecision = FALSE, getReportCovariance = FALSE)
-    parnms <- c("Fm","Winf","Wfs", "a", "eta_S")
+    parnms <- c("Fm","Winf","Wfs", "a", "eta_S",'u','M') # Eta_f is included in Wfs,'M'
     vals <- sdr$value
     nms <- names(vals)
     sds <- setNames(sdr$sd, nms)
@@ -303,7 +316,8 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                  as.numeric(c(vls, n, epsilon_a, epsilon_r, A, eta_m)),
                  transformed=FALSE)
     })
-    Fmsy <- sapply(estpars, calcFmsy)
+    
+      Fmsy <- sapply(estpars, calcFmsy)
     SSBrel <- sapply(estpars, function(x) getParams(x)$B) / 
               mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$B, estpars, Fmsy, SIMPLIFY = TRUE)
     Bexplrel <- sapply(estpars, function(x) getParams(x)$Bexpl) / 
@@ -320,10 +334,11 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
   nw <- function(x) grepl(paste0("^", x, "$"), nms)
   structure(data.frame(Fm=vals[nw("Fm")], Fm_sd = sds[nw("Fm")],
                        Winf=rep(vals[nw("Winf")], nyrs), Winf_sd=rep(sds[nw("Winf")], nyrs),
-                       Fmsy = Fmsy, FFmsy = vals[nw("Fm")]/Fmsy, 
+                       Fmsy = Fmsy, FFmsy = vals[nw("Fm")]/Fmsy, #Fmsy_sd = sds[nw("Fmsy")],
                        Wfs = vals[nw("Wfs")], Wfs_sd = sds[nw("Wfs")],
                        a = rep(vals[nw("a")], nyrs), a_sd = sds[nw("a")],
-                       eta_S = vals[nw("eta_S")],
+                       M = rep(vals[nw("M")], nyrs), M_sd = sds[nw("M")],
+                       eta_S = vals[nw("eta_S")], eta_S_sd = sds[nw("eta_S")],
                        sigma = vals[nw("sigma")], sigma_sd = sds[nw("sigma")],
                        u = vals[nw("u")], u_sd = sds[nw("u")],
                        R = vals[nw("R")], R_sd = sds[nw("R")],
@@ -333,7 +348,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                        Y = vals[nw("Y")], Y_sd = sds[nw("Y")],
                        ssb = vals[nw("ssb")], ssb_sd = sds[nw("ssb")],
                        Bexpl = vals[nw("Bexpl")], Bexpl_sd = sds[nw("Bexpl")],
-                       ssbrel = SSBrel, Bexplrel = Bexplrel,
+                       ssbrel = SSBrel, Bexplrel = Bexplrel,  #, ssbrel_sd = sds[nw("SSBrel")]Bexplrel_sd = sds[nw("Bexplrel")],
                        row.names=yrs),
             obj=obj, opt=opt, sdr = sdr, estpars=estpars)
 }
