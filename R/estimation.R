@@ -189,7 +189,8 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                          sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
                          verbose=FALSE, map=list(), 
                          random=c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
-                         totalYield = NULL, perturbStartingVals = FALSE, Fm = NULL, ...) {
+                         totalYield = NULL, perturbStartingVals = FALSE, Fm = NULL,
+                         Fmsy_range = FALSE, seed = NULL, it = 100, ...) {
   if (is.null(df)) return(NULL)
   if (! require(TMB)) stop("TMB is not installed! Please install and try again.") 
   isTS <- is(df, "list")
@@ -245,10 +246,10 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
       } else {
         Wfs <- df$Weight[round((which.max(df$Freq) + which(df$Freq > 0)[1]) / 2)] - binsize / 2## min(df$Weight[df$Freq > 0])
       }
-    } else {
+     } else {
       map$logWfs  <- rep(factor(NA), nyrs)
     }
-    # Calculate width of selectivity curve u
+    # Calculate width of selectivity curve u:
     if(isTS) {
       if(!is.null(u))  {
         map$logu  <- factor(NA) # It's not estimated
@@ -262,6 +263,22 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
         logu <- log(u) # Arbitrary initial value
       } else {
         logu  <- log(10)
+      }
+    }
+    # Calculate loga
+    if(isTS) {
+      if(!is.null(a))  {
+        map$loga  <- factor(NA) 
+        loga <- rep(log(a),nyrs)
+      } else {
+        loga  <- rep(log(0.22),nyrs)
+      }
+    } else {
+      if(!is.null(a))  {
+        map$loga  <- factor(NA) # It's not estimated
+        loga <- log(a) # Arbitrary initial value
+      } else {
+        loga  <- log(0.22)
       }
     }
     # Calculate Fishing mortality Fm
@@ -285,10 +302,10 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
       }
     }
     data <- list(binsize=binsize, nwc=nwc, freq=freq, n=n, epsilon_a=epsilon_a,
-                 epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = log(a), 
+                 epsilon_r=epsilon_r, A=A, eta_m=eta_m, meanloga = loga, 
                  sdloga = sdloga, isSurvey = as.integer(isSurvey),
                  usePois = as.integer(usePois), totalYield = totalYield)
-    pars <- list(loga = log(a), logFm = logFm, logWinf = log(Winf),
+    pars <- list(loga = loga, logFm = logFm, logWinf = log(Winf),
                  logWfs = log(Wfs), logSigma = log(sigma),logeta_S = log(eta_S), 
                  logu = logu)
     obj <- MakeADFun(data = data, parameters = pars,  map=map, random=random, DLL = DLL)
@@ -301,12 +318,14 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
       newtonOption(obj=obj, trace=0)
       config(trace.optimize = 0, DLL=DLL)
     }
+    
     opt <- nlminb(obj$par, obj$fn, obj$gr, upper = upper)
     sdr <- sdreport(obj, getJointPrecision = FALSE, getReportCovariance = FALSE)
-    parnms <- c("Fm","Winf","Wfs", "a", "eta_S",'u','M') # Eta_f is included in Wfs,'M'
+    parnms <- c("Fm","Winf","Wfs", "a", "eta_S",'u','M') # Eta_f is included in Wfs
     vals <- sdr$value
     nms <- names(vals)
-    sds <- setNames(sdr$sd, nms)
+    sds <- setNames(sdr$sd, nms) # This is not in log
+    # sdr$cov.fixed
     estpars <- sapply(seq(nyrs), function(i) {
       vls <- sapply(parnms, function(x) {
         match <- vals[grepl(paste0("^", x, "$"), nms)]
@@ -317,15 +336,80 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                  transformed=FALSE)
     })
     
+    if(Fmsy_range){
+      
+      # Set seed
+      if(!is.null(seed))  {
+        set.seed(seed)
+      }
+      
+      # Draw from normally distributed parameters that are input to calcFmsy
+      # Input params for calcFmsy:
+      # Winf, n, epsilon_a, epsilon_r, A, eta_m, a, Wfs, u, F
+      # Fm, Winf, a, Wfs and u are estimated -- somehow eta_S doesn't seem to be estimated?
+      
+      Fmsy.dist <- numeric(it)
+      SSBrel.dist <- numeric(it)
+      Bexplrel.dist <- numeric(it)
+      
+      # Clean up and remove for loop
+      estpars.rand <- as.list(estpars[[1]])
+      
+      Fm <- rnorm(it, mean = as.numeric(estpars.rand[names(estpars.rand) %in% 'Fm']), sd = sds['Fm'])
+      Winf <- rnorm(it, mean = as.numeric(estpars.rand[names(estpars.rand) %in% 'Winf']), sd = sds['Winf'])
+      Wfs <- rnorm(it, mean = as.numeric(estpars.rand[names(estpars.rand) %in% 'Wfs']), sd = sds['Wfs'])
+      a <- rnorm(it, mean = as.numeric(estpars.rand[names(estpars.rand) %in% 'a']), sd = sds['a'])
+      u <- rnorm(it, mean = as.numeric(estpars.rand[names(estpars.rand) %in% 'u']), sd = sds['u'])
+      
+      
+      for(i in 1:it){
+        # print(i)
+        
+        estpars.rand <- as.list(estpars[[1]])
+        estpars.rand$Fm <- Fm[i]
+        estpars.rand$Winf <- Winf[i]
+        estpars.rand$Wfs <- Wfs[i]
+        estpars.rand$a <- a[i]
+        estpars.rand$u <- u[i]
+        estpars.rand <- parameters(c(names(estpars.rand)),
+                                   as.numeric(c(estpars.rand)),
+                                   transformed=FALSE)  
+        
+        # Fmsy[i] <- sapply(estpars.rand.1, calcFmsy)
+        Fmsy.dist[i] <- calcFmsy(estpars.rand)
+        # Bmsy: Biomass/Biomass at Fmsy
+        SSBrel.dist[i] <- getParams(estpars.rand)$B / 
+          getParams(parameters("Fm", Fmsy.dist[i], FALSE, base = estpars.rand))$B
+        Bexplrel.dist[i] <-  getParams(estpars.rand)$Bexpl / 
+          getParams(parameters("Fm", Fmsy.dist[i], FALSE, base = estpars.rand))$Bexpl
+        
+      }
+      
+      
       Fmsy <- sapply(estpars, calcFmsy)
-    SSBrel <- sapply(estpars, function(x) getParams(x)$B) / 
-              mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$B, estpars, Fmsy, SIMPLIFY = TRUE)
-    Bexplrel <- sapply(estpars, function(x) getParams(x)$Bexpl) / 
-      mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$Bexpl, estpars, Fmsy, SIMPLIFY = TRUE)
-    if(nyrs == 1) {
-      estpars <- estpars[[1]]
-      Fmsy <- Fmsy[[1]]
-    }
+      SSBrel <- sapply(estpars, function(x) getParams(x)$B) / 
+        mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$B, estpars, Fmsy, SIMPLIFY = TRUE)
+      Bexplrel <- sapply(estpars, function(x) getParams(x)$Bexpl) / 
+        mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$Bexpl, estpars, Fmsy, SIMPLIFY = TRUE)
+      if(nyrs == 1) {
+        estpars <- estpars[[1]]
+        Fmsy <- Fmsy[[1]]
+      }
+      
+    } else {
+      
+      Fmsy <- sapply(estpars, calcFmsy)
+      SSBrel <- sapply(estpars, function(x) getParams(x)$B) / 
+        mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$B, estpars, Fmsy, SIMPLIFY = TRUE)
+      Bexplrel <- sapply(estpars, function(x) getParams(x)$Bexpl) / 
+        mapply(function(p, fmsy) getParams(parameters("Fm", fmsy, FALSE, base = p))$Bexpl, estpars, Fmsy, SIMPLIFY = TRUE)
+      if(nyrs == 1) {
+        estpars <- estpars[[1]]
+        Fmsy <- Fmsy[[1]]
+      }
+      
+    } 
+    
     opt$convergence
   }, silent = !verbose)
   if(class(tryer) == "try-error") {
@@ -334,7 +418,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
   nw <- function(x) grepl(paste0("^", x, "$"), nms)
   structure(data.frame(Fm=vals[nw("Fm")], Fm_sd = sds[nw("Fm")],
                        Winf=rep(vals[nw("Winf")], nyrs), Winf_sd=rep(sds[nw("Winf")], nyrs),
-                       Fmsy = Fmsy, FFmsy = vals[nw("Fm")]/Fmsy, #Fmsy_sd = sds[nw("Fmsy")],
+                       Fmsy = Fmsy, FFmsy = vals[nw("Fm")]/Fmsy, 
                        Wfs = vals[nw("Wfs")], Wfs_sd = sds[nw("Wfs")],
                        a = rep(vals[nw("a")], nyrs), a_sd = sds[nw("a")],
                        M = rep(vals[nw("M")], nyrs), M_sd = sds[nw("M")],
@@ -348,8 +432,8 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                        Y = vals[nw("Y")], Y_sd = sds[nw("Y")],
                        ssb = vals[nw("ssb")], ssb_sd = sds[nw("ssb")],
                        Bexpl = vals[nw("Bexpl")], Bexpl_sd = sds[nw("Bexpl")],
-                       ssbrel = SSBrel, Bexplrel = Bexplrel,  #, ssbrel_sd = sds[nw("SSBrel")]Bexplrel_sd = sds[nw("Bexplrel")],
+                       ssbrel = SSBrel, Bexplrel = Bexplrel,  
                        row.names=yrs),
-            obj=obj, opt=opt, sdr = sdr, estpars=estpars)
+            obj=obj, opt=opt, sdr = sdr, estpars=estpars, Fmsy.dist = Fmsy.dist, SSBrel.dist = SSBrel.dist, Bexplrel.dist = Bexplrel.dist)
 }
 
