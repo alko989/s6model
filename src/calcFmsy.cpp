@@ -2,13 +2,13 @@
 template<class Type>
 Type objective_function<Type>::operator() ()
 { 
+  DATA_SCALAR(Winf);
   DATA_SCALAR(n);
   DATA_SCALAR(epsilon_a);
   DATA_SCALAR(epsilon_r);
   DATA_SCALAR(A);
   DATA_SCALAR(eta_m);
   DATA_SCALAR(a);
-  DATA_SCALAR(Winf);
   DATA_SCALAR(Wfs);
   DATA_INTEGER(md); //From Ken's paper notation
   DATA_SCALAR(u);
