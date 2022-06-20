@@ -186,7 +186,7 @@ estimateMultidata <-
 ##' @export
 estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, 
                          eta_m=0.25, a=0.22, Winf = NULL, sigma=NULL, u = NULL,
-                         sdloga = 0.7, winf.ubound = 2, Wfs = NULL,
+                         sdloga = 0.7, winf.ubound = 1.5, Wfs = NULL,
                          verbose=FALSE, map=list(), 
                          random=c(), isSurvey = FALSE, eta_S = NULL, usePois = TRUE,
                          totalYield = NULL, perturbStartingVals = FALSE, Fm = NULL,
@@ -361,9 +361,8 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
       a <- rnorm(it, mean = as.numeric(estpars.rand[names(estpars.rand) %in% 'a']), sd = sds['a'])
       u <- rnorm(it, mean = as.numeric(estpars.rand[names(estpars.rand) %in% 'u']), sd = sds['u'])
       
-      
       for(i in 1:it){
-        # print(i)
+        print(i)
         
         estpars.rand <- as.list(estpars[[1]])
         estpars.rand$Fm <- Fm[i]
