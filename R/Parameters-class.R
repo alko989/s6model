@@ -427,9 +427,9 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
               lines(p$w, p$pdfN.approx(p$w), col="black", ...)
             }
             points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
-                   pch=16,cex=0.5, col="orange") #"#7E6148B2"
+                   pch=16,cex=1, col="orange") #"#7E6148B2"
             points(data$Weight, data$Freq,
-                   pch=16,cex=0.5, col="orange") # Check those changes!! Currently figure is not working properly
+                   pch=16,cex=1, col="orange") # Check those changes!! Currently figure is not working properly
             # lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
             ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
             lines(p$w, p$pdfN.approx(p$w),  lwd = 2, ...) #,col="blue"
