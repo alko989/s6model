@@ -4,8 +4,14 @@
 \alias{simulateData3}
 \title{Simulates catch-at-weight data using the s6model}
 \usage{
-simulateData3(samplesize = 1000, params = parameters(), binsize = 5,
-  keepZeros = TRUE, retDF = TRUE, ...)
+simulateData3(
+  samplesize = 1000,
+  params = parameters(),
+  binsize = 5,
+  keepZeros = TRUE,
+  retDF = TRUE,
+  ...
+)
 }
 \arguments{
 \item{samplesize}{Integer. Number of simulated individuals}

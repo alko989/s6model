@@ -4,8 +4,7 @@
 \alias{datrasraw2weightfreq}
 \title{Convert a DATRASraw object to weight frequency data.frame}
 \usage{
-datrasraw2weightfreq(datr, a = 0.01, b = 3, estWL = FALSE,
-  verbose = TRUE)
+datrasraw2weightfreq(datr, a = 0.01, b = 3, estWL = FALSE, verbose = TRUE)
 }
 \arguments{
 \item{datr}{DATRASraw object}

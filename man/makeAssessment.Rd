@@ -4,11 +4,24 @@
 \alias{makeAssessment}
 \title{Makes assessment of a fish stock given weight frequency data for several years}
 \usage{
-makeAssessment(inputData, yield = NULL, a.mean = 0.22, a.sd = 0.7,
-  nsample = 100, same.as = TRUE, u = 10, sigma = NULL, binsize = NULL,
-  winf.ubound = 2, equalWinf = TRUE, probs = seq(0, 1, 0.01),
-  seed = as.integer(rnorm(1, 1000, 100)), dirout = "results",
-  fnout = format(Sys.time(), "results_\%Y\%m\%d_\%H\%M.RData"), ...)
+makeAssessment(
+  inputData,
+  yield = NULL,
+  a.mean = 0.22,
+  a.sd = 0.7,
+  nsample = 100,
+  same.as = TRUE,
+  u = 10,
+  sigma = NULL,
+  binsize = NULL,
+  winf.ubound = 2,
+  equalWinf = TRUE,
+  probs = seq(0, 1, 0.01),
+  seed = as.integer(rnorm(1, 1000, 100)),
+  dirout = "results",
+  fnout = format(Sys.time(), "results_\%Y\%m\%d_\%H\%M.RData"),
+  ...
+)
 }
 \arguments{
 \item{inputData}{list of data.frames, each data.frame has columns \code{Weight} and  \code{Freq} and attribute \code{binsize}}

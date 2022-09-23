@@ -4,8 +4,15 @@
 \alias{subsetDatras}
 \title{Subsets a DATRAS object}
 \usage{
-subsetDatras(dat, species = "Gadus morhua", gear = NULL, years = c(1991,
-  2014), haulDur = NULL, icesAreas = NULL, out = NULL)
+subsetDatras(
+  dat,
+  species = "Gadus morhua",
+  gear = NULL,
+  years = c(1991, 2014),
+  haulDur = NULL,
+  icesAreas = NULL,
+  out = NULL
+)
 }
 \arguments{
 \item{dat}{DATRAS object, or character containing the filename of an RDS file holding a DATRASraw object}

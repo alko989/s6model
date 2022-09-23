@@ -5,11 +5,23 @@
 \alias{minimizemeMultidata}
 \title{The negative log likelihood for given parameters and data}
 \usage{
-minimizeme(theta, data, names, fixed.names = c(), fixed.vals = c(),
-  isSurvey = FALSE)
+minimizeme(
+  theta,
+  data,
+  names,
+  fixed.names = c(),
+  fixed.vals = c(),
+  isSurvey = FALSE
+)
 
-minimizemeMultidata(theta, surdata, comdata, names, fixed.names = c(),
-  fixed.vals = c())
+minimizemeMultidata(
+  theta,
+  surdata,
+  comdata,
+  names,
+  fixed.names = c(),
+  fixed.vals = c()
+)
 }
 \arguments{
 \item{theta}{Numeric vector of *transformed* parameter values}

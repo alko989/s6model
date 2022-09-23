@@ -3,11 +3,7 @@
 \docType{package}
 \name{s6model}
 \alias{s6model}
-\alias{s6model-package}
 \title{Data poor stock assessment using a single species size based model in steady state}
-\description{
-Data poor stock assessment using a single species size based model in steady state
-}
 \references{
 Kokkalis, A., Nielsen, A., Thygesen U. H. and K. H. Andersen. (In review) Reliability of fisheries reference points estimation for data-poor stocks, Fisheries research
 

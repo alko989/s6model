@@ -5,14 +5,18 @@
 \alias{getRandomParameters.fixedWinf}
 \title{Random model parameters}
 \usage{
-getRandomParameters(parameter.names = c("A", "n", "eta_m", "eta_F", "a", "Fm",
-  "Winf", "epsilon_a", "epsilon_r"), parameter.value = c(4.5, 0.75, 0.25,
-  0.05, 0.35, 0.25, 10000, 0.8, 0.1), parameter.sd = c(0, 0, 0, 0.5, 0, 0, 0,
-  0, 0), parameter.cv = c(0.5, 0, 0.3, 0, 0.5, 0, 0, 0.1, 0.5),
+getRandomParameters(
+  parameter.names = c("A", "n", "eta_m", "eta_F", "a", "Fm", "Winf", "epsilon_a",
+    "epsilon_r"),
+  parameter.value = c(4.5, 0.75, 0.25, 0.05, 0.35, 0.25, 10000, 0.8, 0.1),
+  parameter.sd = c(0, 0, 0, 0.5, 0, 0, 0, 0, 0),
+  parameter.cv = c(0.5, 0, 0.3, 0, 0.5, 0, 0, 0.1, 0.5),
   parameter.lbound = c(0, 0, 0.01, 0, 0.01, 0, 0, 0, 0),
   parameter.ubound = c(Inf, 0, Inf, Inf, Inf, 0, 0, 0.99, Inf),
-  parameter.unif = c(F, F, F, F, F, F, F, F, F), Rrel.gt = -Inf,
-  Fmsy.gt = 0)
+  parameter.unif = c(F, F, F, F, F, F, F, F, F),
+  Rrel.gt = -Inf,
+  Fmsy.gt = 0
+)
 
 getRandomParameters.fixedWinf(winf, Rrel.gt = -Inf, Fmsy.gt = 0)
 }
@@ -50,7 +54,5 @@ Random model parameters with constraints in Fmsy and relative recruitment (Rrel 
 Shorthand function for a specific asymptotic weight
 }
 \author{
-alko
-
 alko
 }

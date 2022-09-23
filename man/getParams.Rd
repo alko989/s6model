@@ -4,9 +4,15 @@
 \alias{getParams}
 \title{Returns a list with all parameters and functions}
 \usage{
-getParams(p = new("Parameters"), FF = NULL, calcBRPs = FALSE,
-  isSurvey = FALSE, optim.fmsy = FALSE, optim.fmsyr = FALSE,
-  optim.Rrel = FALSE)
+getParams(
+  p = new("Parameters"),
+  FF = NULL,
+  calcBRPs = FALSE,
+  isSurvey = FALSE,
+  optim.fmsy = FALSE,
+  optim.fmsyr = FALSE,
+  optim.Rrel = FALSE
+)
 }
 \arguments{
 \item{p}{A Parameters object}

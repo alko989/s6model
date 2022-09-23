@@ -4,8 +4,14 @@
 \alias{fitWL}
 \title{Fit weight-length relationship}
 \usage{
-fitWL(df, colname.weight = "Weight", colname.length = "Length",
-  plotFit = FALSE, mindata = 0, ...)
+fitWL(
+  df,
+  colname.weight = "Weight",
+  colname.length = "Length",
+  plotFit = FALSE,
+  mindata = 0,
+  ...
+)
 }
 \arguments{
 \item{df}{\code{data.frame} or \code{DATRASraw} object containing length and weight data}

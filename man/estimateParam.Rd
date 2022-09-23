@@ -5,19 +5,33 @@
 \alias{estimateMultidata}
 \title{Estimates parameters using the given data and maybe some parameters}
 \usage{
-estimateParam(names = c("Fm", "Winf", "Wfs"),
-  data = simulateData3(parameters(), samplesize = 1000), start = rep(0.5,
-  length(names)), lower = rep(-Inf, length(names)), upper = rep(Inf,
-  length(names)), fixed.names = c(), fixed.vals = numeric(0),
-  fixed.transformed = TRUE, plotFit = FALSE, isSurvey = FALSE,
-  verbose = getOption("verbose"), useTMB = TRUE, ...)
+estimateParam(
+  names = c("Fm", "Winf", "Wfs"),
+  data = simulateData3(parameters(), samplesize = 1000),
+  start = rep(0.5, length(names)),
+  lower = rep(-Inf, length(names)),
+  upper = rep(Inf, length(names)),
+  fixed.names = c(),
+  fixed.vals = numeric(0),
+  fixed.transformed = TRUE,
+  plotFit = FALSE,
+  isSurvey = FALSE,
+  verbose = getOption("verbose"),
+  useTMB = TRUE,
+  ...
+)
 
-estimateMultidata(names = c("Fm", "Winf", "Wfs"),
-  surdata = simulateData3(parameters(), samplesize = 1000, isSurvey =
-  TRUE)$sample, comdata = simulateData3(parameters(), samplesize =
-  1000)$sample, start = rep(0.5, length(names)), lower = rep(0.1,
-  length(names)), fixed.names = c(), fixed.vals = numeric(0),
-  plotFit = FALSE, ...)
+estimateMultidata(
+  names = c("Fm", "Winf", "Wfs"),
+  surdata = simulateData3(parameters(), samplesize = 1000, isSurvey = TRUE)$sample,
+  comdata = simulateData3(parameters(), samplesize = 1000)$sample,
+  start = rep(0.5, length(names)),
+  lower = rep(0.1, length(names)),
+  fixed.names = c(),
+  fixed.vals = numeric(0),
+  plotFit = FALSE,
+  ...
+)
 }
 \arguments{
 \item{names}{string vector, the parameters to be estimated.}

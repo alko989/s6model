@@ -4,8 +4,13 @@
 \alias{addVersion}
 \title{Adds version watermark to a plot}
 \usage{
-addVersion(v = NULL, cex = 0.5, col = "#12345655", lengthSHA = 6,
-  description = NULL)
+addVersion(
+  v = NULL,
+  cex = 0.5,
+  col = "#12345655",
+  lengthSHA = 6,
+  description = NULL
+)
 }
 \arguments{
 \item{v}{character vector, version(s) to add to plot}

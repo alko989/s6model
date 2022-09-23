@@ -4,7 +4,8 @@
 \name{ices.cod}
 \alias{ices.cod}
 \title{Assessment results for the ICES cod stocks}
-\format{A list of data frames with columns
+\format{
+A list of data frames with columns
 \itemize{
   \item{Year}
   \item{Recruitment}
@@ -14,7 +15,8 @@
   \item{Discards}
   \item{F}
 }
-Meta data are attached to each data frame as attributes. These include the AssessmentYear, the stock name, the stock key and reference points, e.g. Flim, Fpa, FMSY, Bpa}
+Meta data are attached to each data frame as attributes. These include the AssessmentYear, the stock name, the stock key and reference points, e.g. Flim, Fpa, FMSY, Bpa
+}
 \source{
 ICES Stock Assessment Database, 2015/11. ICES, Copenhagen \url{http://http://standardgraphs.ices.dk}
 }

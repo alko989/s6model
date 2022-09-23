@@ -27,6 +27,4 @@ Makes a plot of natural and fishing mortalities
 }
 \author{
 alko
-
-alko
 }

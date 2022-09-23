@@ -145,11 +145,3 @@ print.s6input <- function(x) {
   cat(format(x, objname = objname), "\n")
 }
 
-# a <- new_s6input(wf = nscoddat, years = as.numeric(names(nscoddat)),
-#                  catch = rep(0.12345, length(nscoddat)))
-print(x= a)
-# 
-print(a[1:14])
-# a[5]$wf
-# class(a[1])
-

@@ -12,8 +12,12 @@
 \alias{simulate.Parameters}
 \title{The Parameters class and constructor}
 \usage{
-parameters(names = c(), vals = c(), transformed = TRUE,
-  base = new("Parameters"))
+parameters(
+  names = c(),
+  vals = c(),
+  transformed = TRUE,
+  base = new("Parameters")
+)
 
 meanParameters(x)
 
@@ -23,8 +27,7 @@ meanParameters(x)
 
 \method{as.list}{Parameters}(x, ...)
 
-\method{simulate}{Parameters}(object, nsim = 1000, seed = NULL,
-  binsize = 5, keepZeros = TRUE, ...)
+\method{simulate}{Parameters}(object, nsim = 1000, seed = NULL, binsize = 5, keepZeros = TRUE, ...)
 }
 \arguments{
 \item{names}{String vector. Contains the names of the parameters that will
@@ -113,8 +116,6 @@ difference(par, changeMatsize)
 ## eta_m 0.25  0.3      -0.05                 20
 }
 \author{
-alko
-
 alko
 }
 \keyword{constructor}
