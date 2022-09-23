@@ -1,4 +1,4 @@
-#' The s6input class and constructor
+#' The s6input class constructor
 #'
 #' s6input is an S3 class that contains the input data that are used to 
 #' make the assessment. The \code{s6input} function is the constructor of the
@@ -25,13 +25,13 @@
 #' @aliases s6input-class
 #' @rdname s6input
 #' @export
-#' @example 
+#' @examples  
 #' ## Empty input
 #' inp <- new_s6input()
 #' 
-new_s6input <- function(wf = NULL, surwf = NULL, isSimulated = FALSE, trueParameters = NULL,
-                        isSurvey = FALSE, catch = NULL, catchUnits = "tonnes", years = NULL, 
-                        stockname = "-", stockcode = "-", species = "-") {
+s6input <- function(wf = NULL, surwf = NULL, isSimulated = FALSE, trueParameters = NULL,
+                    isSurvey = FALSE, catch = NULL, catchUnits = "tonnes", years = NULL, 
+                    stockname = "-", stockcode = "-", species = "-") {
   ## Input argument validation
   if (isSurvey) {
     if (length(surwf) != length(catch)) {

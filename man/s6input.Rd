@@ -2,7 +2,6 @@
 % Please edit documentation in R/s6input_class.R
 \name{s6input}
 \alias{s6input}
-\alias{new_s6input}
 \alias{s6input-class}
 \alias{hist.s6input}
 \alias{seq.s6input}
@@ -10,9 +9,9 @@
 \alias{[.s6input}
 \alias{format.s6input}
 \alias{print.s6input}
-\title{The s6input class and constructor}
+\title{The s6input class constructor}
 \usage{
-new_s6input(
+s6input(
   wf = NULL,
   surwf = NULL,
   isSimulated = FALSE,
@@ -77,6 +76,10 @@ class. Convenient functions are available to present the data and
 \code{plot} them.
 }
 \examples{
+ 
+## Empty input
+inp <- new_s6input()
+
 ## simulate a data set
 d <- simulate(s6params(), binsize = 100, nsim = 100)
 
