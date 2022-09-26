@@ -11,6 +11,6 @@ test_that("getParams reads parameters correctly", {
     expect_equal(gpp2$p, p1)
     expect_equal(getParams(p1)$p, p1)
 
-    expect_that(pp <- s6model::getParams(p <- parameters(c("Winf","eta_F"), c(0.5, 0.11), FALSE))$p, not(gives_warning()))
+    expect_warning(pp <- s6model::getParams(p <- parameters(c("Winf","eta_F"), c(0.5, 0.11), FALSE))$p, regexp = NA)
     expect_equal(pp, p)
 })

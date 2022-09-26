@@ -30,7 +30,7 @@ test_that("fitWL handles correctly missing values", {
 test_that("fitWL plots some results", {
   a <- 0.0234
   b <- 2.987
-  df <- data.frame(Weight = a * c(1:15) ^ b,
+  df <- data.frame(Weight = a * c(1:15) ^ b + rnorm(15, sd = 0.1),
                    Length =     c(1:15))
   fitWL(df, plotFit = FALSE)
   expect_error(recordPlot())
