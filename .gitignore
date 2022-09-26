@@ -18,6 +18,8 @@ packrat
 *.so
 *.bak
 tests/testthat/*.pdf
+tests/testthat/*.rds
+
 inst/doc
 vignettes/*.html
 vignettes/*.R
