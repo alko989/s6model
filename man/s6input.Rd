@@ -9,6 +9,7 @@
 \alias{[.s6input}
 \alias{format.s6input}
 \alias{print.s6input}
+\alias{is.s6input}
 \title{The s6input class constructor}
 \usage{
 s6input(
@@ -36,6 +37,8 @@ s6input(
 \method{format}{s6input}(x, ...)
 
 \method{print}{s6input}(x)
+
+is.s6input(x)
 }
 \arguments{
 \item{wf}{list of data frames with commercial weight frequencies}

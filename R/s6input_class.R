@@ -104,11 +104,8 @@ length.s6input <- function(x) {
 `[.s6input` <- function(x, i) {
   if (length(x) < max(i)) stop("Out of bounds.", call. = FALSE)
   res <- as.environment(as.list.environment(x, all.names = TRUE))
-  if(res$isSurvey) {
-    res$surWF <- res$surWF[i]  
-  } else {
-    res$wf <- res$wf[i]
-  }
+  res$surwf <- res$surwf[i]  
+  res$wf <- res$wf[i]
   res$catch <- res$catch[i]
   res$years <- res$years[i]
   structure(res, class = "s6input")
@@ -133,7 +130,7 @@ format.s6input <- function(x, ...) {
   res <- addline(res, "Is simulated data: ", x$isSurvey)
   res <- addline(res, line)
   res <- addline(res, "Use `plot(", objname, ")` for visualizing the data ",
-                 "and `fit(", objname, ")` to make the assessment.\n")
+                 "and `fit(", objname, ")` to make the assessment.")
   res
 }
 
@@ -141,7 +138,12 @@ format.s6input <- function(x, ...) {
 #' @export
 print.s6input <- function(x) {
   syscall <- sys.calls()
-  objname <- deparse(syscall[[1]][[2]])
+  objname <- deparse(syscall[[1]][[2]][[2]])
   cat(format(x, objname = objname), "\n")
 }
 
+#' @rdname s6input
+#' @export
+is.s6input <- function(x) {
+  inherits(x, "s6input")
+}
