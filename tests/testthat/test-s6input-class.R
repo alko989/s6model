@@ -1,3 +1,4 @@
+library(s6model)
 context("s6input Class")
 
 test_that("An s6input object is correctly initialized", {
@@ -8,7 +9,8 @@ test_that("An s6input object is correctly initialized", {
   catch <- runif(length(nscoddat), 140, 700)
   years <- as.numeric(names(nscoddat))
   
-  inpall <- s6input(wf = nscoddat, isSurvey = FALSE, 
+  inpall <- s6input(wf = nscoddat, 
+                    isSurvey = FALSE, 
                     years = years,
                     catch = catch)
   
@@ -64,6 +66,7 @@ test_that("Printing an object works", {
   expect_equal(numberoflines, 8)
   blahbluh <- inpall
   expect_output(print(blahbluh), "blahbluh")
+  expect_output(print(blahbluh[1:10]), "blahbluh\\[1:10\\]")
 })
 
 test_that("Constructor validation", {

@@ -61,7 +61,7 @@ s6input <- function(wf = NULL, surwf = NULL, isSimulated = FALSE, trueParameters
   e$stockname <- stockname
   e$stockcode <- stockcode
   e$species <- species
-  #e$env <- e
+  e$.__env__ <- e
   e$s6version <- s6model:::getVersion("s6model")
   structure(e, class = "s6input")
 }
@@ -117,15 +117,23 @@ format.s6input <- function(x, ...) {
   args <- list(...)
   objname <- if ("objname" %in% names(args)) args$objname else "inp"
   addline <- function(x, ...) paste0(x, ..., "\n") 
-  ny <- length(x$years)
-  yearlines <- ceiling(ny / 10)
   line <- paste0(rep("-", 80), collapse= "")
   res <- addline("", "Object of class 's6input'")
-  res <- addline(res, "Input data for: ", x$stockname, " (", x$species, ", ", x$stockcode,")")
+  res <- addline(res, "Input data for: ", x$stockname, 
+                 " (", x$species, ", ", x$stockcode,")")
   res <- addline(res, line)
-  res <- addline(res, "Available years: ", paste(head(x$years, 10), collapse = ", "))
-  for(i in seq(yearlines)[-1])
-    res <- addline(res, "                 ", paste(x$years[((i - 1) * 10 + 1):min((i) * 10 , ny)], collapse = ", "))
+  years <- x$years
+  ny <- length(years)
+  yearlines <- ceiling(ny / 10)
+  res <- addline(res, "Available years: ", 
+                 paste(head(years, 10), collapse = ", "))
+  years <- tail(years, -10)
+  for(i in seq(yearlines)[-1]) {
+    res <- addline(res, "                 ", 
+                   #paste(x$years[((i - 1) * 10 + 1):min((i) * 10 , ny)], collapse = ", "))
+                   paste(head(years,10), collapse = ", "))
+    years <- tail(years, -10)
+  }
   res <- addline(res, "Is survey: ", x$isSurvey)
   res <- addline(res, "Is simulated data: ", x$isSurvey)
   res <- addline(res, line)
@@ -134,11 +142,25 @@ format.s6input <- function(x, ...) {
   res
 }
 
+get_res_obj_name <- function(x) {
+  find_last <- function(x) {
+    if (!is.list(x[[1]]))
+      return(x[[1]]) 
+    else 
+      return(find_last(x[[1]]))
+  }
+  res <- find_last(x[length(x)])
+  if (any(grepl('UseMethod[(]"print"[)]', deparse(x))))
+    return("inp")
+  if (is.call(res))
+    return(deparse(res[[length(res)]]))
+}
+
 #' @rdname s6input
 #' @export
-print.s6input <- function(x) {
+print.s6input <- function(x, ...) {
   syscall <- sys.calls()
-  objname <- deparse(syscall[[1]][[2]][[2]])
+  objname <- get_res_obj_name(syscall)
   cat(format(x, objname = objname), "\n")
 }
 

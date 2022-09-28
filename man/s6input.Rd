@@ -36,7 +36,7 @@ s6input(
 
 \method{format}{s6input}(x, ...)
 
-\method{print}{s6input}(x)
+\method{print}{s6input}(x, ...)
 
 is.s6input(x)
 }
