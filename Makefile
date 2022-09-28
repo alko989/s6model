@@ -21,7 +21,7 @@ test:
 	echo "testthat::test_local('${PACKAGE}')" | R --slave
 
 cover: 
-	echo "covr::codecov(path = \"${PACKAGE}\", token = "d9ed0064-076f-4726-bbca-abef84e68339")" | R --slave	
+	echo "covr::codecov(path = \"${PACKAGE}\", token = \"d9ed0064-076f-4726-bbca-abef84e68339\")" | R --slave	
 
 vignette:
 	{ \
