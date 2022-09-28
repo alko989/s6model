@@ -1,4 +1,4 @@
-name: Build
+name: Tests
 
 on:
   push:
@@ -13,4 +13,10 @@ jobs:
 
       - name: install s6model
         run: mkdir -p ../library && R_LIBS="~/github/s6model/library" make install
+        
+  test-s6model:
+    runs-on: self-hosted
+    steps:
+      - name: test s6model
+        run: R_LIBS="~/github/s6model/library" make test
   
