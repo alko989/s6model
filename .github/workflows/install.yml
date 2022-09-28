@@ -12,5 +12,5 @@ jobs:
         uses: actions/checkout@v3
 
       - name: install s6model
-        run: mkdir ../library && R_LIBS="~/github/s6model/library" make install
+        run: mkdir -p ../library && R_LIBS="~/github/s6model/library" make install
   
