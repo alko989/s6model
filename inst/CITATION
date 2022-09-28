@@ -1,14 +1,30 @@
-citHeader("To cite s6model in publications, please use:")
-citEntry(entry="article",
-         title = "Limits to the reliability of size-based fishing status estimation for data-poor stocks",
-         author = c(person(given="Alexandros", family="Kokkalis", email="alko@aqua.dtu.dk"),
+bibentry(
+  bibtype = "Article",
+  title = "Limits to the reliability of size-based fishing status estimation for data-poor stocks",
+  author = c(person(given="Alexandros", family="Kokkalis", email="alko@aqua.dtu.dk"),
              person(given=c("Uffe", "H."), family="Thygesen", email="uht@aqua.dtu.dk"),
              person(given="Anders", family="Nielsen", email="an@aqua.dtu.dk"),
              person(c("Ken", "H."), "Andersen", email="kha@aqua.dtu.dk")),
-         note="In press",
-         doi="10.1016/j.fishres.2014.10.007",
-         year="2014",
-         journal="Fisheries Research",
-         textVersion=NULL
-         )
+  doi="10.1016/j.fishres.2014.10.007",
+  year="2015",
+  volume = "171",
+  pages = "4-11",
+  journal="Fisheries Research",
+  header = "To cite s6model in publications, please use:"
+)
 
+bibentry(
+  bibtype = "Article",
+  doi = "10.1093/icesjms/fsw145",
+  author = c(person(family = "Kokkalis", given = "Alexandros", email="alko@aqua.dtu.dk"),
+             person(family = "Eikeset", given = c("Anne", "Maria")),
+             person(family = "Thygesen", given = c("Uffe", "H.")),
+             person(family = "Steingrund", given = "Petur"),
+             person(family = "Andersen", given = c("Ken", "H."))),
+    title = "Estimating uncertainty of data limited stock assessments",
+    journal = "ICES Journal of Marine Science",
+    volume = "74",
+    number = "1",
+    pages = "69-77",
+    year = "2016"
+)
