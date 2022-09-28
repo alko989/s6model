@@ -1,0 +1,20 @@
+name: install-test-s6model
+
+on:
+  push:
+    branches: [ "rewrite" ]
+  workflow_dispatch:
+
+jobs:
+  install-s6model:
+    runs-on: self-hosted
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: install spict
+        run: mkdir library && R_LIBS="~/github/s6model/s6model/library" make install
+      
+      - name: test spict
+        run: R_LIBS="~/github/spict/spict/library" make test
+  
