@@ -8,7 +8,7 @@ Author: Alexandros Kokkalis
 Maintainer: Alexandros Kokkalis <alko@aqua.dtu.dk>
 Description: Contains functions to estimate parameters of the model and the
     Fmsy reference point. Also including functionality to simulate data.
-License: GPL
+License: GPL (>= 3)
 Depends:
     R (>= 2.14)
 Imports:
