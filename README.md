@@ -1,10 +1,8 @@
-## Single species, size structured, steady state (s6) fish stock assessment model
+## Single-species, size-structured, steady-state fish stock assessment model (s6model)
 
-Stable version: [![Build Status](https://travis-ci.org/alko989/s6model.svg?branch=master)](https://travis-ci.org/alko989/s6model?branch=master)
-[![codecov.io](https://codecov.io/github/alko989/s6model/coverage.svg?branch=master)](https://codecov.io/github/alko989/s6model?branch=master)
-
-Development version: [![Build Status](https://travis-ci.org/alko989/s6model.svg?branch=dev)](https://travis-ci.org/alko989/s6model?branch=dev)
-[![codecov.io](https://codecov.io/github/alko989/s6model/coverage.svg?branch=dev)](https://codecov.io/github/alko989/s6model?branch=dev)
+[![Build](https://github.com/alko989/s6model/actions/workflows/install.yml/badge.svg)](https://github.com/alko989/s6model/actions/workflows/install.yml) 
+[![Test](https://github.com/alko989/s6model/actions/workflows/test.yml/badge.svg)](https://github.com/alko989/s6model/actions/workflows/test.yml)
+[![codecov.io](https://codecov.io/github/alko989/s6model/coverage.svg?branch=rewrite)](https://codecov.io/github/alko989/s6model?branch=rewrite)
 
 [![CRAN version](http://www.r-pkg.org/badges/version/s6model)](http://cran.r-project.org/package=s6model)
 

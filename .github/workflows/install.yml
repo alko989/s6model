@@ -1,0 +1,16 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  install-s6model:
+    runs-on: self-hosted
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: install s6model
+        run: mkdir ../library && R_LIBS="~/github/s6model/library" make install
+  
