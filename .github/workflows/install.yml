@@ -16,3 +16,6 @@ jobs:
       
       - name: test s6model
         run: R_LIBS="~/github/s6model/library" make test
+        
+      - name: send code coverage report to codecov
+        run: R_LIBS="~/github/s6model/library" make cover 
