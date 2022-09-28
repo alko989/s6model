@@ -1,4 +1,4 @@
-#' The s6input class constructor
+#' The s6input class and constructor
 #'
 #' s6input is an S3 class that contains the input data that are used to 
 #' make the assessment. The \code{s6input} function is the constructor of the

@@ -10,7 +10,7 @@
 \alias{format.s6input}
 \alias{print.s6input}
 \alias{is.s6input}
-\title{The s6input class constructor}
+\title{The s6input class and constructor}
 \usage{
 s6input(
   wf = NULL,
