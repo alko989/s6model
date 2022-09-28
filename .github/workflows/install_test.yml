@@ -12,9 +12,9 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
-      - name: install spict
+      - name: install s6model
         run: mkdir library && R_LIBS="~/github/s6model/s6model/library" make install
       
-      - name: test spict
-        run: R_LIBS="~/github/spict/spict/library" make test
+      - name: test s6model
+        run: R_LIBS="~/github/s6model/s6model/library" make test
   
