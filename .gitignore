@@ -17,13 +17,13 @@ packrat
 *.o
 *.so
 *.bak
-tests/testthat/*.pdf
-tests/testthat/*.rds
+s6model/tests/testthat/*.pdf
+s6model/tests/testthat/*.rds
 
 inst/doc
-vignettes/*.html
-vignettes/*.R
-vignettes/*.pdf
-vignettes/*_cache
-vignettes/*_files
+s6model/vignettes/*.html
+s6model/vignettes/*.R
+s6model/vignettes/*.pdf
+s6model/vignettes/*_cache
+s6model/vignettes/*_files
 results

@@ -17,13 +17,15 @@ Data-poor stock assessment using the s6model
 Using `remotes' package:
 
 ``` 
+install.packages('TMB', type = "source")
 ## install.packages('remotes')
-install.packages('TMB')
 library(remotes)
+
 ## Stable version
-install_github("alko989/s6model")
+install_github("alko989/s6model/s6model")
+
 ## Development version
-install_github("alko989/s6model", ref = "dev")
+install_github("alko989/s6model/s6model", ref = "dev")
 ```
 
 Another option is to download the whole code as a zipball and build and install using ```R CMD INSTALL```
