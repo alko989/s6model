@@ -1,7 +1,6 @@
 ## Single-species, size-structured, steady-state fish stock assessment model (s6model)
 
-[![Build](https://github.com/alko989/s6model/actions/workflows/install.yml/badge.svg)](https://github.com/alko989/s6model/actions/workflows/install.yml) 
-[![Test](https://github.com/alko989/s6model/actions/workflows/test.yml/badge.svg)](https://github.com/alko989/s6model/actions/workflows/test.yml)
+[![Tests](https://github.com/alko989/s6model/actions/workflows/install.yml/badge.svg)](https://github.com/alko989/s6model/actions/workflows/install.yml) 
 [![codecov.io](https://codecov.io/github/alko989/s6model/coverage.svg?branch=rewrite)](https://codecov.io/github/alko989/s6model?branch=rewrite)
 
 [![CRAN version](http://www.r-pkg.org/badges/version/s6model)](http://cran.r-project.org/package=s6model)
