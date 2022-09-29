@@ -329,38 +329,38 @@ as.list.Parameters <- function(x, ...) {
   with(getParams(x), list(Winf=Winf, Fm=Fm, Wfs=Wfs, eta_m=eta_m, epsilon_r=epsilon_r, epsilon_a=epsilon_a, A=A, a=a, n=n, u=u))
 }
 
-##' Difference between two \code{Parameters} objects
-##' 
-##' @param base \code{Parameters} object. First object
-##' @param comp \code{Parameters} object. Second object
-##' @return TRUE if they are the same. If there are differences, a data.frame is returned
-##' with the untransformed parameter values of the two objects, the relative difference (base - comp)
-##' and the percent difference 
-##' @author alko
-##' @docType methods
-##' @rdname difference-methods
-##' @export
-setGeneric("difference", function(base, comp) {
-  standardGeneric ("difference")
-})
-
-##' @rdname difference-methods
-##' @aliases difference,Parameters,Parameters-method
-setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
-  res <- data.frame(base=numeric(), comp=numeric(),difference=numeric(),percent.difference=numeric(), stringsAsFactors=FALSE)
-  r <- sapply(slotNames("Parameters"), function(n) {
-    if(eval(parse(text=paste("base@" , n, sep=""))) !=
-         eval(parse(text=paste("comp@" , n, sep="")))) {
-      val1 <- exp(eval(parse(text=paste("base@" , n, sep="")))) * eval(parse(text=paste("base@scale" , substr(n, 4, nchar(n)), sep="")))
-      val2 <- exp(eval(parse(text=paste("comp@" , n, sep="")))) * eval(parse(text=paste("comp@scale" , substr(n, 4, nchar(n)), sep="")))
-      res[substr(n, 4, nchar(n)), ] <<- c(val1,val2, val1 - val2,abs((val1-val2)/(mean(val1,val2)))*100)
-    } else {
-      NA
-    }
-  })
-  if(dim(res)[1] == 0) return( TRUE)
-  round(res,4)
-})
+# ##' Difference between two \code{Parameters} objects
+# ##' 
+# ##' @param base \code{Parameters} object. First object
+# ##' @param comp \code{Parameters} object. Second object
+# ##' @return TRUE if they are the same. If there are differences, a data.frame is returned
+# ##' with the untransformed parameter values of the two objects, the relative difference (base - comp)
+# ##' and the percent difference 
+# ##' @author alko
+# ##' @docType methods
+# ##' @rdname difference-methods
+# ##' @export
+# setGeneric("difference", function(base, comp) {
+#   standardGeneric ("difference")
+# })
+# 
+# ##' @rdname difference-methods
+# ##' @aliases difference,Parameters,Parameters-method
+# setMethod("difference", c("Parameters", "Parameters"), function(base, comp) {
+#   res <- data.frame(base=numeric(), comp=numeric(),difference=numeric(),percent.difference=numeric(), stringsAsFactors=FALSE)
+#   r <- sapply(slotNames("Parameters"), function(n) {
+#     if(eval(parse(text=paste("base@" , n, sep=""))) !=
+#          eval(parse(text=paste("comp@" , n, sep="")))) {
+#       val1 <- exp(eval(parse(text=paste("base@" , n, sep="")))) * eval(parse(text=paste("base@scale" , substr(n, 4, nchar(n)), sep="")))
+#       val2 <- exp(eval(parse(text=paste("comp@" , n, sep="")))) * eval(parse(text=paste("comp@scale" , substr(n, 4, nchar(n)), sep="")))
+#       res[substr(n, 4, nchar(n)), ] <<- c(val1,val2, val1 - val2,abs((val1-val2)/(mean(val1,val2)))*100)
+#     } else {
+#       NA
+#     }
+#   })
+#   if(dim(res)[1] == 0) return( TRUE)
+#   round(res,4)
+# })
 
 ##' Visualizing fit of s6model
 ##'
