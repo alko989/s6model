@@ -1,7 +1,7 @@
 #' The s6params class and constructor
 #'
 #' s6params is an S3 class that contains all model parameters. The 
-#' \code{s6params} function is the constructor of the class. Convienient 
+#' \code{s6params} function is the constructor of the class. Convenient 
 #' functions are available to \code{plot}, draw \code{lines}, \code{simulate} 
 #' data, return a named list of all parameters (\code{as.list}) and get the 
 #' mean parameters of a list of \code{s6params} objects.
@@ -13,14 +13,14 @@
 #' @param eta_F numeric, 50\% retention size, relative to asymptotic weight
 #' @param eta_m numeric, 50\% maturation size, relative to asymptotic weight
 #' @param eta_S numeric, 50\% retention size (survey), relative to asymptotic weight
-#' @param a numeric, physioical mortality
+#' @param a numeric, physiological mortality
 #' @param epsilon_a numeric, allocation to activity
 #' @param epsilon_r numeric, recruitment efficiency
 #' @param Wfs numeric, 50\% retention size
 #' @param u numeric, selectivity parameter
 #' @param ngrid numeric, number of internal weight classes for Fmsy estimation
-#' @param wl.a, numeric, weight lenght relationship multiplier
-#' @param wl.b numeric, weight lenght relationship exponent
+#' @param wl.a, numeric, weight length relationship multiplier
+#' @param wl.b numeric, weight length relationship exponent
 #' @param base s6params object
 #'
 #' @author Alexandros Kokkalis <alko@aqua.dtu.dk>
