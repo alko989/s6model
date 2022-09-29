@@ -6,6 +6,8 @@
 \alias{print.s6params}
 \alias{is.s6params}
 \alias{all.equal.s6params}
+\alias{format.s6params}
+\alias{as.list.s6params}
 \title{The s6params class and constructor}
 \usage{
 s6params(
@@ -30,7 +32,11 @@ s6params(
 
 is.s6params(x)
 
-\method{all}{equal.s6params}(target, current)
+\method{all.equal}{s6params}(target, current)
+
+\method{format}{s6params}(x, ...)
+
+\method{as.list}{s6params}(x, ...)
 }
 \arguments{
 \item{Winf}{numeric, asymptotic weight}
@@ -45,7 +51,7 @@ is.s6params(x)
 
 \item{eta_S}{numeric, 50\% retention size (survey), relative to asymptotic weight}
 
-\item{a}{numeric, physioical mortality}
+\item{a}{numeric, physiological mortality}
 
 \item{epsilon_a}{numeric, allocation to activity}
 
@@ -57,9 +63,9 @@ is.s6params(x)
 
 \item{ngrid}{numeric, number of internal weight classes for Fmsy estimation}
 
-\item{wl.a, }{numeric, weight lenght relationship multiplier}
+\item{wl.a, }{numeric, weight length relationship multiplier}
 
-\item{wl.b}{numeric, weight lenght relationship exponent}
+\item{wl.b}{numeric, weight length relationship exponent}
 
 \item{base}{s6params object}
 
@@ -67,10 +73,17 @@ is.s6params(x)
 }
 \description{
 s6params is an S3 class that contains all model parameters. The 
-\code{s6params} function is the constructor of the class. Convienient 
+\code{s6params} function is the constructor of the class. Convenient 
 functions are available to \code{plot}, draw \code{lines}, \code{simulate} 
 data, return a named list of all parameters (\code{as.list}) and get the 
 mean parameters of a list of \code{s6params} objects.
+
+#' @export
+#' @rdname s6params
+lines.s6params <- function(x, ...){
+  p <- getParams(x)
+  lines(xy.coords(p$w / p$Winf, p$N * (p$w ^ 2)), ...)
+}
 }
 \examples{
 ## Without any arguments gives a \code{s6params} object with default values
@@ -81,8 +94,8 @@ par1 <- s6params(Winf = 1000, Fm = 0.4, Wfs = 100)
  
 ## Take a s6params object and change one parameter
 par <- s6params(Winf = (1000), a = (0.4), Fm = (0.2), Wfs = (100))
-changeMatsize <- par
-changeMatsize$etam <- (0.3)
+changeMatsize <- par$clone()
+changeMatsize$eta_m <- 0.3
 
 difference(par, changeMatsize)
 ##       base comp difference percent.difference

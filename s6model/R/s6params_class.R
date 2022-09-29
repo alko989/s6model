@@ -38,8 +38,8 @@
 #'  
 #' ## Take a s6params object and change one parameter
 #' par <- s6params(Winf = (1000), a = (0.4), Fm = (0.2), Wfs = (100))
-#' changeMatsize <- par
-#' changeMatsize$etam <- (0.3)
+#' changeMatsize <- par$clone()
+#' changeMatsize$eta_m <- 0.3
 #'
 #' difference(par, changeMatsize)
 #' ##       base comp difference percent.difference
@@ -49,32 +49,36 @@ s6params <- function(
     Fm =        0.25,   # Fishing mortality
     A =         4.47,   # Growth parameter
     n =         0.75,   # Exponent of consumption
-    eta_m=      0.25,   # Maturation weight (relative to Winf)
-    eta_S=      0.001,  # 50% retainment weight, survey gear
+    eta_m =     0.25,   # Maturation weight (relative to Winf)
+    eta_S =     0.001,  # 50% retainment weight, survey gear
     a =         0.22,   # Physiological mortality
     epsilon_a = 0.8,    # Allocation to maintenance
     epsilon_r = 0.1,    # Reproduction efficiency
-    Wfs =  500,         # 50% retainment weight of commercial gear
-    u =    10,
-    ngrid = 1000,       # Grid points for Fmsy estimation
+    Wfs =       500,    # 50% retainment weight of commercial gear
+    u =         10, 
+    ngrid =     1000,   # Grid points for Fmsy estimation
     wl.a = 0.01,        # Weight-length relationship a,b: W = a L^b
     wl.b = 3,                
     base = NULL) {
+  
   ## Get user defined parameters
   mc <- match.call()
   mcl <- as.list(mc[-1])
   userargs <- names(mcl)
   usebase <- "base" %in% userargs
-  userargs <- userargs[userargs != "base"]
+  excludeargs <- c("base", ".clone")
+  userargs <- userargs[!userargs %in% excludeargs]
   
   if(usebase && ! is.s6params(base)) stop("base should be an s6params object", call. = FALSE)
   
-  for (n in userargs) {
-    if (! is.finite(eval(mcl[[n]]))) stop(paste(n, " should be finite number"), call. = FALSE)
-    if (length(eval(mcl[[n]])) != 1) stop(paste(n, " should not be a vector"), call. = FALSE)
+  for (arg in userargs) {
+    if (length(eval(mcl[[arg]])) != 1) stop(paste(arg, " should not be a vector"), call. = FALSE)
+    if (! is.finite(eval(mcl[[arg]]))) stop(paste(arg, " should be finite number"), call. = FALSE)
   }
   
   e <- new.env()
+  ## Clone function
+  e$.clone <- add_clone_fun(envir = e)
   e$Winf <- Winf
   e$Fm <- Fm
   e$A <- A
@@ -92,8 +96,8 @@ s6params <- function(
   
   if ("base" %in% names(mcl)) {
     mcl <- mcl[mcl!="base"]
-    for (n in setdiff(names(base), userargs)) {
-      e[[n]] <- base[[n]]
+    for (nm in setdiff(names(base), userargs)) {
+      e[[nm]] <- base[[nm]]
     }
   }
   
@@ -101,11 +105,21 @@ s6params <- function(
     warning("The start of fishing occurs at a weight equal or greater than the asymptotic weight")
   }
   
-  # e$.__env__ <- e
+  e$.__env__ <- e
   e$s6version <- s6model:::getVersion("s6model")
   structure(e, class = "s6params")
 }
 
+add_clone_fun <- function(envir) {
+  function() {
+    # en <- new.env(parent = envir)
+    # parent <- parent.env(env = en)
+    res <- as.environment(as.list(envir))
+    res$.__env__ <- res
+    res$.clone <- add_clone_fun(res)
+    structure(res, class = "s6params")
+  }
+}
 
 #' @rdname s6params
 #' @export
@@ -120,6 +134,7 @@ is.s6params <- function(x) {
 }
 
 #' @rdname s6params
+#' @method all.equal s6params
 #' @export
 all.equal.s6params <- function(target, current) {
   names <- ls(envir = target)
@@ -131,164 +146,162 @@ all.equal.s6params <- function(target, current) {
 }
 
 
-#' s6params <- function(pars = list()) {
-#'   res <- base
-#'   nms <- names(pars)
-#'   mats <- wfs <- etaf <- 0
-#'   for(i in seq(along = nms)) {
-#'     nm <- nms[i]
-#'     if(nm %in% c("M", "wl.a", "wl.b")) {
-#'       slot(res, nm) <- pars[[i]]
-#'     } else if (nm == "matSize") {
-#'       mats <- i
-#'     } else if (nm %in% c("Wfs", "logWfs")) {
-#'       wfs <- i
-#'     } else if (nm %in% c("eta_F", "logeta_F")) {
-#'       etaf <- i
-#'     } else if (grepl("^log", nm)) {
-#'       slot(res, nm) <- pars[[i]]
-#'     } else {
-#'       slot(res, paste0("log", nm)) <- log(pars[[i]])
-#'     }
-#'   }
-#'   if(mats > 0) {
-#'     res@logeta_m <- log(pars[[mats]]) - res@logWinf
-#'     if(any(nms %in% c("logeta_m", "eta_m"))) 
-#'       warning("The maturation size is defined both in absolute (matSize) and in relative (eta_m) terms. Only matSize is used.")
-#'   }
-#'   if (wfs > 0) {
-#'     res@logWfs <- if (grepl("^log", nms[wfs])) {
-#'       pars[[wfs]]
-#'     } else {
-#'       log(pars[[wfs]])
-#'     }
-#'     res@logeta_F <- res@logWfs - res@logWinf
-#'     if (etaf > 0)
-#'       warning("Do not use Wfs and eta_F at the same time. Only Wfs was used")
-#'   }
-#'   if (etaf > 0 & wfs == 0) {
-#'     res@logeta_F <- if (grepl("^log", nms[etaf])) {
-#'       pars[[etaf]]
-#'     } else {
-#'       log(pars[[etaf]])
-#'     }
-#'     res@logWfs <- res@logeta_F + res@logWinf
-#'   }
-#'   if (etaf == 0 & wfs == 0) {
-#'     res@logWfs <- res@logeta_F + res@logWinf
-#'   }
-#'   if (res@logWinf <= res@logWfs) {
-#'     warning("The start of fishing occurs at a weight equal or greater than the asymptotic weight")
-#'   }
-#'   res    
-#' }
-#' 
-#' ##' Calculate the mean value of 
-#' ##' @param l list of \code{s6params} objects
-#' ##'
-#' ##' @return A \code{s6params} object with mean 
-#' ##' values of the input \code{s6params}. If the input is NULL it returns NULL
-#' ##' and it returns the i
-#' ##' 
-#' ##' It returns NULL if \code{x} is NULL and 
-#' ##' \code{l} if \code{l} is an object of class \code{s6params}
-#' ##' @export
-#' ##' @rdname s6params
-#' meanParameters <- function(l, ...) {
-#'   if(is.null(l)) {
-#'     warning("Argument l in `meanParameters` is NULL")
-#'     return(NULL)
-#'   }
-#'   if(is(l, "s6params")) return(l)
-#'   p <- as.list(s6params())
-#'   p$eta_F <- NULL
-#'   s6params(setNames(sapply(names(p), function(i) {
-#'     allvals <- sapply(l, function(xx) {
-#'       if(is.null(xx)) return(NA)
-#'       c(as.list(xx)[[i]])  
-#'     })
-#'     mean(allvals, na.rm = TRUE)
-#'   }), names(p)))
-#' }
-#' 
-#' ##' Takes a \code{s6params} object and changes its asymptotic weight
-#' ##'
-#' ##' The asymptotic weight is changed, along with the relative and absolute sizes of 50\% retention 
-#' ##' @param value Numeric. The new asymptotic weight
-#' ##' @return \code{s6params} object with changed asymptotic weight, and absolute and
-#' ##' relative 50\% retention sizes
-#' ##' @author alko
-#' ##' @docType methods
-#' ##' @rdname Winf-methods
-#' ##' @export
-#' setGeneric("Winf<-",function(object,value){standardGeneric("Winf<-")})
-#' 
-#' ##' @rdname Winf-methods
-#' ##' @aliases Winf<--methods, Winf<-,s6params-method
-#' ##' @name Winfsetter
-#' setReplaceMethod(
-#'   f = "Winf",
-#'   signature = "s6params",
-#'   definition = function(object, value) {
-#'     object@logWinf <- log(value)
-#'     eF <- exp(object@logeta_F)
-#'     winf <- exp(object@logWinf)
-#'     object@logWfs <- log(eF * winf)
-#'     return (object)
-#'   })
-#' 
-#' ##' @param object \code{s6params} object 
-#' ##' @export
-#' ##' @docType methods
-#' ##' @rdname Winf-methods
-#' setGeneric("Winf", function(object) standardGeneric("Winf"))
-#' 
-#' ##' @rdname Winf-methods
-#' ##' @aliases Winf,s6params-method
-#' setMethod("Winf", 
-#'           signature(object = "s6params"), 
-#'           function(object) {
-#'             exp(object@logWinf)
-#'           }
-#' )
-#' 
-#' formatEntry <- function(..., width = 20) {
-#'   res <- c()
-#'   for(arg in list(...)) {
-#'     if(is(arg, "numeric")) {
-#'       res <- c(res, round(arg, ifelse(arg < 10, 4, 1)))
-#'     } else {
-#'       res <- c(res, arg)
-#'     }
-#'   }
-#'   format(paste(res, sep = "", collapse = ""), width = width)
-#' }
-#' 
-#' setMethod("show", "s6params",
-#'           function(object) {
-#'             width <- min(floor(getOption("width") / 5), 20)
-#'             cat(" ___________________________________\n")
-#'             cat("|  An object of class 's6params'    |\n")
-#'             cat("|___________________________________|",rep("_", width * 3 - 34), "\n", sep="")
-#'             cat("|", formatEntry("  Winf  = ", exp(object@logWinf), width = width), 
-#'                 "|", formatEntry("  A = ", exp(object@logA), width = width),
-#'                 "|", formatEntry("  eps_r = ", exp(object@logepsilon_r), width = width), "|\n",
-#'                 "|", formatEntry("  Fm    = ", exp(object@logFm), width = width),
-#'                 "|", formatEntry("  a = ", exp(object@loga), width = width),
-#'                 "|", formatEntry("  eta_m = ", exp(object@logeta_m), width = width), "|\n",
-#'                 "|", formatEntry("  eta_F = ", exp(object@logeta_F), width = width), 
-#'                 "|", formatEntry("  n = ", exp(object@logn), width = width),
-#'                 "|", formatEntry("  eps_a = ", exp(object@logepsilon_a), width = width),"|\n",
-#'                 "|", formatEntry("  eta_S = ", exp(object@logeta_S), width = width),
-#'                 "|", formatEntry("  Wfs = ", exp(object@logWfs), width = width),
-#'                 "|", formatEntry("  u = ", exp(object@logu), width = width),"|\n",
-#'                 "|", formatEntry("  wl.a = ", object@wl.a, width = width),
-#'                 "|", formatEntry("  wl.b = ", object@wl.b, width = width), 
-#'                 "|", formatEntry("", width = width),"|\n",
-#'                 sep="")
-#'             cat("|", rep("_", width), "|", rep("_", width), "|", rep("_", width), "|\n", sep="")
-#'             cat("\n")
-#'           })
+# s6params <- function(pars = list()) {
+#   res <- base
+#   nms <- names(pars)
+#   mats <- wfs <- etaf <- 0
+#   for(i in seq(along = nms)) {
+#     nm <- nms[i]
+#     if(nm %in% c("M", "wl.a", "wl.b")) {
+#       slot(res, nm) <- pars[[i]]
+#     } else if (nm == "matSize") {
+#       mats <- i
+#     } else if (nm %in% c("Wfs", "logWfs")) {
+#       wfs <- i
+#     } else if (nm %in% c("eta_F", "logeta_F")) {
+#       etaf <- i
+#     } else if (grepl("^log", nm)) {
+#       slot(res, nm) <- pars[[i]]
+#     } else {
+#       slot(res, paste0("log", nm)) <- log(pars[[i]])
+#     }
+#   }
+#   if(mats > 0) {
+#     res@logeta_m <- log(pars[[mats]]) - res@logWinf
+#     if(any(nms %in% c("logeta_m", "eta_m")))
+#       warning("The maturation size is defined both in absolute (matSize) and in relative (eta_m) terms. Only matSize is used.")
+#   }
+#   if (wfs > 0) {
+#     res@logWfs <- if (grepl("^log", nms[wfs])) {
+#       pars[[wfs]]
+#     } else {
+#       log(pars[[wfs]])
+#     }
+#     res@logeta_F <- res@logWfs - res@logWinf
+#     if (etaf > 0)
+#       warning("Do not use Wfs and eta_F at the same time. Only Wfs was used")
+#   }
+#   if (etaf > 0 & wfs == 0) {
+#     res@logeta_F <- if (grepl("^log", nms[etaf])) {
+#       pars[[etaf]]
+#     } else {
+#       log(pars[[etaf]])
+#     }
+#     res@logWfs <- res@logeta_F + res@logWinf
+#   }
+#   if (etaf == 0 & wfs == 0) {
+#     res@logWfs <- res@logeta_F + res@logWinf
+#   }
+#   if (res@logWinf <= res@logWfs) {
+#     warning("The start of fishing occurs at a weight equal or greater than the asymptotic weight")
+#   }
+#   res
+# }
+
+# ##' Calculate the mean value of
+# ##' @param l list of \code{s6params} objects
+# ##'
+# ##' @return A \code{s6params} object with mean
+# ##' values of the input \code{s6params}. If the input is NULL it returns NULL
+# ##' and it returns the i
+# ##'
+# ##' It returns NULL if \code{x} is NULL and
+# ##' \code{l} if \code{l} is an object of class \code{s6params}
+# ##' @export
+# ##' @rdname s6params
+# meanParameters <- function(l, ...) {
+#   if(is.null(l)) {
+#     warning("Argument l in `meanParameters` is NULL")
+#     return(NULL)
+#   }
+#   if(is(l, "s6params")) return(l)
+#   p <- as.list(s6params())
+#   p$eta_F <- NULL
+#   s6params(setNames(sapply(names(p), function(i) {
+#     allvals <- sapply(l, function(xx) {
+#       if(is.null(xx)) return(NA)
+#       c(as.list(xx)[[i]])
+#     })
+#     mean(allvals, na.rm = TRUE)
+#   }), names(p)))
+# }
+# 
+# ##' Takes a \code{s6params} object and changes its asymptotic weight
+# ##'
+# ##' The asymptotic weight is changed, along with the relative and absolute sizes of 50\% retention
+# ##' @param value Numeric. The new asymptotic weight
+# ##' @return \code{s6params} object with changed asymptotic weight, and absolute and
+# ##' relative 50\% retention sizes
+# ##' @author alko
+# ##' @docType methods
+# ##' @rdname Winf-methods
+# ##' @export
+# setGeneric("Winf<-",function(object,value){standardGeneric("Winf<-")})
+# 
+# ##' @rdname Winf-methods
+# ##' @aliases Winf<--methods, Winf<-,s6params-method
+# ##' @name Winfsetter
+# setReplaceMethod(
+#   f = "Winf",
+#   signature = "s6params",
+#   definition = function(object, value) {
+#     object@logWinf <- log(value)
+#     eF <- exp(object@logeta_F)
+#     winf <- exp(object@logWinf)
+#     object@logWfs <- log(eF * winf)
+#     return (object)
+#   })
+# 
+# ##' @param object \code{s6params} object
+# ##' @export
+# ##' @docType methods
+# ##' @rdname Winf-methods
+# setGeneric("Winf", function(object) standardGeneric("Winf"))
+# 
+# ##' @rdname Winf-methods
+# ##' @aliases Winf,s6params-method
+# setMethod("Winf",
+#           signature(object = "s6params"),
+#           function(object) {
+#             exp(object@logWinf)
+#           }
+# )
+
+formatEntry <- function(..., width = 20) {
+  res <- c()
+  for(arg in list(...)) {
+    if(is(arg, "numeric")) {
+      res <- c(res, round(arg, ifelse(arg < 10, 4, 1)))
+    } else {
+      res <- c(res, arg)
+    }
+  }
+  format(paste(res, sep = "", collapse = ""), width = width)
+}
+
+#' @export
+#' @rdname s6params
+format.s6params <- function(x, ...) {
+  width <- min(floor(getOption("width") / 5), 20)
+  cat(" ___________________________________\n")
+  cat("|   An object of class 's6params'   |\n")
+  cat("|___________________________________|",rep("_", width * 3 - 34), "\n", sep="")
+  cat("|", formatEntry("  Winf  = ", x$Winf, width = width),
+      "|", formatEntry("  A     = ", x$A, width = width),
+      "|", formatEntry("  eps_r = ", x$epsilon_r, width = width), "|\n",
+      "|", formatEntry("  Fm    = ", x$Fm, width = width),
+      "|", formatEntry("  eta_m = ", x$eta_m, width = width),
+      "|", formatEntry("  eps_a = ", x$epsilon_a, width = width),"|\n",
+      "|", formatEntry("  a     = ", x$a, width = width),
+      "|", formatEntry("  n     = ", x$n, width = width),
+      "|", formatEntry("  u     = ", x$u, width = width),"|\n",
+      "|", formatEntry("  Wfs   = ", x$Wfs, width = width),
+      "|", formatEntry("  eta_S = ", x$eta_S, width = width),
+      "|", formatEntry("  wl(a,b) = ",  paste(x$wl.a, x$wl.b, sep = ", ") , width = width),"|\n",
+      sep="")
+  cat("|", rep("_", width), "|", rep("_", width), "|", rep("_", width), "|\n", sep="")
+  cat("\n")
+}
 #' 
 #' 
 #' #' @param x a s6params object
@@ -315,53 +328,43 @@ all.equal.s6params <- function(target, current) {
 #'   p <- getParams(x)
 #'   lines(xy.coords(p$w / p$Winf, p$N * (p$w ^ 2)), ...)
 #' }
-#' 
-#' ##' @export
-#' ##' @rdname s6params
-#' as.list.s6params <- function(x, ...) {
-#'   res <- lapply(slotNames("s6params"), function(nm) {
-#'     exp(slot(x, nm))
-#'   })
-#'   res <- setNames(res, sub(slotNames("s6params"), pattern = "log", replacement = ""))
-#'   res$M <- slot(x, "M")
-#'   res$wl.a <- slot(x, "wl.a")
-#'   res$wl.b <- slot(x, "wl.b")
-#'   res
-#' }
-#' 
-#' ##' Difference between two \code{s6params} objects
-#' ##' 
-#' ##' @param base \code{s6params} object. First object
-#' ##' @param comp \code{s6params} object. Second object
-#' ##' @return TRUE if they are the same. If there are differences, a data.frame is returned
-#' ##' with the untransformed parameter values of the two objects, the relative difference (base - comp)
-#' ##' and the percent difference. 
-#' ##' @author alko
-#' ##' @docType methods
-#' ##' @rdname difference-methods
-#' ##' @export
-#' setGeneric("difference", function(base, comp) {
-#'   standardGeneric ("difference")
-#' })
-#' 
-#' ##' @rdname difference-methods
-#' ##' @aliases difference,s6params,s6params-method
-#' setMethod("difference", c("s6params", "s6params"), function(base, comp) {
-#'   res <- sapply(slotNames("s6params"), function(n) {
-#'     if (slot(base, n) != slot(comp, n)) {
-#'       val1 <- exp(slot(base, n))
-#'       val2 <- exp(slot(comp, n))
-#'       c(val1, val2, val1 - val2, abs((val1 - val2) / (mean(val1, val2))) * 100)
-#'     } else {
-#'       c(NA, NA, NA, NA)
-#'     }
-#'   })
-#'   res <- res[,which(!is.na(res[1,])), drop = FALSE]
-#'   rownames(res) <- c("base", "comp", "difference", "percent.difference")
-#'   colnames(res) <- gsub("log", "", colnames(res))
-#'   if(dim(res)[2] == 0) return(FALSE)
-#'   round(res, 4)
-#' })
+#'
+ 
+##' @export
+##' @rdname s6params
+as.list.s6params <- function(x, ...) {
+  as.list.environment(x, ...)
+}
+
+
+##' Difference between objects
+##' 
+##' @param x First object to compare
+##' @export
+difference <- function(x, ...) {
+  UseMethod("difference") 
+}
+
+
+#' @rdname difference
+#' @export
+difference.s6params <- function(x, y) {
+res <- sapply(ls(x), function(nm) {
+  if (x[[nm]] != y[[nm]]) {
+    val1 <- x[[nm]]
+    val2 <- y[[nm]]
+    c(val1, val2, val1 - val2, abs((val1 - val2) / (mean(val1, val2))) * 100)
+  } else {
+    c(NA, NA, NA, NA)
+  }
+})
+res <- res[,which(!is.na(res[1,])), drop = FALSE]
+rownames(res) <- c("first object", "second object", "difference", "percent.difference")
+colnames(res) <- names(res)
+if (dim(res)[2] == 0) return(FALSE)
+round(res, 4)
+}
+
 #' 
 #' ##' Visualizing fit of s6model
 #' ##'
@@ -534,14 +537,4 @@ all.equal.s6params <- function(target, current) {
 #'   })
 #'   s6input(wf = res, surWF = list(), isSimulated = TRUE, trueParams = object, 
 #'           catch = rep(1, ndataset), ...)
-#' }
-#' 
-#' ##' @export
-#' plot.s6input <- function(x, ...) {
-#'   plot(x$Weight, x$Freq, type = "h", lwd = 5, ...)
-#' }
-#' 
-#' ##' @export
-#' hist.s6input <- function(x, ..., main = "", xlab = "Weight") {
-#'   hist(rep(x$Weight, x$Freq), xlab = xlab,  main = main, ...)
 #' }
