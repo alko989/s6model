@@ -4,6 +4,7 @@
 \alias{s6input}
 \alias{s6input-class}
 \alias{hist.s6input}
+\alias{plot.s6input}
 \alias{seq.s6input}
 \alias{length.s6input}
 \alias{[.s6input}
@@ -17,16 +18,17 @@ s6input(
   surwf = NULL,
   isSimulated = FALSE,
   trueParameters = NULL,
-  isSurvey = FALSE,
   catch = NULL,
   catchUnits = "tonnes",
-  years = NULL,
   stockname = "-",
   stockcode = "-",
-  species = "-"
+  species = "-",
+  verbose = options()$verbose
 )
 
 \method{hist}{s6input}(x, ...)
+
+\method{plot}{s6input}(x, y, ...)
 
 \method{seq}{s6input}(x)
 
@@ -47,13 +49,9 @@ is.s6input(x)
 
 \item{isSimulated}{logical, are the data simulated?}
 
-\item{isSurvey}{logical, if TRUE the surWF is used and wf is ignored and vice versa}
-
 \item{catch}{vector of total catch}
 
 \item{catchUnits}{character, units of catch}
-
-\item{years}{vector of years}
 
 \item{stockname}{character, the stock name, e.g. North Sea cod}
 
@@ -69,19 +67,24 @@ is.s6input(x)
 }
 \value{
 A s6input object
-
-Nothing, it is just used for to plot the
 }
 \description{
-s6input is an S3 class that contains the input data that are used to 
+s6input is an S3 class that contains the input data that are used to
 make the assessment. The \code{s6input} function is the constructor of the
-class. Convenient functions are available to present the data and 
+class. Convenient functions are available to present the data and
 \code{plot} them.
 }
 \examples{
- 
 ## Empty input
 inp <- new_s6input()
+
+## North Sea cod input data
+inpall <- s6input(wf = nscoddat, isSurvey = FALSE,
+stockcode = "cod.27.47d20",
+species = "Gadus morhua",
+stockname = "North Sea cod",
+years = years,
+catch = catch)
 
 ## simulate a data set
 d <- simulate(s6params(), binsize = 100, nsim = 100)
