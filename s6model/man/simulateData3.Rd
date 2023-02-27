@@ -6,7 +6,7 @@
 \usage{
 simulateData3(
   samplesize = 1000,
-  params = parameters(),
+  params = s6params(),
   binsize = 5,
   keepZeros = TRUE,
   retDF = TRUE,

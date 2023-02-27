@@ -1,18 +1,18 @@
 #' Returns a list with all parameters and functions
-#' 
-#' Given a Parameters object, it returns as a list all relevant parameters and
+#'
+#' Given an s6params object, it returns a list with all relevant parameters and
 #' corresponding functions like pdf and cdf.
-#' 
-#' 
-#' @param p A Parameters object
-#' @param FF Numeric. Fishing mortality. This argument is ignored if all optim.* are FALSE 
+#'
+#'
+#' @param p A s6params object
+#' @param FF Numeric. Fishing mortality. This argument is ignored if all optim.* are FALSE
 #' @param calcBRPs Boolean. If true, calculates biological reference points.
 #' @param isSurvey boolean, if TRUE a survey selectivity is used for the pdf
 #' @param optim.fmsy Logical.
 #' @param optim.fmsyr Logical.
 #' @param optim.Rrel Logical
 #' @return \itemize{
-#' \item If optim.* are all FALSE, an invisible list, containing all model parameters, the cdf, the pdf
+#' \item If optim.* are all \code{FALSE}, an invisible list containing all model parameters, the cdf and pdf
 #' functions. spawning stock biomass (SSB), yield. If calcBRPs is TRUE also Fmsy.
 #' \item If optim.fmsy is TRUE, only the yield per Rmax is returned
 #' \item If optim.fmsyr is TRUE, only the yield per recruit is returned
@@ -22,97 +22,97 @@
 #' @seealso \code{\link{parameters}}
 #' @keywords misc
 #' @examples
-#' 
+#'
 #'  getParams()
-#' 
+#'
 #' @export
-getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=FALSE, 
-                      optim.fmsy=FALSE, optim.fmsyr = FALSE, optim.Rrel =FALSE) {
-  if( ! is(p,"Parameters"))
-    stop("Wrong input argument in getParams. Use the Parameters class instead.")  
-  Winf <- exp(p@logWinf) * p@scaleWinf
-  Fm <- exp(p@logFm) * p@scaleFm
-  if(optim.fmsy | optim.fmsyr | optim.Rrel)
-    Fm <- FF
-  A <- exp(p@logA) * p@scaleA
-  n <- exp(p@logn) *p@scalen
-  eta_m <- exp(p@logeta_m) * p@scaleeta_m
-  eta_S <- exp(p@logeta_S) * p@scaleeta_S
-  a <- exp(p@loga) *  p@scalea
-  epsilon_a <- exp(p@logepsilon_a) * p@scaleepsilon_a
-  epsilon_r <- exp(p@logepsilon_r) * p@scaleepsilon_r
-  Wfs <- exp(p@logWfs) * p@scaleWfs
-  eta_F <- Wfs/Winf
-  if(!(isTRUE(all.equal(p@logeta_F, log(eta_F / p@scaleeta_F))))) warning("Wfs and eta_F do not match! Wfs was used and eta_F was returned correctly")
-  p@logeta_F <- log(eta_F / p@scaleeta_F)
-  u <-exp(p@logu) * p@scaleu
-  M <- p@M
-  
-  w_r <- w_egg<- 0.001
-  Delta <- (log(Winf) - log(w_r)) / (M - 1)
-  w <- exp(log(w_r) + (1:M - 1) * Delta)
-  
-  delta <- diff(w)
-  
-  psi_F <- (1 + (w / Wfs)^-u )^-1
-  
-  psi_S <- (1 + (w / (eta_S * Winf))^-u )^-1
-  
-  psi_m <- (1 + (w / (eta_m * Winf))^-10 )^-1
-  m <- a * A * w^(n - 1) +  Fm * psi_F
-  m[M] <- Inf
-  g <- A*w^n *(1 - (w/Winf)^(1-n) * (epsilon_a + (1 - epsilon_a) * psi_m))
-  
-  N <- exp(- cumsum((m / g)[-1] * delta)) / g[-1]
-  N <- c(1/g[1], N)
-  N[M] <- 0
-  if(isSurvey)
-  {
-    fishing <- psi_S * N
-  }
-  else
-  {
-    fishing <- psi_F * N
-  }
-  if( ! (optim.fmsy | optim.fmsyr | optim.Rrel)) {    
-    pdfN <-  fishing / sum(fishing * c(delta, 0))
-    pdfN.approx <- approxfun(w, pdfN, yleft=0, yright=.Machine$double.xmin)
-    cdf <-approxfun(w, cumsum(pdfN * c(delta,0)), yleft=0, yright=1)
-  }
-  B <- sum((psi_m  * N * w)[-M] * delta)
-  Bexpl <- sum((psi_F  * N * w)[-M] * delta)
-  Rrel <- 1 - (Winf^(1-n) * w_egg/(epsilon_r * (1 - epsilon_a) * A * B))## * (w_r/w_egg)^(a-1)
-  Rp <- epsilon_r * (1 - epsilon_a) * A * Winf ^ (n-1) / w_egg * B
-  Y <- Fm * Rrel * sum((psi_F * N * w)[-M] * delta)
-  wF <- which.min(abs(Wfs - w)) ## Find the closest weight to Wfs
-  
-  YR <- Y * 1 / (N[wF] * Rrel * g[wF])# Fm * sum((psi_F * N * w)[-M] * delta)
-  
-  if(calcBRPs) {
-    Fmsy <- optimise(f=getParams, interval=c(0,10), maximum=TRUE, p=p, optim.fmsy=TRUE)$maximum
-    FoverFmsy <- Fm/Fmsy
-    ##Fmsyr <- optimise(f=getParams, interval=c(0,2), maximum=TRUE, p=p, optim.fmsyr=TRUE)$maximum
-    ##FoverFmsyr <- Fm/Fmsyr
-    Fcrash <- try(uniroot(f=getParams, interval=c(1e-25,10), p=p, optim.fmsy=TRUE)$root, silent=TRUE)
-    Flim <-try(uniroot(f=getParams, interval=c(1e-25,10), p=p,  optim.Rrel = TRUE)$root, silent=TRUE)
-  }   
-  vb.M <- a * A * Winf^(n-1)*eta_m^(n-1)
-  vb.K <- A * Winf^(n-1) / 3
-  vb.MK <- vb.M / vb.K
-  if(optim.fmsy)
-    return(Y)
-  if(optim.fmsyr)
-    return(YR)
-  if(optim.Rrel)
-    return(Rrel - 0.5)
-  res <- as.list(environment())
-  attr(res, "version") <- getVersion()
-  return(invisible(res))
+getParams <- function(p = s6params(), FF = NULL, calcBRPs = FALSE, isSurvey = FALSE,
+                      optim.fmsy = FALSE, optim.fmsyr = FALSE, optim.Rrel = FALSE) {
+  stopifnot(is.s6params(p))
+  ret <- with(as.list(p), {
+    if (optim.fmsy | optim.fmsyr | optim.Rrel)
+      Fm <- FF
+    w_r <- w_egg <- 0.001
+
+    ## Make log-spaced weight classes
+    Delta <- (log(Winf) - log(w_r)) / (ngrid - 1)
+    w <- exp(log(w_r) + (seq(ngrid) - 1) * Delta)
+    delta <- diff(w)
+
+    ## Selectivity ogives
+    psi_F <- (1 + (w / Wfs)^-u )^-1
+    psi_S <- (1 + (w / (eta_S * Winf))^-u )^-1
+
+    ## Maturation ogive
+    psi_m <- (1 + (w / (eta_m * Winf))^-10 )^-1
+
+    ## Mortality
+    m <- a * A * w^(n - 1) +  Fm * psi_F
+    m[ngrid] <- Inf
+
+    ## Growth
+    g <- A*w^n * (1 - (w/Winf)^(1-n) * (epsilon_a + (1 - epsilon_a) * psi_m))
+
+    ## Numbers at weight class
+    N <- exp(- cumsum((m / g)[-1] * delta)) / g[-1]
+    N <- c(1/g[1], N)
+    N[ngrid] <- 0
+
+    if (isSurvey) {
+      fishing <- psi_S * N
+    } else {
+      fishing <- psi_F * N
+    }
+    if( !(optim.fmsy | optim.fmsyr | optim.Rrel)) {
+      pdfN <-  fishing / sum(fishing * c(delta, 0))
+      pdfN.approx <- approxfun(w, pdfN, yleft = 0, yright=.Machine$double.xmin)
+      cdf <- approxfun(w, cumsum(pdfN * c(delta, 0)), yleft = 0, yright = 1)
+    }
+    ## Spawning stock biomass / R
+    B <- sum((psi_m  * N * w)[-ngrid] * delta)
+    ## Exploitable biomass / R
+    Bexpl <- sum((psi_F  * N * w)[-ngrid] * delta)
+    ## R / Rmax
+    Rrel <- 1 - (Winf^(1-n) * w_egg / (epsilon_r * (1 - epsilon_a) * A * B))## * (w_r/w_egg)^(a-1) : this is 1 (in Andersen and Beyer 2015 the exponent is -a)
+    ## Egg production / R
+    Rp <- epsilon_r * (1 - epsilon_a) * A * Winf ^ (n-1) / w_egg * B
+    ## Yield / Rmax
+    Y <- Fm * Rrel * sum((psi_F * N * w)[-ngrid] * delta)
+    wF <- which.min(abs(Wfs - w)) ## Find the closest weight to Wfs
+
+    YR <- Y / (N[wF] * Rrel * g[wF])# Fm * sum((psi_F * N * w)[-M] * delta)
+
+    if (optim.fmsy) return(Y)
+    if (optim.fmsyr) return(YR)
+    if (optim.Rrel) return(Rrel - 0.5)
+
+    if (calcBRPs) {
+      Fmsy <- optimise(f = getParams, interval = c(0, 10), maximum = TRUE, p = p, optim.fmsy = TRUE)$maximum
+      FoverFmsy <- Fm/Fmsy
+      ##Fmsyr <- optimise(f=getParams, interval=c(0,2), maximum=TRUE, p=p, optim.fmsyr=TRUE)$maximum
+      ##FoverFmsyr <- Fm/Fmsyr
+      Fcrash <- try(uniroot(f = getParams, interval = c(1e-25, 10), p = p, optim.fmsy = TRUE)$root, silent = TRUE)
+      Flim <- try(uniroot(f = getParams, interval = c(1e-25, 10), p = p,  optim.Rrel = TRUE)$root, silent = TRUE)
+    }
+    vb.M <- a * A * Winf^(n - 1) * eta_m^(n - 1)
+    vb.K <- A * Winf^(n - 1) / 3
+    vb.MK <- vb.M / vb.K
+
+    res <- as.list(environment())
+    if (getVersion() != attr(p, "s6version")) {
+      warning("There is a version mismatch.")
+      attr(res, "s6version") <- getVersion()
+    }
+    res
+  })
+  if (optim.fmsy | optim.fmsyr | optim.Rrel) return(ret)
+  ret$p <- p
+  return(invisible(ret))
 }
 
 ##' Simulates catch-at-weight data using the s6model
 ##'
-##' Simulate a data set of individual catch weight or 
+##' Simulate a data set of individual catch weight or
 ##' @param samplesize Integer. Number of simulated individuals
 ##' @param params Object of class \code{Parameters}. Model parameters
 ##' @param binsize Numeric. Weight class width. If \code{retDF} is FALSE, \code{binsize} is ignored
@@ -128,17 +128,16 @@ getParams <- function(p = new("Parameters"),  FF=NULL, calcBRPs=FALSE, isSurvey=
 ##' }
 ##' @author alko
 ##' @export
-simulateData3 <- function(samplesize= 1000, params = parameters(), binsize = 5, keepZeros=TRUE, retDF=TRUE, ...)
-{
-  applyfun <- if(require(parallel)) mclapply else sapply
-  sam <- c()
-  with(getParams(params, ...), {
-    sam <<- simplify2array(applyfun(runif(samplesize), function(u) uniroot(function(x) {cdf(x) - u}, c(w_r, Winf))$root))
+simulateData3 <- function(samplesize = 1000, params = s6params(), binsize = 5, keepZeros = TRUE, retDF = TRUE, ...) {
+  applyfun <- if (require(parallel)) mclapply else sapply
+  sam <- with(getParams(params, ...), {
+    simplify2array(applyfun(runif(samplesize), function(u) uniroot(function(x) {cdf(x) - u}, c(w_r, Winf))$root))
   })
-  res <- list(sample = sam, parameters = params, Fmsy = getParams(params,calcBRPs=TRUE)$Fmsy)
-  if(retDF) res$df <- sample2df(sam, binsize, keepZeros=keepZeros)
+  res <- list(sample = sam, parameters = params, Fmsy = getParams(params, calcBRPs = TRUE)$Fmsy)
+  if (retDF) res$df <- sample2df(sam, binsize, keepZeros = keepZeros)
+  res$trueParams <- params
   attr(res, "version") <- getVersion()
-  return(invisible(res))  
+  return(invisible(res))
 }
 
 ##' Convert a vector sample to data.frame with counts per weight class
@@ -179,7 +178,7 @@ rparam <- function(value, range.sd, range.cv, lb= -Inf, ub = Inf, unif=FALSE)
     while((res < lb) || (res > ub) ) {
       res <- rlnorm(1, log(value), range.sd)
     }
-    return(res)    
+    return(res)
   }
 }
 
@@ -210,8 +209,8 @@ getRandomParameters <-
            parameter.unif  =c(F,F,F,F,F,F,F,F,F), Rrel.gt=-Inf, Fmsy.gt=0) {
     while(TRUE) {
       par.vals <- sapply(seq(along.with=parameter.value),
-                         function(x) rparam(parameter.value[x], 
-                                            parameter.sd[x], 
+                         function(x) rparam(parameter.value[x],
+                                            parameter.sd[x],
                                             parameter.cv[x],
                                             parameter.lbound[x],
                                             parameter.ubound[x],
@@ -264,7 +263,7 @@ getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
 #         tt <- (1 - progress)*(difftime(Sys.time(), start, units="mins"))/ progress
 #         cat(" ETC:", as.integer(tt), "min(s) and", round((tt - as.integer(tt)) * 60, 0) ,"secs")
 #         if( ! progressbar) cat("\r")
-#       } 
+#       }
 #       parallel:::mcexit()
 #     }
 #     res <- aplfun(X, function(x) {
@@ -281,47 +280,47 @@ getRandomParameters.fixedWinf <- function(winf, Rrel.gt=-Inf, Fmsy.gt=0) {
 #   })
 #   cat(difftime(Sys.time(), start, units="mins"), "mins\n")
 #   results
-# } 
+# }
 
 ##' Calculates the Fmsy reference point
 ##'
-##' @param params An object of class \code{Parameters} 
+##' @param params An object of class \code{Parameters}
 ##' @return numeric F that leads to MSY
 ##' @author alko
 ##' @export
 calcFmsy <- function(params=NULL) {
-  if(!require(TMB)) stop("TMB package not installed.")
-  if(is.null(params)) return (NULL)
-  if(is(params, "Parameters")) {
-    params <- as.list(params)
-  }
-  if( ! is(params,"list"))
-    stop("params is of class ", class(params))
-  def <- list(n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47, eta_m=0.25, a=0.27, M=1000, u = 10)
-  def <- replace(def, names(params), unlist(params))
-  obj <- MakeADFun(def, list(logF = log(0.2)), DLL="calcFmsy")
+  if (!require(TMB)) stop("TMB package not installed.")
+  if (is.null(params)) return(NULL)
+  stopifnot(is.s6params(params))
+  params <- as.list(params)
+
+  # def <- list(n = 0.75, epsilon_a = 0.8, epsilon_r = 0.1, A = 4.47, eta_m = 0.25, a = 0.27, M = 1000, u = 10)
+  # def <- replace(def, names(params), unlist(params))
+  obj <- MakeADFun(params, list(logF = log(0.2)), DLL = "calcFmsy")
   obj$env$tracemgc <- FALSE
-  obj$env$silent <- TRUE; newtonOption(obj=obj,trace=0); config(trace.optimize = 0,DLL="calcFmsy")
+  obj$env$silent <- TRUE
+  newtonOption(obj = obj, trace = 0)
+  config(trace.optimize = 0, DLL = "calcFmsy")
   opt <- try(do.call("optim", obj))
   res <- try(sdreport(obj)$val)
-  if(is(res, "try-error"))
+  if (is(res, "try-error"))
     return(NULL)
   names(res) <- NULL
   res
 }
 
 ##' Change the bin size of a weight frequency data.frame
-##' 
-##' 
+##'
+##'
 ##' @param df data.frame with colums 'Weight' and 'Freq'
 ##' @param binsize numeric, the bin size in grams
 ##' @param keepZeros logical, if TRUE the bins with zero observation are not removed
 ##' @export
-##' 
-##' @examples 
+##'
+##' @examples
 ##' ## Simulate a data set with bin size equal to 100 gr
 ##' dat <- simulateData3(binsize=100)
-##' 
+##'
 ##' ## Change the bin size to 200 gr
 ##' dat <- changeBinsize(dat$df, binsize = 200)
 ##' @return data.frame with weight frequencies binned with bin size \code{binsize}
@@ -331,9 +330,9 @@ changeBinsize <- function(df, binsize = 10, keepZeros = TRUE) {
 
 ##' @export
 changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq", verbose = options()$verbose) {
-  if(is(df, "list")) { 
-    return(lapply (df, changeBinsize2, binsize = binsize, keepZeros = keepZeros, 
-                   weight.col = weight.col, freq.col = freq.col, verbose = verbose)) 
+  if(is(df, "list")) {
+    return(lapply (df, changeBinsize2, binsize = binsize, keepZeros = keepZeros,
+                   weight.col = weight.col, freq.col = freq.col, verbose = verbose))
   }
   if(dim(df)[1] == 0 ) return( structure(data.frame(Weight = numeric(0), Freq = integer(0)), binsize = binsize))
   cuts <- seq(0, max(df[weight.col], na.rm = TRUE) + binsize, binsize)
@@ -355,17 +354,17 @@ changeBinsize2 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Wei
 
 #' @export
 changeBinsize3 <- function(df, binsize = 10, keepZeros = TRUE, weight.col = "Weight", freq.col = "Freq", verbose = options()$verbose) {
-  if(is(df, "list")) { 
-    return(lapply (df, changeBinsize2, binsize = binsize, keepZeros = keepZeros, 
-                   weight.col = weight.col, freq.col = freq.col, verbose = verbose)) 
+  if(is(df, "list")) {
+    return(lapply (df, changeBinsize2, binsize = binsize, keepZeros = keepZeros,
+                   weight.col = weight.col, freq.col = freq.col, verbose = verbose))
   }
   if(dim(df)[1] == 0 ) return( structure(data.frame(Weight = numeric(0), Freq = integer(0)), binsize = binsize))
-  res <- df %>% 
-    group_by_(WeightClass = ~cut(weight.col, breaks = seq(0, max(weight.col) + binsize, by = binsize) )) %>% 
-    summarise_(Freq = ~sum(freq.col)) %>% 
-    mutate_(Weight = ~WeightClass %>% 
-             sapply( . %>% as.character %>% getmid)) %>% 
-    select(Weight, Freq, WeightClass) %>% 
+  res <- df %>%
+    group_by_(WeightClass = ~cut(weight.col, breaks = seq(0, max(weight.col) + binsize, by = binsize) )) %>%
+    summarise_(Freq = ~sum(freq.col)) %>%
+    mutate_(Weight = ~WeightClass %>%
+             sapply( . %>% as.character %>% getmid)) %>%
+    select(Weight, Freq, WeightClass) %>%
     `attr<-`("binsize", binsize)
   if (! keepZeros) {
     res <- res[df$Freq > 0, ]
@@ -391,6 +390,6 @@ findLatest <- function(path = ".", pattern = "") {
     data.frame(fn = f, mtime = file.info(f)$mtime, stringsAsFactors = FALSE)
   })
   df <- do.call(rbind.data.frame, df)
-  latest <- df[order(df$mtime, decreasing = TRUE), ][1,1]  
+  latest <- df[order(df$mtime, decreasing = TRUE), ][1,1]
   latest
 }

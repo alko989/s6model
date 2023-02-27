@@ -295,6 +295,6 @@ estimate_TMB <- function(inp, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                        Bexpl = vals[nw("Bexpl")], Bexpl_sd = sds[nw("Bexpl")],
                        ssbrel = SSBrel, Bexplrel = Bexplrel,
                        row.names=yrs),
-            obj=obj, opt=opt, sdr = sdr, estpars=estpars)
+            obj=obj, opt=opt, sdr = sdr, estpars=estpars, inp = inp)
 }
 

@@ -5,14 +5,7 @@
 \alias{minimizemeMultidata}
 \title{The negative log likelihood for given parameters and data}
 \usage{
-minimizeme(
-  theta,
-  data,
-  names,
-  fixed.names = c(),
-  fixed.vals = c(),
-  isSurvey = FALSE
-)
+minimizeme(theta, data, fixed.vals = list())
 
 minimizemeMultidata(
   theta,
@@ -28,45 +21,45 @@ minimizemeMultidata(
 
 \item{data}{Numeric vector, or \code{data.frame} with columns named Weight and Freq. The observed values, fished individuals in grams}
 
-\item{names}{String vector. Contains the names of the parameter vector theta.}
-
-\item{fixed.names}{String vector. Names of constants.}
-
 \item{fixed.vals}{Numeric vector. Transformed values of constants.}
-
-\item{isSurvey}{Logical. If TRUE the observations are assumed to be from a survey.}
 
 \item{surdata}{Same as data. Survey data.}
 
 \item{comdata}{Same as data. Commercial data.}
+
+\item{names}{String vector. Contains the names of the parameter vector theta.}
+
+\item{fixed.names}{String vector. Names of constants.}
+
+\item{isSurvey}{Logical. If TRUE the observations are assumed to be from a survey.}
 }
 \value{
 Numeric scalar. The negative log likelihood for the given parameters and observations.
 }
 \description{
-\code{minimizeme} is mainly used by an optimizer (e.g. \code{optim}) 
+\code{minimizeme} is mainly used by an optimizer (e.g. \code{optim})
 to estimate parameters.
 }
 \note{
 If data is a list containing both sample and df, the \code{data.frame} df will be used.
 }
 \examples{
- 
+
 \dontrun{
 ## Simulate some data with default parameter values and fishing mortality Fm = 0.3
-sim <- simulateData3(params = parameters("Fm", 0.3, transformed=FALSE))
+sim <- simulateData3(params = s6params(Fm = 0.3))
 
 ## Plotting the negative log likelihood for different values of Fm
-Fm <- seq(0.1, 1, 0.05) 
-Fm.transformed <- log(Fm / 0.25)
-nll <- sapply(Fm.transformed, function(x) minimizeme(theta = x, data = sim$sample, names = "Fm"))
-plot(Fm, nll, type="l") 
+Fm <- seq(0.1, 1, 0.05)
+nll <- sapply(Fm, function(x) minimizeme(theta = list(Fm = x), data = s6input(sim$df)))
+plot(Fm, nll, type="l")
 
 ## Using optimise to estimate one parameter
-est <- optimise(f = minimizeme, interval=c(0.01, 1), data=sim$sample, names="Fm")
-est.Fm <- exp(est$minimum) * 0.25
+wrapper <- function(x, ...) minimizeme(theta = list(Fm = x), ...)
+est <- optimise(f = wrapper, interval=c(0.01, 1), data = s6input(sim$df))
+est.Fm <- est$minimum
 abline(v=est.Fm)
-mtext(paste("Estimated Fm = ", round(est.Fm, 2)), at=est.Fm)
+mtext(paste("Estimated Fm = ", round(est.Fm, 3)), at=est.Fm)
 }
 
 }

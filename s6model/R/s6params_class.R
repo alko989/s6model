@@ -523,8 +523,8 @@ simulate.s6params <- function(object, nsim = 1000, seed = NULL, binsize = 100,
   if (is.null(seed)) seed <- as.integer(rnorm(1, mean = 1e5, sd = 1e4))
   set.seed(seed)
   p <- getParams(object, isSurvey = isSurvey)
-  l <- seq(binsize / 2, p$Winf - binsize / 2, binsize)
-  u <- seq(binsize + binsize / 2, p$Winf + binsize / 2, binsize)
+  l <- seq(0, p$Winf - binsize / 2, binsize)
+  u <- seq(binsize, p$Winf + binsize / 2, binsize)
   pr <- mapply(function(low, up) {
     integrate(p$pdfN.approx, lower = low, upper = up)$value},
     l, u)

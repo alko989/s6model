@@ -1,5 +1,3 @@
-context("fitWL function")
-
 test_that("fitWL chooses the correct columns", {
   a <- 0.00123
   b <- 3.456
@@ -16,13 +14,13 @@ test_that("fitWL handles correctly missing values", {
   df <- data.frame(w = a * c(1,2,3,4,5,0,7,8,9,NA,11,12,13,-1,-1,16) ^ b,
                    l =     c(1,2,3,4,5,6,7,8,9,10,NA,-1,13,-1, 0,NA))
   expect_warning(fitab <- fitWL(df, colname.weight = "w", colname.length = "l", mindata = 8), regexp = NA)
-  
+
   expect_equal(a, fitab$a)
   expect_equal(b, fitab$b)
   expect_equal(9, fitab$n)
-  
+
   expect_warning(defVal <- fitWL(df, colname.weight = "w", colname.length = "l", mindata = 10))
-  
+
   expect_equal(0.01, defVal$a)
   expect_equal(3, defVal$b)
 })

@@ -89,11 +89,12 @@ addWeight <- function(df, a, b, lengthcol = "Length") {
 
 
 getalim <- function (p) {
-  if(!is(p, "Parameters")) { 
-    return(0.8)
+  if(!is.s6params(p)) { 
+    stop("p should be a s6params object") ## return(0.8)
   }
   optimize(function(x) {
-    getParams(parameters("a", x, FALSE, base = p), optim.Rrel = TRUE, FF = 0)^2
+    p$a <- x
+    getParams(p, optim.Rrel = TRUE, FF = 0)^2
   }, c(0,2) )$minimum
 }
 
