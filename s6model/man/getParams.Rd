@@ -5,7 +5,7 @@
 \title{Returns a list with all parameters and functions}
 \usage{
 getParams(
-  p = new("Parameters"),
+  p = s6params(),
   FF = NULL,
   calcBRPs = FALSE,
   isSurvey = FALSE,
@@ -15,7 +15,7 @@ getParams(
 )
 }
 \arguments{
-\item{p}{A Parameters object}
+\item{p}{A s6params object}
 
 \item{FF}{Numeric. Fishing mortality. This argument is ignored if all optim.* are FALSE}
 
@@ -31,7 +31,7 @@ getParams(
 }
 \value{
 \itemize{
-\item If optim.* are all FALSE, an invisible list, containing all model parameters, the cdf, the pdf
+\item If optim.* are all \code{FALSE}, an invisible list containing all model parameters, the cdf and pdf
 functions. spawning stock biomass (SSB), yield. If calcBRPs is TRUE also Fmsy.
 \item If optim.fmsy is TRUE, only the yield per Rmax is returned
 \item If optim.fmsyr is TRUE, only the yield per recruit is returned
@@ -39,7 +39,7 @@ functions. spawning stock biomass (SSB), yield. If calcBRPs is TRUE also Fmsy.
 }
 }
 \description{
-Given a Parameters object, it returns as a list all relevant parameters and
+Given an s6params object, it returns a list with all relevant parameters and
 corresponding functions like pdf and cdf.
 }
 \examples{

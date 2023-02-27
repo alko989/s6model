@@ -7,7 +7,10 @@
 \alias{is.s6params}
 \alias{all.equal.s6params}
 \alias{format.s6params}
+\alias{plot.s6params}
+\alias{lines.s6params}
 \alias{as.list.s6params}
+\alias{simulate.s6params}
 \title{The s6params class and constructor}
 \usage{
 s6params(
@@ -36,10 +39,25 @@ is.s6params(x)
 
 \method{format}{s6params}(x, ...)
 
+\method{plot}{s6params}(x, xlim = c(0.001, 1), ...)
+
+\method{lines}{s6params}(x, ...)
+
 \method{as.list}{s6params}(x, ...)
+
+\method{simulate}{s6params}(
+  object,
+  nsim = 1000,
+  seed = NULL,
+  binsize = 100,
+  keepZeros = TRUE,
+  ndataset = 1,
+  isSurvey = FALSE,
+  ...
+)
 }
 \arguments{
-\item{Winf}{numeric, asymptotic weight}
+\item{Winf}{numeric, asymptotic weight \eqn{W_\infty}}
 
 \item{Fm}{numeric, fishing mortality}
 
@@ -47,9 +65,9 @@ is.s6params(x)
 
 \item{n}{numeric, exponent of consumption}
 
-\item{eta_m}{numeric, 50\% maturation size, relative to asymptotic weight}
+\item{eta_m}{numeric, 50\% maturation size, relative to \eqn{W_\infty}}
 
-\item{eta_S}{numeric, 50\% retention size (survey), relative to asymptotic weight}
+\item{eta_S}{numeric, 50\% retention size (survey), relative to \eqn{W_\infty}}
 
 \item{a}{numeric, physiological mortality}
 
@@ -69,21 +87,163 @@ is.s6params(x)
 
 \item{base}{s6params object}
 
-\item{eta_F}{numeric, 50\% retention size, relative to asymptotic weight}
+\item{x}{a s6params object}
+
+\item{...}{Arguments passed to other methods.}
+
+\item{xlim}{the x limits (x1, x2) of the plot.}
+
+\item{object}{a \code{s6params} object.}
+
+\item{nsim}{number of individuals in the simulated sample.}
+
+\item{seed}{the seed that is passed to \code{\link{set.seed}}.}
+
+\item{binsize}{numeric, the width of the weight classes in grams.}
+
+\item{keepZeros}{logical, if TRUE keep bins with zero frequency.}
+
+\item{ndataset}{integer, the number of datasets to simulate.}
+
+\item{isSurvey}{logical, if \code{TRUE}, simulate survey data}
+
+\item{eta_F}{numeric, 50\% retention size, relative to \eqn{W_\infty}}
 }
 \description{
-s6params is an S3 class that contains all model parameters. The 
-\code{s6params} function is the constructor of the class. Convenient 
-functions are available to \code{plot}, draw \code{lines}, \code{simulate} 
-data, return a named list of all parameters (\code{as.list}) and get the 
+s6params is an S3 class that contains all model parameters. The
+\code{s6params} function is the constructor of the class. Convenient
+functions are available to \code{plot}, draw \code{lines}, \code{simulate}
+data, return a named list of all parameters (\code{as.list}) and get the
 mean parameters of a list of \code{s6params} objects.
 
-#' @export
-#' @rdname s6params
-lines.s6params <- function(x, ...){
-  p <- getParams(x)
-  lines(xy.coords(p$w / p$Winf, p$N * (p$w ^ 2)), ...)
+##' @rdname plotFit-methods
+##' @aliases plotFit,s6params,numeric,missing-method
+setMethod("plotFit", c("s6params", "numeric", "missing"),
+          function(object, data,...) {plotFit(object, data, FALSE,...)})
 }
+\details{
+##' @rdname plotFit-methods
+##' @aliases plotFit,s6params,data.frame,missing-method
+setMethod("plotFit", c("s6params", "data.frame", "missing"),
+          function(object, data,...) {plotFit(object, data, FALSE,...)})
+
+##' @rdname plotFit-methods
+##' @aliases plotFit,s6params,numeric,logical-method
+setMethod("plotFit", c("s6params", "numeric", "logical"),
+          function(object, data, add,...) {
+            p <- getParams(object)
+            if(add == FALSE) {
+              plot(p$w, p$pdfN.approx(p$w), type="l", col="blue",
+                   main="Fitted pdf and histogram of the simulated data",
+                   xlab="Weight (g)",
+                   ylab="Probability")
+            } else {
+              lines(p$w, p$pdfN.approx(p$w), col="blue", ...)
+            }
+            hist(data, freq=FALSE, add=TRUE, breaks="FD")
+            invisible(NULL)
+          })
+
+##' @rdname plotFit-methods
+##' @aliases plotFit,s6params,data.frame,logical-method
+setMethod("plotFit", c("s6params", "data.frame", "logical"),
+          function(object, data, add, ...) {
+            p <- getParams(object)
+            if(add == FALSE) {
+              plot(p$w, p$pdfN.approx(p$w), type="l",
+                   main="Fitted pdf and histogram of the simulated data",
+                   xlab="Weight (g)",
+                   ylab="Probability")
+            } else {
+              lines(p$w, p$pdfN.approx(p$w), col="blue", ...)
+            }
+            points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
+                   pch=".", cex=3)
+            lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
+            ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
+            lines(p$w, p$pdfN.approx(p$w), col="blue", lwd = 2, ...)
+            legend("topright", NULL, c("fitted PDF", "Data kernel density"), col=c("blue","red"),
+                   lty=1, lwd=2, seg.len=5)
+            invisible(NULL)
+          })
+
+##' Plots growth function
+##'
+##' @param object A \code{s6params} object
+##' @param ... Additional arguments for plot
+##' @return Invisible \code{NULL}
+##' @author alko
+##' @docType methods
+##' @rdname plotGrowthMortality
+##' @export
+setGeneric("plotGrowth", function(object, ...) {standardGeneric("plotGrowth")})
+##' @aliases plotGrowth,s6params-methods
+setMethod("plotGrowth", c("s6params"),
+          function(object, ...) {
+            p <- getParams(object)
+            ylim.min <- max(p$g) / 100
+            ylim.max <- max(p$g)
+            ylim <- c( ylim.min - ylim.min * 0.01, ylim.max + ylim.max * 0.6)
+            plot(p$w / p$Winf, p$g, type="n",
+                 xlab="",  log="xy", ylab="",
+                 xlim=c(0.01, 1), ylim = ylim, yaxt="n",xaxt="n", ...)
+            polygon(c(p$w/p$Winf, 1 ), c(p$psi_m, 0) * ylim.min * 3 + ylim.min,
+                    border="lightgrey",col="lightgrey")
+            lines(p$w / p$Winf, p$g, lwd=3)
+            abline(v = p$eta_m, lty = 2, lwd = 1.5)
+            axis(4, at = c(ylim.min, ylim.min * 4), labels = NA, col.axis = "grey28")
+            mtext(c(0, 100),at=c(ylim.min, ylim.min * 4), side = 4, line = 0.5)
+            mtext(side=4, at=ylim.min * 2, text="% mature individuals", line = 1.2, col="grey28")
+            pow <- 1:3
+            ticksat <- as.vector(sapply(pow, function(p) (2:10) * 10 ^ p))
+            axis(2, 10 ^ pow, tcl = 0.5, labels = NA)
+            mtext(10 ^ pow, 2, 0.5, at = 10 ^ pow)
+            axis(2, ticksat, labels = NA, tcl = 0.25, lwd = 0, lwd.ticks = 1)
+            title(ylab="Growth rate (g/y)", line = 1.4)
+            pow <- -2:0
+            ticksat <- as.vector(sapply(pow, function(p) (2:10) * 10 ^ p))
+            axis(1, 10^pow, tcl = 0.5, labels = NA)
+            axis(1, ticksat, labels = NA, tcl = 0.25, lwd = 0, lwd.ticks = 1)
+            invisible(NULL)
+          })
+
+##' Makes a plot of natural and fishing mortalities
+##' @return Invisible \code{NULL}
+##' @author alko
+##' @rdname plotGrowthMortality
+##' @docType methods
+##' @export
+setGeneric("plotMortality", function(object, ...){
+  standardGeneric("plotMortality")
+})
+##' @aliases plotMortality,s6params-method
+setMethod("plotMortality", c("s6params"),
+          function(object, ...) {
+            p <- getParams(object)
+            plot(p$w / p$Winf, p$m , type = "n", lwd=2,
+                 xlab = "",  log = "x", ylab = "", xaxt = "n", yaxt = "n", ...)
+            title(xlab = expression(w / W[infinity]))
+            title(ylab = expression(Mortality ~ (y ^ {-1})), line = 1.4)
+            lines(p$w / p$Winf, p$psi_F * p$Fm, lwd = 3, lty = "dotted")
+            lines(p$w / p$Winf, p$m - p$psi_F * p$Fm, lty = 2, lwd = 3)
+            lines(p$w / p$Winf, p$m, lty = 1, lwd = 3)
+            pow <- -2:0
+            ticksat <- as.vector(sapply(pow, function(p) (2:10) * 10 ^ p))
+            axis(1, 10 ^ pow, tcl = 0.5)
+            axis(1, ticksat, labels = NA, tcl = 0.25, lwd = 0, lwd.ticks = 1)
+            coords <- par()$usr
+            ys <- round(seq(0, coords[4], length.out = 4), 2)
+            axis(2, labels = NA, at = ys, tcl = 0.5)
+            mtext(ys, side=2, line = 0.5, at = ys)
+            invisible(NULL)
+          })
+}
+\note{
+Additional arguments are passed to \code{\link{plot.default}}
+(from plot) and to \code{\link{lines}} (from lines). From all other
+functions the extra arguments are ignored.
+
+In \code{simulate}, all zero bins after the last non-zero bin are dropped; even if \code{keepZeros} is TRUE.
 }
 \examples{
 ## Without any arguments gives a \code{s6params} object with default values
@@ -91,7 +251,7 @@ s6params()
 
 ## An object with some user selected values
 par1 <- s6params(Winf = 1000, Fm = 0.4, Wfs = 100)
- 
+
 ## Take a s6params object and change one parameter
 par <- s6params(Winf = (1000), a = (0.4), Fm = (0.2), Wfs = (100))
 changeMatsize <- par$clone()
