@@ -322,9 +322,10 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
     opt <- nlminb(obj$par, obj$fn, obj$gr, upper = upper)
     sdr <- sdreport(obj, getJointPrecision = FALSE, getReportCovariance = FALSE)
     parnms <- c("Fm","Winf","Wfs", "a", "eta_S",'u','M') # Eta_f is included in Wfs
-    vals <- sdr$value
+    vals <- sdr$value # This is not in log
     nms <- names(vals)
     sds <- setNames(sdr$sd, nms) # This is not in log
+    # diag(sdr$cov.fixed) gives sds
     # sdr$cov.fixed
     estpars <- sapply(seq(nyrs), function(i) {
       vls <- sapply(parnms, function(x) {
@@ -369,7 +370,7 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
         estpars.rand$Winf <- Winf[i]
         estpars.rand$Wfs <- Wfs[i]
         estpars.rand$a <- a[i]
-        estpars.rand$u <- u[i]
+        estpars.rand$u <- u[i]+
         estpars.rand <- parameters(c(names(estpars.rand)),
                                    as.numeric(c(estpars.rand)),
                                    transformed=FALSE)  
@@ -431,8 +432,10 @@ estimate_TMB <- function(df, n=0.75, epsilon_a=0.8, epsilon_r=0.1, A=4.47,
                        Y = vals[nw("Y")], Y_sd = sds[nw("Y")],
                        ssb = vals[nw("ssb")], ssb_sd = sds[nw("ssb")],
                        Bexpl = vals[nw("Bexpl")], Bexpl_sd = sds[nw("Bexpl")],
-                       ssbrel = SSBrel, Bexplrel = Bexplrel,  
+                       ssbrel = SSBrel, Bexplrel = Bexplrel, epsilon_a = epsilon_a, 
+                       epsilon_r = epsilon_r, n = n, A = A, eta_m = eta_m,
                        row.names=yrs),
-            obj=obj, opt=opt, sdr = sdr, estpars=estpars, Fmsy.dist = Fmsy.dist, SSBrel.dist = SSBrel.dist, Bexplrel.dist = Bexplrel.dist)
+            obj=obj, opt=opt, sdr = sdr, estpars=estpars, log.sd = diag(sdr$cov.fixed))
 }
 
+# , Fmsy.dist = Fmsy.dist, SSBrel.dist = SSBrel.dist, Bexplrel.dist = Bexplrel.dist

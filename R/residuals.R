@@ -11,6 +11,7 @@ plotResiduals <- function(rr) {
   obs <- rprt$freq
   exp <- rprt$Nvec / sum(rprt$Nvec) * rr$sigma
   w <- which(obs > 0)
+  # Observed count and weight
   plot(rprt$Weight[w], obs[w], pch = 20, ylim = range(obs[w], exp[w]), log = "xy", col = 'lightgrey',xlab = 'Weight (g)', ylab = 'Observed count') # sub = 'Size distribution', 
   lines(rprt$Weight[w], exp[w])
   D <- 2 * ( obs[w] * log(obs[w] / exp[w]) - (obs[w] - exp[w]))

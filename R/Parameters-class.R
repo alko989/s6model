@@ -417,24 +417,28 @@ setMethod("plotFit", c("Parameters", "numeric", "logical"),
 setMethod("plotFit", c("Parameters", "data.frame", "logical"),
           function(object, data, add, ...) {
             data[data$Freq > 0, ] # Only plot observations > 0
-            p <- getParams(object)
+            p <- getParams(object, ...)
             if(add == FALSE) {
+              h <- hist(rep(data$Weight, data$Freq), breaks = 32, add=T, freq=FALSE, plot = FALSE ) 
+              ylim <- range(0, p$pdfN.approx(p$w), h$density)
               plot(p$w, p$pdfN.approx(p$w), type="l",
+                   col="darkred",
                    # main="Fitted pdf and histogram of the simulated data",
-                   xlab="Weight (g)",
-                   ylab="Probability")
+                   xlab="Weight (mg)",
+                   ylab="Probability", 
+                   ylim = ylim, ...)
             } else {
-              lines(p$w, p$pdfN.approx(p$w), col="black", ...)
+              lines(p$w, p$pdfN.approx(p$w), col="darkred")
             }
-            points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
-                   pch=16,cex=1, col="orange") #"#7E6148B2"
-            points(data$Weight, data$Freq,
-                   pch=16,cex=1, col="orange") # Check those changes!! Currently figure is not working properly
+            # points(data$Weight, data$Freq/sum(data$Freq)/diff(c(data$Weight,tail(data$Weight,1))),
+            #        cex=1, col="coral") #"#7E6148B2"
+            # points(data$Weight, data$Freq,
+            #        cex=1, col="coral") # Check those changes!! Currently figure is not working properly
             # lines(density(rep(data$Weight, data$Freq)), col=2, lty=2, lwd=2)
-            ##hist(rep(data$Weight, data$Freq), breaks = 35, add=T, freq=FALSE)
-            lines(p$w, p$pdfN.approx(p$w),  lwd = 2, ...) #,col="blue"
-            legend("topright", NULL, c("Fitted Probability Density Function (PDF)"),
-                   lty=1, lwd=2, seg.len=5, bty = "n") # , "Data kernel density"col=c("blue","red"), 
+            hist(rep(data$Weight, data$Freq), breaks = 32, add=T, freq=FALSE)
+            lines(p$w, p$pdfN.approx(p$w), col="darkred",lwd = 2) #,col="blue"
+            # legend("topright", NULL, c("Fitted Probability Density Function (PDF)"),
+            #        lty=1, lwd=2, seg.len=5, bty = "n") # , "Data kernel density"col=c("blue","red"), 
             invisible(NULL)
           })
 
@@ -465,7 +469,9 @@ setMethod("plotGrowth", c("Parameters"),
             lines(p$w / p$Winf, p$g, lwd=3)
             # Plot eta_m
             abline(v=p$eta_m, lty=2, lwd=1.5)
-            text(p$eta_m+0.1, 1500, label = paste('Eta_m = ', round(p$eta_m, digits =1)), col = 'grey35')
+            # text(p$eta_m+0.1, 1500, label = paste('Eta_m = ', round(p$eta_m, digits =1)), col = 'grey35')
+            text(p$eta_m+0.1, 2000, label = paste('Eta_m = ', round(p$eta_m, digits =1)), col = 'grey35')
+            
             #  Plot selectivity axis
             axis(4, at=c(ylim.min, ylim.min * 4), labels=NA, col.axis="lightgrey")
             mtext(c(0,100),at=c(ylim.min, ylim.min * 4), side=4, line=0.5) 
@@ -499,13 +505,19 @@ setGeneric("plotMortality", function(object, ...){
 setMethod("plotMortality", c("Parameters"),
           function(object, ...) {
             p <- getParams(object)
+            
+            mort <- as.data.frame(cbind(p$m,p$w/p$Winf))
+            mort1 <- mort[mort$V2>=0.01,]
+            mort1 <- mort1[mort1$V2<1,]
+
             plot(p$w / p$Winf, p$m , type = "n", lwd=2, 
-                 xlab = "",  log = "x", ylab = "",xaxt = "n", yaxt = "n", ... )
+                 xlim=c(0.01, 1), ylim=c(0,max(mort1$V1, na.rm = T)),xlab = "",  log = "x", 
+                 ylab = "",xaxt = "n", yaxt = "n", ... )
             title(xlab=expression(w/W[infinity]))
             title(ylab=expression(Mortality~(y^{-1})), line = 1.4)
             # Plot fishing mortality
-            lines(p$w / p$Winf, p$psi_F * p$Fm, lwd = 2, lty = 2, col="lightgrey")
-            lines(p$w / p$Winf, p$m - p$psi_F * p$Fm, lty = 2, lwd = 3)
+            # lines(p$w / p$Winf, p$psi_F * p$Fm, lwd = 2, lty = 2, col="lightgrey")
+            # lines(p$w / p$Winf, p$m - p$psi_F * p$Fm, lty = 2, lwd = 3)
             lines(p$w / p$Winf, p$m, lty = 1, lwd = 2)
             pow <- -2:0
             ticksat <- as.vector(sapply(pow, function(p) (2:10) * 10 ^ p))
@@ -516,8 +528,8 @@ setMethod("plotMortality", c("Parameters"),
             axis(2, labels = NA, at = ys, tcl = 0.5)
             mtext(ys, side=2, line = 0.5, at = ys)
             # Include legend
-            legend("topright", NULL, c("Natural mortality","Fishing mortality"),
-                   lty=c(1,2), col = c('black', 'lightgrey'), lwd=2, seg.len=5, bty = "n") 
+            # legend("topright", NULL, c("Natural mortality","Fishing mortality"),
+            #        lty=c(1,2), col = c('black', 'lightgrey'), lwd=2, seg.len=5, bty = "n") 
             
             invisible(NULL)
           })
