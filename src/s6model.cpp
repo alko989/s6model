@@ -2,7 +2,7 @@
 template<class Type>
 Type objective_function<Type>::operator() ()
 {
-  DATA_INTEGER(binsize);
+  DATA_SCALAR(binsize);
   DATA_INTEGER(nwc);
   DATA_VECTOR(freq);
   DATA_SCALAR(n);
