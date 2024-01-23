@@ -424,7 +424,7 @@ setMethod("plotFit", c("Parameters", "data.frame", "logical"),
               plot(p$w, p$pdfN.approx(p$w), type="l",
                    col="darkred",
                    # main="Fitted pdf and histogram of the simulated data",
-                   xlab="Weight (mg)",
+                   xlab="Weight (g)",
                    ylab="Probability", 
                    ylim = ylim, ...)
             } else {
