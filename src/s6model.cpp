@@ -42,7 +42,7 @@ Type objective_function<Type>::operator() ()
   for(int j=0; j<nwc; j++) {
     w = binsize * (j + 0.5);
     Weight(j) = w;
-    psi_m = 1 / (1 + pow(w / (Winf * eta_m), -10));
+    psi_m = 1 / (1 + pow(w / (Winf * eta_m), -5));
     psi_F = 1 / (1 + pow(w / (Wfs), -u));
     psi_S = 1 / (1 + pow(w / (Winf * eta_S), -u));
     g = A * pow(w, n) * (1 - pow(w / Winf, 1 - n) * (epsilon_a + (1 - epsilon_a) * psi_m));
