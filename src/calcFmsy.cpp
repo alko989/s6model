@@ -38,7 +38,7 @@ Type objective_function<Type>::operator() ()
   for(int i=1; i<md; i++) {
     ww(i) = exp(log(w_r) + i * (log(Winf) - log(w_r)) / (md - 1.0));
     delta(i) = ww(i) - ww(i-1);
-    psi_m(i) = 1 / (1 + pow(ww(i)/(eta_m * Winf),-10));
+    psi_m(i) = 1 / (1 + pow(ww(i)/(eta_m * Winf),-5));
     psi_F(i) = 1 / (1 + pow(ww(i)/(Wfs),-u));
     m(i) = a * A * pow(ww(i), n - 1) + Fmsy * psi_F(i); // exp(-(ww(i)/Winf)) + 0.4 * (1 - ww(i) / Winf) + Fmsy * psi_F(i);
     g(i) = A * pow(ww(i),n) * (1 - pow(ww(i)/Winf, 1-n) * (epsilon_a + (1-epsilon_a)*psi_m(i)));
