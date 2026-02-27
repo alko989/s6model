@@ -85,7 +85,7 @@ Type objective_function<Type>::operator() ()
   
   // Calculate M here
   K = A / (3 * pow(Winf, 1-n));
-  M = a * (3 * K * pow(eta_m, n-1)); // Derive K from capital A and a : Do this in separate function
+  M = (a * 3 * K ) / (pow(eta_m, 1-n)); // Derive K from capital A and a : Do this in separate function
 
   ADREPORT(Fm);
   ADREPORT(Winf);
